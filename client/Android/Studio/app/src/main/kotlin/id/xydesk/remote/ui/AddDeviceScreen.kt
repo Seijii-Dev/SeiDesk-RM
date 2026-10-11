@@ -1595,53 +1595,9 @@ fun AddDeviceScreen(
                     },
                     modifier = Modifier.fillMaxWidth(),
                 )
-                Spacer(Modifier.height(10.dp))
-                Text(
-                    xy("Pengalaman Visual Desktop Windows", "Windows Desktop Visual Experience"),
-                    style = MaterialTheme.typography.titleSmall,
-                )
-                XyToggleRow(
-                    title = xy("Font Smoothing (ClearType)", "Font Smoothing (ClearType)"),
-                    checked = options.fontSmoothing,
-                    onCheckedChange = {
-                        options = options.copy(fontSmoothing = it, streamProfile = XyStreamProfile.CUSTOM)
-                    },
-                )
-                XyToggleRow(
-                    title = xy("Desktop Composition (Aero DWM)", "Desktop Composition (Aero DWM)"),
-                    checked = options.desktopComposition,
-                    onCheckedChange = {
-                        options = options.copy(desktopComposition = it, streamProfile = XyStreamProfile.CUSTOM)
-                    },
-                )
-                XyToggleRow(
-                    title = xy("Wallpaper Desktop", "Desktop Wallpaper"),
-                    checked = options.desktopWallpaper,
-                    onCheckedChange = {
-                        options = options.copy(desktopWallpaper = it, streamProfile = XyStreamProfile.CUSTOM)
-                    },
-                )
-                XyToggleRow(
-                    title = xy("Tema Visual Windows", "Windows Visual Themes"),
-                    checked = options.visualThemes,
-                    onCheckedChange = {
-                        options = options.copy(visualThemes = it, streamProfile = XyStreamProfile.CUSTOM)
-                    },
-                )
-                XyToggleRow(
-                    title = xy("Tarik Jendela Penuh (Full Window Drag)", "Full Window Drag"),
-                    checked = options.windowDrag,
-                    onCheckedChange = {
-                        options = options.copy(windowDrag = it, streamProfile = XyStreamProfile.CUSTOM)
-                    },
-                )
-                XyToggleRow(
-                    title = xy("Animasi Menu Windows", "Windows Menu Animations"),
-                    checked = options.menuAnimations,
-                    onCheckedChange = {
-                        options = options.copy(menuAnimations = it, streamProfile = XyStreamProfile.CUSTOM)
-                    },
-                )
+                // Seksi "Pengalaman Visual Desktop Windows" dihapus atas permintaan
+                // pemilik: toggle ini bikin wallpaper hitam & animasi Windows hilang.
+                // Semua opsi visual kini selalu aktif (lihat default RdpOptions).
             }
 
             XySectionLabel(xy("Keamanan & Sesi Admin", "Security & Admin Session"))

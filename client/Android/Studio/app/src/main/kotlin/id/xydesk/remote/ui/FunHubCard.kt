@@ -30,6 +30,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.draw.clip
 import id.xydesk.remote.ui.components.XyOverlay
 import id.xydesk.remote.ui.components.XyPillButton
 import kotlinx.coroutines.launch
@@ -59,6 +68,30 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
     var reportedIds by remember { mutableStateOf(emptySet<String>()) }
     var showAll by remember { mutableStateOf(false) }
     var composerOpen by remember { mutableStateOf(false) }
+    var pendingAttachment by remember { mutableStateOf<FeedAttachment?>(null) }
+    var editingJoke by remember { mutableStateOf<CommunityJoke?>(null) }
+    var editRemoveAttachment by remember { mutableStateOf(false) }
+    var deleteTarget by remember { mutableStateOf<CommunityJoke?>(null) }
+    var deleting by remember { mutableStateOf(false) }
+    val pickVisual = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickVisualMedia(),
+    ) { uri ->
+        if (uri != null) {
+            scope.launch {
+                val att = encodePickedFeedImage(context, uri)
+                if (att == null) {
+                    formMessage = xyNow(
+                        "Gambar tidak didukung atau melebihi 500KB.",
+                        "Image unsupported or over 500KB.",
+                    )
+                    formMessageIsError = true
+                } else {
+                    pendingAttachment = att
+                    editRemoveAttachment = false
+                }
+            }
+        }
+    }
     var feedError by remember { mutableStateOf<String?>(null) }
     var formMessage by remember { mutableStateOf<String?>(null) }
     var formMessageIsError by remember { mutableStateOf(false) }
@@ -112,7 +145,8 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
     val characterCount = draft.codePointCount(0, draft.length)
     val trimmedCharacterCount = trimmedDraft.codePointCount(0, trimmedDraft.length)
     val containsLink = COMMUNITY_LINK_PATTERN.containsMatchIn(draft)
-    val canSubmit = trimmedCharacterCount >= 3 && !containsLink && !submitting
+    val hasAttachment = pendingAttachment != null
+    val canSubmit = !containsLink && !submitting && (trimmedCharacterCount >= 3 || hasAttachment)
 
     Column(
         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
@@ -124,7 +158,7 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Column(Modifier.weight(1f)) {
-                Text(xy("Jokes komunitas", "Community jokes"), style = MaterialTheme.typography.titleSmall)
+                Text(xy("Feed komunitas", "Community feed"), style = MaterialTheme.typography.titleSmall)
                 Text(
                     xy("Anonim · dibagikan ke semua pengguna", "Anonymous · shared with everyone"),
                     style = MaterialTheme.typography.labelSmall,
@@ -168,7 +202,7 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
 
         when {
             refreshing && jokes.isEmpty() -> Text(
-                xy("Memuat jokes komunitas…", "Loading community jokes…"),
+                xy("Memuat feed komunitas…", "Loading community feed…"),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -259,10 +293,18 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    Text(xy("Kirim jokes", "Post a joke"), style = MaterialTheme.typography.labelLarge)
+                    Text(
+                        if (editingJoke != null) xy("Edit postingan", "Edit post") else xy("Kirim postingan", "Post to feed"),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
                     Text(
                         xy("Batal", "Cancel"),
-                        modifier = Modifier.clickable(enabled = !submitting) { composerOpen = false }.padding(4.dp),
+                        modifier = Modifier.clickable(enabled = !submitting) {
+                            composerOpen = false
+                            editingJoke = null
+                            pendingAttachment = null
+                            editRemoveAttachment = false
+                        }.padding(4.dp),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -278,6 +320,46 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
                     },
                     placeholder = xy("Tulis singkat. Tanpa nama atau tautan.", "Keep it short. No names or links."),
                 )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    XyPillButton(
+                        text = xy(" Foto / stiker / GIF", "📷 Photo / sticker / GIF"),
+                        onClick = {
+                            pickVisual.launch(
+                                ActivityResultContracts.PickVisualMedia.Request(
+                                    ActivityResultContracts.PickVisualMedia.ImageOnly,
+                                ),
+                            )
+                        },
+                        primary = false,
+                        compact = true,
+                    )
+                    pendingAttachment?.let { att ->
+                        val bmp = remember(att) {
+                            android.graphics.BitmapFactory.decodeByteArray(att.bytes, 0, att.bytes.size)
+                        }
+                        if (bmp != null) {
+                            Image(
+                                bitmap = bmp.asImageBitmap(),
+                                contentDescription = null,
+                                modifier = Modifier.size(52.dp).clip(RoundedCornerShape(10.dp)),
+                                contentScale = ContentScale.Crop,
+                            )
+                        }
+                        Text(
+                            xy("Hapus", "Remove"),
+                            modifier = Modifier.clickable {
+                                pendingAttachment = null
+                                if (editingJoke != null) editRemoveAttachment = true
+                            }.padding(4.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    }
+                }
                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     val helper = when {
                         containsLink -> xy("Tautan tidak diterima", "Links aren't allowed")
@@ -297,12 +379,29 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
                                     submitting = true
                                     formMessage = null
                                     try {
-                                        val posted = api.submit(trimmedDraft)
+                                        val target = editingJoke
+                                        val posted = if (target != null) {
+                                            api.edit(
+                                                target.id,
+                                                trimmedDraft,
+                                                pendingAttachment,
+                                                removeAttachment = editRemoveAttachment && pendingAttachment == null,
+                                            )
+                                        } else {
+                                            api.submit(trimmedDraft, pendingAttachment)
+                                        }
                                         jokes = (listOf(posted) + jokes.filterNot { it.id == posted.id }).take(20)
+                                        api.cacheFeed(jokes)
                                         draft = ""
+                                        pendingAttachment = null
+                                        editingJoke = null
+                                        editRemoveAttachment = false
                                         showAll = false
                                         composerOpen = false
-                                        formMessage = xyNow("Terkirim dan tampil di feed komunitas.", "Posted to the community feed.")
+                                        formMessage = xyNow(
+                                            if (target != null) "Postingan diperbarui." else "Terkirim dan tampil di feed komunitas.",
+                                            if (target != null) "Post updated." else "Posted to the community feed.",
+                                        )
                                         formMessageIsError = false
                                     } catch (error: Exception) {
                                         formMessage = showCommunityError(error)
@@ -325,7 +424,7 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
             }
         } else {
             XyPillButton(
-                text = xy("Tulis jokes", "Write a joke"),
+                text = xy("Tulis postingan", "Write a post"),
                 onClick = { composerOpen = true },
                 primary = false,
                 compact = true,
@@ -337,6 +436,55 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
                 style = MaterialTheme.typography.bodySmall,
                 color = if (formMessageIsError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
             )
+        }
+    }
+
+    deleteTarget?.let { target ->
+        XyOverlay(
+            title = xy("Hapus postingan?", "Delete post?"),
+            onDismiss = { if (!deleting) deleteTarget = null },
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(
+                    xy("Postingan dan lampirannya dihapus permanen dari feed komunitas.",
+                       "The post and its attachment are permanently removed from the community feed."),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    XyPillButton(
+                        text = xy("Batal", "Cancel"),
+                        onClick = { deleteTarget = null },
+                        primary = false,
+                        compact = true,
+                        modifier = Modifier.weight(1f),
+                    )
+                    XyPillButton(
+                        text = if (deleting) xy("Menghapus…", "Deleting…") else xy("Hapus", "Delete"),
+                        onClick = {
+                            scope.launch {
+                                deleting = true
+                                try {
+                                    api.delete(target.id)
+                                    jokes = jokes.filterNot { it.id == target.id }
+                                    api.cacheFeed(jokes)
+                                    feedMessage = xyNow("Postingan dihapus.", "Post deleted.")
+                                    feedMessageIsError = false
+                                } catch (error: Exception) {
+                                    feedMessage = showCommunityError(error)
+                                    feedMessageIsError = true
+                                } finally {
+                                    deleting = false
+                                    deleteTarget = null
+                                }
+                            }
+                        },
+                        enabled = !deleting,
+                        compact = true,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
         }
     }
 
@@ -441,6 +589,8 @@ private fun CommunityJokeItem(
     onReport: () -> Unit,
     isCommentBusy: Boolean = false,
     onComment: (String) -> Unit = {},
+    onEdit: (() -> Unit)? = null,
+    onDelete: (() -> Unit)? = null,
 ) {
     var pickerOpen by remember(joke.id) { mutableStateOf(false) }
     var commentsOpen by remember(joke.id) { mutableStateOf(false) }
@@ -472,7 +622,15 @@ private fun CommunityJokeItem(
             .padding(vertical = 6.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Text(joke.text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
+        if (joke.text.isNotBlank()) {
+            Text(joke.text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
+        }
+        joke.attachmentUrl?.let { url ->
+            FeedBinaryImage(
+                path = url,
+                modifier = Modifier.fillMaxWidth().heightIn(max = 320.dp),
+            )
+        }
 
         // Reaksi cepat + tombol "+" untuk 24 emoji (grid 8x3, tanpa scroll).
         Row(
@@ -516,12 +674,23 @@ private fun CommunityJokeItem(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            joke.authorAvatarUrl?.let { avatar ->
+                FeedBinaryImage(path = avatar, modifier = Modifier.size(20.dp), round = true)
+                Spacer(Modifier.width(6.dp))
+            }
             Text(
                 joke.authorName ?: xy("Anonim", "Anonymous"),
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            if (joke.editedAtMillis > 0) {
+                Text(
+                    xy(" · diedit", " · edited"),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
             Spacer(Modifier.width(10.dp))
             Text(
                 xy("Komentar ({0})", "Comments ({0})", joke.commentsTotal),
@@ -540,6 +709,21 @@ private fun CommunityJokeItem(
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            if (onEdit != null) {
+                Spacer(Modifier.weight(1f))
+                Text(
+                    xy("Edit", "Edit"),
+                    modifier = Modifier.clickable(onClick = onEdit).padding(horizontal = 4.dp, vertical = 3.dp),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                Text(
+                    xy("Hapus", "Delete"),
+                    modifier = Modifier.clickable(onClick = { onDelete?.invoke() }).padding(horizontal = 4.dp, vertical = 3.dp),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
         }
 
         if (commentsOpen) {
@@ -603,3 +787,59 @@ private fun CommunityJokeItem(
 }
 
 private val COMMUNITY_LINK_PATTERN = Regex("(?:https?://|www\\.)", RegexOption.IGNORE_CASE)
+
+/** Kompres gambar pilihan jadi stiker webp/gif ≤500KB untuk lampiran feed. */
+private fun encodePickedFeedImage(context: android.content.Context, uri: android.net.Uri): FeedAttachment? {
+    return runCatching {
+        val resolver = context.contentResolver
+        val type = resolver.getType(uri).orEmpty()
+        val raw = resolver.openInputStream(uri)?.use { it.readBytes() } ?: return null
+        if (type == "image/gif" && raw.size <= 500_000) return FeedAttachment("image/gif", raw)
+        val src = android.graphics.BitmapFactory.decodeByteArray(raw, 0, raw.size) ?: return null
+        val maxSide = 720
+        val scale = minOf(1f, maxSide / maxOf(src.width, src.height).toFloat())
+        val out = if (scale < 1f) {
+            android.graphics.Bitmap.createScaledBitmap(
+                src,
+                (src.width * scale).toInt().coerceAtLeast(1),
+                (src.height * scale).toInt().coerceAtLeast(1),
+                true,
+            )
+        } else {
+            src
+        }
+        val stream = java.io.ByteArrayOutputStream()
+        val fmt = if (android.os.Build.VERSION.SDK_INT >= 30) {
+            android.graphics.Bitmap.CompressFormat.WEBP_LOSSY
+        } else {
+            @Suppress("DEPRECATION")
+            android.graphics.Bitmap.CompressFormat.WEBP
+        }
+        out.compress(fmt, 82, stream)
+        val bytes = stream.toByteArray()
+        if (bytes.isEmpty() || bytes.size > 500_000) null else FeedAttachment("image/webp", bytes)
+    }.getOrNull()
+}
+
+/** Gambar biner feed (lampiran postingan / avatar) — dimuat async dari worker. */
+@Composable
+private fun FeedBinaryImage(path: String, modifier: Modifier = Modifier, round: Boolean = false) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    var bitmap by remember(path) { mutableStateOf<android.graphics.Bitmap?>(null) }
+    androidx.compose.runtime.LaunchedEffect(path) {
+        bitmap = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            runCatching {
+                val bytes = CommunityJokesApi(context).fetchBinary(path)
+                android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+            }.getOrNull()
+        }
+    }
+    bitmap?.let { bmp ->
+        Image(
+            bitmap = bmp.asImageBitmap(),
+            contentDescription = null,
+            modifier = modifier.clip(if (round) CircleShape else RoundedCornerShape(12.dp)),
+            contentScale = if (round) ContentScale.Crop else ContentScale.FillWidth,
+        )
+    }
+}

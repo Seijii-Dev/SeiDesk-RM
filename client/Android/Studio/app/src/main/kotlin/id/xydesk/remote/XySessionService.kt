@@ -12,6 +12,7 @@ import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import id.xydesk.remote.ui.AppPrefs
 import androidx.core.content.ContextCompat
 import id.xydesk.remote.ui.xyNow
 import id.xydesk.remote.ui.XyDeskHomeActivity
@@ -127,6 +128,7 @@ class XySessionService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
         val host = label ?: "XyDesk Remote"
+        val prefs = AppPrefs(this)
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             // Ikon app sendiri (mark monokrom) — dulu pakai
             // android.R.drawable.stat_sys_upload_done, ikon sistem panah
@@ -137,8 +139,9 @@ class XySessionService : Service() {
             .setSubText(versionLabel())
             .setContentIntent(open)
             .addAction(0, xyNow("Buka", "Open"), open)
-            .addAction(0, xyNow("Beranda", "Home"), home)
-            .addAction(0, xyNow("Musik", "Music"), music)
+        if (prefs.notifHomeButton) builder.addAction(0, xyNow("Beranda", "Home"), home)
+        if (prefs.notifMusicButton) builder.addAction(0, xyNow("Musik", "Music"), music)
+        builder
             .addAction(0, xyNow("Putuskan", "Disconnect"), stop)
             .setOngoing(true)
             .setOnlyAlertOnce(true)

@@ -56,7 +56,7 @@ function envFor(files = {}, extra = {}) {
   };
 }
 
-function communityJokesObject() {
+function communityJokesObject(kv = null) {
   const records = new Map();
   const storage = {
     async get(key) { return records.get(key); },
@@ -77,7 +77,18 @@ function communityJokesObject() {
       return callback(transaction);
     },
   };
-  return { object: new CommunityJokes({ storage }), records };
+  return { object: new CommunityJokes({ storage }, kv ? { UNIQUE_DOWNLOADS: kv } : undefined), records };
+}
+
+function mockKv() {
+  const store = new Map();
+  return {
+    store,
+    async put(key, value, opts = {}) { store.set(key, { value, metadata: opts.metadata || null }); },
+    async get(key) { const e = store.get(key); return e ? e.value : null; },
+    async getWithMetadata(key) { return store.get(key) || { value: null, metadata: null }; },
+    async delete(key) { store.delete(key); },
+  };
 }
 
 function jokesEnv(object) {
@@ -1156,4 +1167,82 @@ test("expanded reaction set accepts new emoji and /me stores display names", asy
     body: JSON.stringify({ client_id: clientId, display_name: "https://spam.link" }),
   }));
   assert.equal(badMe.status, 400);
+});
+test("feed attachment foto/stiker, edit & hapus milik sendiri, avatar profil", async () => {
+  const kv = mockKv();
+  const { object } = communityJokesObject(kv);
+  const env = { ...jokesEnv(object), UNIQUE_DOWNLOADS: kv };
+  const owner = "00000000-0000-4000-8000-000000000041";
+  const other = "00000000-0000-4000-8000-000000000042";
+  const pixels = "QUJDRA=="; // "ABCD"
+
+  const submit = await worker.fetch(new Request("https://rdp.xydesk.my.id/api/jokes", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      client_id: owner,
+      text: "Stiker webp perdana di feed.",
+      attachment: { mime: "image/webp", data: pixels },
+    }),
+  }), env);
+  assert.equal(submit.status, 201);
+  const posted = (await submit.json()).joke;
+  assert.equal(posted.is_own, true);
+  assert.equal(posted.attachment.mime, "image/webp");
+
+  const att = await worker.fetch(new Request(`https://rdp.xydesk.my.id${posted.attachment.url}`), env);
+  assert.equal(att.status, 200);
+  assert.equal(att.headers.get("content-type"), "image/webp");
+  assert.equal(Buffer.from(await att.arrayBuffer()).toString("base64"), pixels);
+
+  const feed = await worker.fetch(new Request("https://rdp.xydesk.my.id/api/jokes", {
+    headers: { "x-xydesk-client-id": other },
+  }), env);
+  const item = (await feed.json()).items[0];
+  assert.equal(item.is_own, false);
+
+  const foreignEdit = await worker.fetch(new Request(`https://rdp.xydesk.my.id/api/jokes/${posted.id}/edit`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ client_id: other, text: "Ambil alih postingan orang." }),
+  }), env);
+  assert.equal(foreignEdit.status, 403);
+
+  const ownEdit = await worker.fetch(new Request(`https://rdp.xydesk.my.id/api/jokes/${posted.id}/edit`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ client_id: owner, text: "Stiker webp perdana, sudah diedit." }),
+  }), env);
+  assert.equal(ownEdit.status, 200);
+  assert.equal((await ownEdit.json()).joke.edited_at > 0, true);
+
+  const putAvatar = await worker.fetch(new Request("https://rdp.xydesk.my.id/api/jokes/me", {
+    method: "PUT",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ client_id: owner, avatar: pixels, avatar_mime: "image/png" }),
+  }), env);
+  assert.equal(putAvatar.status, 200);
+  const avatarUrl = (await putAvatar.json()).avatar_url;
+  assert.ok(avatarUrl);
+  const avatar = await worker.fetch(new Request(`https://rdp.xydesk.my.id${avatarUrl}`), env);
+  assert.equal(avatar.status, 200);
+  assert.equal(avatar.headers.get("content-type"), "image/png");
+
+  const foreignDelete = await worker.fetch(new Request(`https://rdp.xydesk.my.id/api/jokes/${posted.id}/delete`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ client_id: other }),
+  }), env);
+  assert.equal(foreignDelete.status, 403);
+
+  const ownDelete = await worker.fetch(new Request(`https://rdp.xydesk.my.id/api/jokes/${posted.id}/delete`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ client_id: owner }),
+  }), env);
+  assert.equal(ownDelete.status, 200);
+  const after = await worker.fetch(new Request("https://rdp.xydesk.my.id/api/jokes"), env);
+  assert.equal((await after.json()).items.length, 0);
+  const attGone = await worker.fetch(new Request(`https://rdp.xydesk.my.id${posted.attachment.url}`), env);
+  assert.equal(attGone.status, 404);
 });

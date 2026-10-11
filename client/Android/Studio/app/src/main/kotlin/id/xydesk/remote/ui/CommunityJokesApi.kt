@@ -28,8 +28,14 @@ internal class CommunityJokesApi(context: Context) {
         }
     }
 
-    suspend fun submit(text: String): CommunityJoke = withContext(Dispatchers.IO) {
+    suspend fun submit(text: String, attachment: FeedAttachment? = null): CommunityJoke = withContext(Dispatchers.IO) {
+        val attachmentJson = attachment?.let { att ->
+            JSONObject()
+                .put("mime", att.mime)
+                .put("data", android.util.Base64.encodeToString(att.bytes, android.util.Base64.NO_WRAP))
+        }
         val payload = JSONObject().put("client_id", clientId).put("text", text)
+        attachmentJson?.let { payload.put("attachment", it) }
         displayName()?.let { payload.put("display_name", it) }
         val body = request(method = "POST", path = "/api/jokes", payload = payload)
         parseJoke(body.optJSONObject("joke") ?: error("Missing submitted joke"))
@@ -63,6 +69,61 @@ internal class CommunityJokesApi(context: Context) {
             payload = JSONObject().put("client_id", clientId).put("emoji", emoji),
         )
         parseJoke(body.optJSONObject("joke") ?: error("Missing reacted joke"))
+    }
+
+    suspend fun edit(
+        jokeId: String,
+        text: String,
+        attachment: FeedAttachment? = null,
+        removeAttachment: Boolean = false,
+    ): CommunityJoke = withContext(Dispatchers.IO) {
+        val payload = JSONObject().put("client_id", clientId).put("text", text)
+        if (removeAttachment) {
+            payload.put("attachment", JSONObject.NULL)
+        } else {
+            attachment?.let { att ->
+                payload.put(
+                    "attachment",
+                    JSONObject()
+                        .put("mime", att.mime)
+                        .put("data", android.util.Base64.encodeToString(att.bytes, android.util.Base64.NO_WRAP)),
+                )
+            }
+        }
+        val body = request(method = "POST", path = "/api/jokes/$jokeId/edit", payload = payload)
+        parseJoke(body.optJSONObject("joke") ?: error("Missing edited joke"))
+    }
+
+    suspend fun delete(jokeId: String): Boolean = withContext(Dispatchers.IO) {
+        request(
+            method = "POST",
+            path = "/api/jokes/$jokeId/delete",
+            payload = JSONObject().put("client_id", clientId),
+        )
+        true
+    }
+
+    /** Unduh lampiran feed / avatar (byte mentah). */
+    suspend fun fetchBinary(path: String): ByteArray = withContext(Dispatchers.IO) {
+        val connection = java.net.URL(ENDPOINT + path).openConnection() as javax.net.ssl.HttpsURLConnection
+        connection.connectTimeout = 15_000
+        connection.readTimeout = 30_000
+        try {
+            if (connection.responseCode !in 200..299) throw CommunityJokesException("http_${connection.responseCode}")
+            connection.inputStream.use { it.readBytes() }
+        } finally {
+            connection.disconnect()
+        }
+    }
+
+    /** Unggah avatar profil komunitas (maks ~200KB setelah kompresi). */
+    suspend fun uploadAvatar(bytes: ByteArray, mime: String): String? = withContext(Dispatchers.IO) {
+        val payload = JSONObject()
+            .put("client_id", clientId)
+            .put("avatar", android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP))
+            .put("avatar_mime", mime)
+        val body = request(method = "PUT", path = "/api/jokes/me", payload = payload)
+        body.optString("avatar_url").takeIf { it.isNotBlank() }
     }
 
     suspend fun report(jokeId: String): Boolean = withContext(Dispatchers.IO) {
@@ -150,6 +211,14 @@ internal class CommunityJokesApi(context: Context) {
             authorName = value.optString("author_name").takeIf { it.isNotBlank() },
             commentsTotal = value.optInt("comments_total", 0),
             comments = comments,
+            editedAtMillis = value.optLong("edited_at", 0L),
+            isOwn = value.optBoolean("is_own", false),
+            attachmentUrl = value.optJSONObject("attachment")?.optString("url")
+                ?.takeIf { it.startsWith("/api/jokes/attachment/") },
+            attachmentMime = value.optJSONObject("attachment")?.optString("mime")
+                ?.takeIf { it.isNotBlank() },
+            authorAvatarUrl = value.optString("author_avatar_url")
+                ?.takeIf { it.startsWith("/api/jokes/avatar/") },
         )
     }
 
@@ -258,6 +327,11 @@ internal data class JokeComment(
     val createdAtMillis: Long,
 )
 
+internal data class FeedAttachment(
+    val mime: String,
+    val bytes: ByteArray,
+)
+
 internal data class CommunityJoke(
     val id: String,
     val text: String,
@@ -267,6 +341,11 @@ internal data class CommunityJoke(
     val authorName: String? = null,
     val commentsTotal: Int = 0,
     val comments: List<JokeComment> = emptyList(),
+    val editedAtMillis: Long = 0L,
+    val isOwn: Boolean = false,
+    val attachmentUrl: String? = null,
+    val attachmentMime: String? = null,
+    val authorAvatarUrl: String? = null,
 )
 
 internal class CommunityJokesException(val reason: String) : Exception(reason)

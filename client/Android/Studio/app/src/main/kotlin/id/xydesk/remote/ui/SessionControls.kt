@@ -2,6 +2,10 @@ package id.xydesk.remote.ui
 
 import id.xydesk.remote.ui.input.XyStickMode
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -614,7 +618,23 @@ fun SessionControls(
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                if (railMenuOpen) {
+                // Bubble rail "disedot" keluar dari tombol panah: scale dari
+                // titik bawah (posisi tombol) + fade, masuk dan keluar.
+                AnimatedVisibility(
+                    visible = railMenuOpen,
+                    enter = fadeIn(androidx.compose.animation.core.tween(140)) +
+                        scaleIn(
+                            androidx.compose.animation.core.tween(230, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+                            initialScale = 0.25f,
+                            transformOrigin = androidx.compose.ui.layout.TransformOrigin(0.5f, 1f),
+                        ),
+                    exit = fadeOut(androidx.compose.animation.core.tween(120)) +
+                        scaleOut(
+                            androidx.compose.animation.core.tween(170, easing = androidx.compose.animation.core.FastOutInEasing),
+                            targetScale = 0.2f,
+                            transformOrigin = androidx.compose.ui.layout.TransformOrigin(0.5f, 1f),
+                        ),
+                ) {
                     Column(
                         Modifier
                             .xyGlass(shape = RoundedCornerShape(18.dp))
@@ -1637,9 +1657,11 @@ private fun SessionPanel(
                     .widthIn(max = 380.dp)
             } else {
                 Modifier
-                    .fillMaxHeight(0.9f)
-                    .fillMaxWidth(0.94f)
-                    .widthIn(max = 760.dp)
+                    // Popup diperluas atas permintaan pemilik ("masih kurang"):
+                    // hampir penuh di layar HP maupun tablet.
+                    .fillMaxHeight(0.94f)
+                    .fillMaxWidth(0.97f)
+                    .widthIn(max = 900.dp)
             }
                 .graphicsLayer {
                     scaleX = panelScale
@@ -2071,6 +2093,31 @@ private fun InputTab(
                 onCheckedChange = onGyroMouseEnabled,
             )
         }
+
+    section("tombol-notifikasi-kustom", xy("Tombol notifikasi sesi", "Session notification buttons"), advanced = true) {
+        val notifPrefs = remember { AppPrefs(context) }
+        var notifHome by remember { mutableStateOf(notifPrefs.notifHomeButton) }
+        var notifMusic by remember { mutableStateOf(notifPrefs.notifMusicButton) }
+        fun refreshNotif() {
+            runCatching {
+                context.startService(
+                    android.content.Intent(context, id.xydesk.remote.XySessionService::class.java),
+                )
+            }
+        }
+        XyToggleRow(
+            title = xy("Tombol \"Beranda\" di notifikasi", "\"Home\" button in notification"),
+            subtitle = xy("Kembali ke beranda tanpa memutus sesi", "Return home without disconnecting"),
+            checked = notifHome,
+            onCheckedChange = { v -> notifHome = v; notifPrefs.notifHomeButton = v; refreshNotif() },
+        )
+        XyToggleRow(
+            title = xy("Tombol \"Musik\" di notifikasi", "\"Music\" button in notification"),
+            subtitle = xy("Jeda/putar musik dari notifikasi", "Play/pause music from the notification"),
+            checked = notifMusic,
+            onCheckedChange = { v -> notifMusic = v; notifPrefs.notifMusicButton = v; refreshNotif() },
+        )
+    }
 
     section("clipboard-otomatis-teks-gambar",xy("Clipboard otomatis (Teks & Gambar)", "Automatic clipboard (Text & Image)"), advanced = true) {
             PanelHint(

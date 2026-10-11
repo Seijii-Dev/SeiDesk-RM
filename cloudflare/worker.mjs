@@ -44,6 +44,11 @@ const ACTIVE_SESSION_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-
 const ACTIVE_SESSION_PREFIX = "session:";
 const COMMUNITY_CLIENT_ID_RE = ACTIVE_SESSION_ID_RE;
 const COMMUNITY_JOKE_MAX_CHARS = 280;
+const COMMUNITY_ATTACHMENT_MAX_BYTES = 500_000; // foto/stiker webp/gif di feed
+const COMMUNITY_AVATAR_MAX_BYTES = 200_000;
+const COMMUNITY_ATTACHMENT_MIMES = Object.freeze([
+  "image/webp", "image/gif", "image/png", "image/jpeg",
+]);
 const COMMUNITY_JOKE_FEED_SIZE = 20;
 const COMMUNITY_JOKE_MAX_ITEMS = 1_000;
 const COMMUNITY_JOKE_POST_INTERVAL_MS = 60_000;
@@ -608,17 +613,37 @@ function communityCommentPublicView(comment) {
   };
 }
 
-function communityJokePublicView(joke, viewerReaction = null, comments = null) {
+function communityJokePublicView(joke, viewerReaction = null, comments = null, extra = {}) {
   return {
     id: joke.id,
     text: joke.text,
     created_at: joke.created_at,
+    edited_at: Number(joke.edited_at) > 0 ? Number(joke.edited_at) : null,
     author_name: joke.author_name || null,
+    author_avatar_url: extra.avatarUrl || null,
+    is_own: Boolean(extra.isOwn),
+    attachment: joke.attachment?.url
+      ? { mime: joke.attachment.mime || "image/webp", url: joke.attachment.url }
+      : null,
     reactions: Object.fromEntries(COMMUNITY_JOKE_REACTIONS.map((emoji) => [emoji, Math.max(0, Number(joke.reactions?.[emoji]) || 0)])),
     viewer_reaction: viewerReaction,
     comments_total: Math.max(0, Number(joke.comment_count) || 0),
     comments: comments || [],
   };
+}
+
+// Dekode base64 jadi Uint8Array; null jika tidak valid.
+function decodeBase64Limited(value, maxBytes) {
+  if (typeof value !== "string" || value.length === 0) return null;
+  if (!/^[A-Za-z0-9+/]+={0,2}$/.test(value) || Math.floor(value.length * 0.75) > maxBytes) return null;
+  try {
+    const binary = atob(value);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return bytes.length > maxBytes ? null : bytes;
+  } catch {
+    return null;
+  }
 }
 
 async function readRequestTextLimited(request, maxBytes) {
@@ -1092,8 +1117,13 @@ export class ActiveSessions {
 }
 
 export class CommunityJokes {
-  constructor(state) {
+  constructor(state, env) {
     this.state = state;
+    this.env = env;
+  }
+
+  get kv() {
+    return this.env?.UNIQUE_DOWNLOADS || null;
   }
 
   async fetch(request) {
@@ -1109,6 +1139,10 @@ export class CommunityJokes {
     if (report && request.method === "POST") return this.report(request, report[1]);
     const comment = path.match(/^\/comment\/([0-9a-f-]{36})$/i);
     if (comment && request.method === "POST") return this.comment(request, comment[1]);
+    const edit = path.match(/^\/edit\/([0-9a-f-]{36})$/i);
+    if (edit && request.method === "POST") return this.edit(request, edit[1]);
+    const del = path.match(/^\/delete\/([0-9a-f-]{36})$/i);
+    if (del && request.method === "POST") return this.deletePost(request, del[1]);
     if (path === "/me" && request.method === "GET") return this.me(request);
     if (path === "/me" && request.method === "PUT") return this.setMe(request);
     return durableObjectJson({ status: "not_found" }, 404, request.method);
@@ -1134,7 +1168,15 @@ export class CommunityJokes {
           limit: COMMUNITY_COMMENT_FEED_SIZE,
         });
         const comments = Array.from(commentEntries.values()).map(communityCommentPublicView);
-        items.push(communityJokePublicView(joke, viewerReaction, comments));
+        const isOwn = Boolean(clientHash && joke.author_hash === clientHash);
+        let avatarUrl = null;
+        if (joke.author_hash && this.kv) {
+          const head = await this.kv.getWithMetadata(`feed-avatar:${joke.author_hash}`).catch(() => null);
+          if (head?.value !== null && head?.value !== undefined) {
+            avatarUrl = `/api/jokes/avatar/${joke.author_hash}`;
+          }
+        }
+        items.push(communityJokePublicView(joke, viewerReaction, comments, { isOwn, avatarUrl }));
         if (items.length >= COMMUNITY_JOKE_FEED_SIZE) break;
       }
       return durableObjectJson({ status: "ok", items }, 200, request.method);
@@ -1155,7 +1197,8 @@ export class CommunityJokes {
     }
     const text = parsed.body.text.replace(/\r\n?/g, "\n").replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "").trim();
     const chars = [...text].length;
-    if (chars < 3 || chars > COMMUNITY_JOKE_MAX_CHARS || /(?:https?:\/\/|www\.)/i.test(text)) {
+    const hasAttachmentBody = Boolean(parsed.body?.attachment && typeof parsed.body.attachment === "object");
+    if (chars > COMMUNITY_JOKE_MAX_CHARS || /(?:https?:\/\/|www\.)/i.test(text) || (chars < 3 && !hasAttachmentBody)) {
       return durableObjectJson({ status: "invalid_text", max_chars: COMMUNITY_JOKE_MAX_CHARS }, 400, request.method);
     }
 
@@ -1173,11 +1216,28 @@ export class CommunityJokes {
         const displayName = sanitizeCommunityDisplayName(parsed.body?.display_name);
         const storedName = displayName || await transaction.get(`account-name:${clientHash}`) || null;
         if (displayName) await transaction.put(`account-name:${clientHash}`, displayName);
+
+        // Lampiran foto/stiker/gif opsional (disimpan di KV, bukan storage DO).
+        let attachment = null;
+        const rawAtt = parsed.body?.attachment;
+        if (rawAtt && typeof rawAtt === "object") {
+          const mime = COMMUNITY_ATTACHMENT_MIMES.includes(rawAtt.mime) ? rawAtt.mime : null;
+          const bytes = decodeBase64Limited(String(rawAtt.data || ""), COMMUNITY_ATTACHMENT_MAX_BYTES);
+          if (!mime || !bytes) return { status: "invalid_attachment" };
+          attachment = { mime, bytes };
+        }
+
+        const hasText = chars >= 3;
+        if (!hasText && !attachment) {
+          return { status: "invalid_text", max_chars: COMMUNITY_JOKE_MAX_CHARS };
+        }
         const joke = {
           id,
-          text,
+          text: hasText ? text : "",
           created_at: now,
           author_name: storedName,
+          author_hash: clientHash,
+          attachment: attachment ? { mime: attachment.mime, url: `/api/jokes/attachment/${id}` } : null,
           reactions: Object.fromEntries(COMMUNITY_JOKE_REACTIONS.map((emoji) => [emoji, 0])),
           comment_count: 0,
           report_count: 0,
@@ -1203,10 +1263,114 @@ export class CommunityJokes {
             for (const reportKey of oldReports.keys()) await transaction.delete(reportKey);
           }
         }
-        return { status: "created", joke: communityJokePublicView(joke) };
+        return { status: "created", joke: communityJokePublicView(joke, null, null, { isOwn: true }), pendingAttachment: attachment };
       });
       if (outcome.status === "rate_limited") return durableObjectJson(outcome, 429, request.method);
+      if (outcome.status === "created" && outcome.pendingAttachment && this.kv) {
+        await this.kv.put(`feed-att:${outcome.joke.id}`, outcome.pendingAttachment.bytes, {
+          metadata: { mime: outcome.pendingAttachment.mime },
+        });
+      }
       return durableObjectJson(outcome, 201, request.method);
+    } catch {
+      return durableObjectJson({ status: "unavailable" }, 503, request.method);
+    }
+  }
+
+  async edit(request, jokeId) {
+    const parsed = await readCommunityJson(request, 1_600_000);
+    if (parsed.error) return parsed.error;
+    const clientId = parsed.body?.client_id;
+    if (!COMMUNITY_CLIENT_ID_RE.test(String(clientId || ""))) {
+      return durableObjectJson({ status: "invalid_client_id" }, 400, request.method);
+    }
+    try {
+      const clientHash = await hashedCommunityClientId(clientId);
+      const outcome = await this.state.storage.transaction(async (transaction) => {
+        const listKey = await transaction.get(`joke-id:${jokeId}`);
+        if (!listKey) return { status: "not_found" };
+        const joke = await transaction.get(listKey);
+        if (!joke || joke.hidden) return { status: "not_found" };
+        if (joke.author_hash !== clientHash) return { status: "forbidden" };
+
+        let text = joke.text;
+        if (typeof parsed.body?.text === "string") {
+          text = parsed.body.text.replace(/\r\n?/g, "\n")
+            .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "").trim();
+          const chars = [...text].length;
+          if (chars > COMMUNITY_JOKE_MAX_CHARS || /(?:https?:\/\/|www\.)/i.test(text)) {
+            return { status: "invalid_text", max_chars: COMMUNITY_JOKE_MAX_CHARS };
+          }
+        }
+        let attachment = joke.attachment || null;
+        let pending = null;
+        const rawAtt = parsed.body?.attachment;
+        if (rawAtt === null) {
+          attachment = null; // hapus lampiran
+        } else if (rawAtt && typeof rawAtt === "object") {
+          const mime = COMMUNITY_ATTACHMENT_MIMES.includes(rawAtt.mime) ? rawAtt.mime : null;
+          const bytes = decodeBase64Limited(String(rawAtt.data || ""), COMMUNITY_ATTACHMENT_MAX_BYTES);
+          if (!mime || !bytes) return { status: "invalid_attachment" };
+          attachment = { mime, url: `/api/jokes/attachment/${jokeId}` };
+          pending = { mime, bytes };
+        }
+        const hasText = [...text].length >= 3;
+        if (!hasText && !attachment) return { status: "invalid_text", max_chars: COMMUNITY_JOKE_MAX_CHARS };
+
+        joke.text = text;
+        joke.attachment = attachment;
+        joke.edited_at = Date.now();
+        await transaction.put(listKey, joke);
+        return { status: "edited", joke: communityJokePublicView(joke, null, null, { isOwn: true }), pendingAttachment: pending, jokeId };
+      });
+      if (["not_found", "forbidden", "invalid_text", "invalid_attachment"].includes(outcome.status)) {
+        const code = outcome.status === "forbidden" ? 403 : outcome.status === "not_found" ? 404 : 400;
+        return durableObjectJson(outcome, code, request.method);
+      }
+      if (outcome.pendingAttachment && this.kv) {
+        await this.kv.put(`feed-att:${outcome.jokeId}`, outcome.pendingAttachment.bytes, {
+          metadata: { mime: outcome.pendingAttachment.mime },
+        });
+      }
+      if (outcome.pendingAttachment === null || (outcome.joke && !outcome.joke.attachment)) {
+        // lampiran dihapus
+        if (this.kv) await this.kv.delete(`feed-att:${jokeId}`).catch(() => {});
+      }
+      return durableObjectJson(outcome, 200, request.method);
+    } catch {
+      return durableObjectJson({ status: "unavailable" }, 503, request.method);
+    }
+  }
+
+  async deletePost(request, jokeId) {
+    const parsed = await readCommunityJson(request, 1_024);
+    if (parsed.error) return parsed.error;
+    const clientId = parsed.body?.client_id;
+    if (!COMMUNITY_CLIENT_ID_RE.test(String(clientId || ""))) {
+      return durableObjectJson({ status: "invalid_client_id" }, 400, request.method);
+    }
+    try {
+      const clientHash = await hashedCommunityClientId(clientId);
+      const outcome = await this.state.storage.transaction(async (transaction) => {
+        const listKey = await transaction.get(`joke-id:${jokeId}`);
+        if (!listKey) return { status: "not_found" };
+        const joke = await transaction.get(listKey);
+        if (!joke) return { status: "not_found" };
+        if (joke.author_hash !== clientHash) return { status: "forbidden" };
+        await transaction.delete(listKey);
+        await transaction.delete(`joke-id:${jokeId}`);
+        const reactions = await transaction.list({ prefix: `joke-reaction:${jokeId}:`, limit: 1_000 });
+        const comments = await transaction.list({ prefix: `joke-comments:${jokeId}:`, limit: 1_000 });
+        const reports = await transaction.list({ prefix: `joke-report:${jokeId}:`, limit: 1_000 });
+        for (const k of reactions.keys()) await transaction.delete(k);
+        for (const k of comments.keys()) await transaction.delete(k);
+        for (const k of reports.keys()) await transaction.delete(k);
+        return { status: "deleted", hadAttachment: Boolean(joke.attachment) };
+      });
+      if (outcome.status === "not_found") return durableObjectJson(outcome, 404, request.method);
+      if (outcome.status === "forbidden") return durableObjectJson(outcome, 403, request.method);
+      if (outcome.hadAttachment && this.kv) await this.kv.delete(`feed-att:${jokeId}`).catch(() => {});
+      return durableObjectJson(outcome, 200, request.method);
     } catch {
       return durableObjectJson({ status: "unavailable" }, 503, request.method);
     }
@@ -1323,27 +1487,52 @@ export class CommunityJokes {
     try {
       const clientHash = await hashedCommunityClientId(clientId);
       const displayName = await this.state.storage.get(`account-name:${clientHash}`) || null;
-      return durableObjectJson({ status: "ok", display_name: displayName }, 200, request.method);
+      let avatarUrl = null;
+      if (this.kv) {
+        const head = await this.kv.getWithMetadata(`feed-avatar:${clientHash}`).catch(() => null);
+        if (head?.value !== null && head?.value !== undefined) avatarUrl = `/api/jokes/avatar/${clientHash}`;
+      }
+      return durableObjectJson({ status: "ok", display_name: displayName, avatar_url: avatarUrl }, 200, request.method);
     } catch {
       return durableObjectJson({ status: "unavailable" }, 503, request.method);
     }
   }
 
   async setMe(request) {
-    const parsed = await readCommunityJson(request, 1_024);
+    const parsed = await readCommunityJson(request, 1_600_000);
     if (parsed.error) return parsed.error;
     const clientId = parsed.body?.client_id;
     if (!COMMUNITY_CLIENT_ID_RE.test(String(clientId || ""))) {
       return durableObjectJson({ status: "invalid_client_id" }, 400, request.method);
     }
     const displayName = sanitizeCommunityDisplayName(parsed.body?.display_name);
-    if (!displayName) {
+    const wantsAvatar = parsed.body?.avatar !== undefined && parsed.body?.avatar !== null;
+    const avatarMime = COMMUNITY_ATTACHMENT_MIMES.includes(parsed.body?.avatar_mime)
+      ? parsed.body.avatar_mime : null;
+    const avatarBytes = wantsAvatar && parsed.body.avatar !== ""
+      ? decodeBase64Limited(String(parsed.body.avatar || ""), COMMUNITY_AVATAR_MAX_BYTES)
+      : null;
+    if (wantsAvatar && parsed.body.avatar !== "" && (!avatarMime || !avatarBytes)) {
+      return durableObjectJson({ status: "invalid_avatar" }, 400, request.method);
+    }
+    if (!displayName && !wantsAvatar) {
       return durableObjectJson({ status: "invalid_display_name", max_chars: COMMUNITY_DISPLAY_NAME_MAX_CHARS }, 400, request.method);
     }
     try {
       const clientHash = await hashedCommunityClientId(clientId);
-      await this.state.storage.put(`account-name:${clientHash}`, displayName);
-      return durableObjectJson({ status: "ok", display_name: displayName }, 200, request.method);
+      if (displayName) await this.state.storage.put(`account-name:${clientHash}`, displayName);
+      if (wantsAvatar) {
+        if (parsed.body.avatar === "") {
+          if (this.kv) await this.kv.delete(`feed-avatar:${clientHash}`).catch(() => {});
+        } else if (this.kv) {
+          await this.kv.put(`feed-avatar:${clientHash}`, avatarBytes, { metadata: { mime: avatarMime } });
+        }
+      }
+      const savedName = displayName || await this.state.storage.get(`account-name:${clientHash}`) || null;
+      return durableObjectJson({
+        status: "ok", display_name: savedName,
+        avatar_url: wantsAvatar && parsed.body.avatar !== "" ? `/api/jokes/avatar/${clientHash}` : null,
+      }, 200, request.method);
     } catch {
       return durableObjectJson({ status: "unavailable" }, 503, request.method);
     }
@@ -1519,6 +1708,34 @@ async function sessionReportResponse(request, env) {
   }
 }
 
+async function serveCommunityBinary(request, env, url) {
+  if (request.method !== "GET" && request.method !== "HEAD") return methodNotAllowed("GET, HEAD");
+  if (!env.UNIQUE_DOWNLOADS) return jsonResponse({ status: "unavailable" }, 503, request.method);
+  const m = url.pathname.match(/^\/api\/jokes\/(attachment|avatar)\/([^/]+)$/i);
+  if (!m) return jsonResponse({ status: "not_found" }, 404, request.method);
+  const key = m[1] === "attachment" ? `feed-att:${m[2]}` : null;
+  const avatarKey = m[1] === "avatar" && /^[0-9a-f]{64}$/i.test(m[2]) ? `feed-avatar:${m[2].toLowerCase()}` : null;
+  const kvKey = key || avatarKey;
+  if (!kvKey) return jsonResponse({ status: "not_found" }, 404, request.method);
+  try {
+    const value = await env.UNIQUE_DOWNLOADS.getWithMetadata(kvKey, { type: "arrayBuffer" });
+    if (!value || value.value === null || value.value === undefined) {
+      return jsonResponse({ status: "not_found" }, 404, request.method);
+    }
+    const mime = COMMUNITY_ATTACHMENT_MIMES.includes(value.metadata?.mime) ? value.metadata.mime : "application/octet-stream";
+    return new Response(request.method === "HEAD" ? null : value.value, {
+      status: 200,
+      headers: {
+        "content-type": mime,
+        "cache-control": "public, max-age=86400",
+        "access-control-allow-origin": "*",
+      },
+    });
+  } catch {
+    return jsonResponse({ status: "unavailable" }, 503, request.method);
+  }
+}
+
 async function communityJokesResponse(request, env) {
   if (!env.COMMUNITY_JOKES) {
     return jsonResponse({ status: "unavailable" }, 503, request.method);
@@ -1537,8 +1754,8 @@ async function communityJokesResponse(request, env) {
       });
     } else if (request.method === "POST") {
       const length = Number(request.headers.get("content-length") || 0);
-      if (length > 2_048) return jsonResponse({ status: "payload_too_large" }, 413, request.method);
-      const bounded = await readRequestTextLimited(request, 2_048);
+      if (length > 1_600_000) return jsonResponse({ status: "payload_too_large" }, 413, request.method);
+      const bounded = await readRequestTextLimited(request, 1_600_000);
       if (bounded.tooLarge) return jsonResponse({ status: "payload_too_large" }, 413, request.method);
       if (bounded.invalid) return jsonResponse({ status: "invalid_request" }, 400, request.method);
       internal = new Request("https://community-jokes/submit", {
@@ -1559,8 +1776,8 @@ async function communityJokesResponse(request, env) {
       });
     } else if (request.method === "PUT") {
       const length = Number(request.headers.get("content-length") || 0);
-      if (length > 1_024) return jsonResponse({ status: "payload_too_large" }, 413, request.method);
-      const bounded = await readRequestTextLimited(request, 1_024);
+      if (length > 1_600_000) return jsonResponse({ status: "payload_too_large" }, 413, request.method);
+      const bounded = await readRequestTextLimited(request, 1_600_000);
       if (bounded.tooLarge) return jsonResponse({ status: "payload_too_large" }, 413, request.method);
       if (bounded.invalid) return jsonResponse({ status: "invalid_request" }, 400, request.method);
       internal = new Request("https://community-jokes/me", {
@@ -1571,14 +1788,17 @@ async function communityJokesResponse(request, env) {
     } else {
       return methodNotAllowed("GET, HEAD, PUT");
     }
+  } else if (url.pathname.match(/^\/api\/jokes\/(attachment|avatar)\//i)) {
+    return serveCommunityBinary(request, env, url);
   } else {
-    const match = url.pathname.match(/^\/api\/jokes\/([0-9a-f-]{36})\/(reaction|report|comment)$/i);
+    const match = url.pathname.match(/^\/api\/jokes\/([0-9a-f-]{36})\/(reaction|report|comment|edit|delete)$/i);
     if (!match || request.method !== "POST") {
       return match ? methodNotAllowed("POST") : jsonResponse({ status: "not_found" }, 404, request.method);
     }
+    const cap = match[2] === "edit" ? 1_600_000 : 1_024;
     const length = Number(request.headers.get("content-length") || 0);
-    if (length > 1_024) return jsonResponse({ status: "payload_too_large" }, 413, request.method);
-    const bounded = await readRequestTextLimited(request, 1_024);
+    if (length > cap) return jsonResponse({ status: "payload_too_large" }, 413, request.method);
+    const bounded = await readRequestTextLimited(request, cap);
     if (bounded.tooLarge) return jsonResponse({ status: "payload_too_large" }, 413, request.method);
     if (bounded.invalid) return jsonResponse({ status: "invalid_request" }, 400, request.method);
     internal = new Request(`https://community-jokes/${match[2]}/${match[1]}`, {

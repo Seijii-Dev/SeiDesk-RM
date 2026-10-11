@@ -267,11 +267,11 @@ data class RdpOptions(
     /** `+fonts`: ClearType font smoothing agar teks kode/dokumen tajam. */
     val fontSmoothing: Boolean = true,
     /** `+wallpaper`: tampilkan wallpaper desktop remote. */
-    val desktopWallpaper: Boolean = false,
+    val desktopWallpaper: Boolean = true,
     /** `+window-drag`: gambar isi jendela saat digeser. */
-    val windowDrag: Boolean = false,
+    val windowDrag: Boolean = true,
     /** `+menu-anims`: animasi buka/tutup menu Windows. */
-    val menuAnimations: Boolean = false,
+    val menuAnimations: Boolean = true,
     /** `+themes` / `-themes`: tema visual Windows. */
     val visualThemes: Boolean = true,
     /** `+aero`: komposisi desktop DWM/Aero. */
@@ -319,9 +319,11 @@ data class RdpOptions(
             asyncChannels = true,
             compressionLevel = 1,
             fontSmoothing = true,
-            desktopWallpaper = false,
-            windowDrag = false,
-            menuAnimations = false,
+            // Pemilik meminta wallpaper tidak hitam & animasi Windows tetap ada;
+            // preset bawaan AUTO kini mengaktifkan seluruh visual.
+            desktopWallpaper = true,
+            windowDrag = true,
+            menuAnimations = true,
             visualThemes = true,
             desktopComposition = true,
         )
