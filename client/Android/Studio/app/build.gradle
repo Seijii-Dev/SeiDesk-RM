@@ -28,6 +28,10 @@ android {
     }
 
     signingConfigs {
+        debug {
+            enableV1Signing = true
+            enableV2Signing = true
+        }
         release {
             storeFile file(RELEASE_STORE_FILE)
             storePassword RELEASE_STORE_PASSWORD
@@ -53,6 +57,7 @@ android {
         }
         debug {
             jniDebuggable true
+            signingConfig signingConfigs.debug
         }
     }
     compileOptions {

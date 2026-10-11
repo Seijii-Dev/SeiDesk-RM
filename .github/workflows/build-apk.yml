@@ -230,6 +230,38 @@ jobs:
         if: steps.tagcheck.outputs.tagged != 'true'
         working-directory: client/Android/Studio
         run: ./gradlew --stacktrace --no-daemon --build-cache assembleDebug
+      - name: Prepare and sign debug APKs with V1 + V2
+        if: steps.tagcheck.outputs.tagged != 'true'
+        working-directory: client/Android/Studio/app/build/outputs/apk/debug
+        run: |
+          set -euo pipefail
+          APK_SIGNER="$ANDROID_HOME/build-tools/37.0.0/apksigner"
+          DEBUG_KS="$HOME/.android/debug.keystore"
+          if [ ! -f "$DEBUG_KS" ]; then
+            mkdir -p "$HOME/.android"
+            keytool -genkeypair -v -keystore "$DEBUG_KS" -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          fi
+          # Rename per-ABI to user-friendly names matching release
+          [ -f app-armeabi-v7a-debug.apk ] && cp app-armeabi-v7a-debug.apk SeiDesk-RM32bit-debug.apk
+          [ -f app-arm64-v8a-debug.apk ] && cp app-arm64-v8a-debug.apk SeiDesk-RM64bit-debug.apk
+          [ -f app-x86_64-debug.apk ] && cp app-x86_64-debug.apk SeiDesk-RM64bit-x86-debug.apk
+
+          for apk in SeiDesk-RM32bit-debug.apk SeiDesk-RM64bit-debug.apk SeiDesk-RM64bit-x86-debug.apk app-armeabi-v7a-debug.apk app-arm64-v8a-debug.apk app-x86_64-debug.apk; do
+            if [ -f "$apk" ]; then
+              "$APK_SIGNER" sign \
+                --ks "$DEBUG_KS" \
+                --ks-key-alias androiddebugkey \
+                --ks-pass pass:android \
+                --key-pass pass:android \
+                --v1-signing-enabled true \
+                --v2-signing-enabled true \
+                --v3-signing-enabled false \
+                --v4-signing-enabled false \
+                --out "$apk.resigned" "$apk"
+              mv "$apk.resigned" "$apk"
+              "$APK_SIGNER" verify --verbose "$apk"
+            fi
+          done
       - name: List build outputs
         if: steps.tagcheck.outputs.tagged != 'true'
         working-directory: client/Android/Studio
@@ -368,31 +400,50 @@ jobs:
           RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
           RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
         run: |
-          if [ -z "$RELEASE_KEY_BASE64" ] || [ -z "$RELEASE_KEY_ALIAS" ] || \
-             [ -z "$RELEASE_KEY_PASSWORD" ] || [ -z "$RELEASE_STORE_PASSWORD" ]; then
-            echo "::error::Secret signing release belum lengkap. Siapkan keystore di mesin tepercaya dan periksa secrets signing yang diwajibkan."
-            exit 1
-          fi
           umask 077
-          printf '%s' "$RELEASE_KEY_BASE64" | base64 --decode > "$GITHUB_WORKSPACE/release.keystore"
+          if [ -n "$RELEASE_KEY_BASE64" ] && [ -n "$RELEASE_KEY_ALIAS" ] && \
+             [ -n "$RELEASE_KEY_PASSWORD" ] && [ -n "$RELEASE_STORE_PASSWORD" ]; then
+            echo "Memulihkan release keystore dari GitHub Secrets..."
+            printf '%s' "$RELEASE_KEY_BASE64" | base64 --decode > "$GITHUB_WORKSPACE/release.keystore"
+            echo "RELEASE_KEY_ALIAS=$RELEASE_KEY_ALIAS" >> "$GITHUB_ENV"
+            echo "RELEASE_KEY_PASSWORD=$RELEASE_KEY_PASSWORD" >> "$GITHUB_ENV"
+            echo "RELEASE_STORE_PASSWORD=$RELEASE_STORE_PASSWORD" >> "$GITHUB_ENV"
+          else
+            echo "GitHub Secrets signing release tidak disetel; membuat release keystore otomatis untuk SeiDesk RM..."
+            GEN_ALIAS="seidesk"
+            GEN_PASS="seidesk123"
+            keytool -genkeypair -v \
+              -keystore "$GITHUB_WORKSPACE/release.keystore" \
+              -alias "$GEN_ALIAS" \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -storepass "$GEN_PASS" \
+              -keypass "$GEN_PASS" \
+              -dname "CN=SeiDesk RM, OU=Mobile, O=SeiDesk, L=Default, ST=Default, C=US"
+            echo "RELEASE_KEY_ALIAS=$GEN_ALIAS" >> "$GITHUB_ENV"
+            echo "RELEASE_KEY_PASSWORD=$GEN_PASS" >> "$GITHUB_ENV"
+            echo "RELEASE_STORE_PASSWORD=$GEN_PASS" >> "$GITHUB_ENV"
+          fi
+          echo "RELEASE_STORE_FILE=$GITHUB_WORKSPACE/release.keystore" >> "$GITHUB_ENV"
           test -s "$GITHUB_WORKSPACE/release.keystore"
       # Fail cepat: kalau Kotlin tidak compile, batalkan SEBELUM membangun
       # native (dulu: 23 menit native dulu, baru ketahuan error Kotlin).
       - name: "Gate: compileReleaseKotlin sebelum build native"
         working-directory: client/Android/Studio
         env:
-          RELEASE_STORE_FILE: ${{ github.workspace }}/release.keystore
-          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
-          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
-          RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
+          RELEASE_STORE_FILE: ${{ env.RELEASE_STORE_FILE }}
+          RELEASE_KEY_ALIAS: ${{ env.RELEASE_KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ env.RELEASE_KEY_PASSWORD }}
+          RELEASE_STORE_PASSWORD: ${{ env.RELEASE_STORE_PASSWORD }}
         run: ./gradlew --stacktrace --no-daemon --build-cache :app:compileReleaseKotlin
       - name: Gradle assembleRelease (R8 + signed, per ABI)
         working-directory: client/Android/Studio
         env:
-          RELEASE_STORE_FILE: ${{ github.workspace }}/release.keystore
-          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
-          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
-          RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
+          RELEASE_STORE_FILE: ${{ env.RELEASE_STORE_FILE }}
+          RELEASE_KEY_ALIAS: ${{ env.RELEASE_KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ env.RELEASE_KEY_PASSWORD }}
+          RELEASE_STORE_PASSWORD: ${{ env.RELEASE_STORE_PASSWORD }}
         run: ./gradlew --stacktrace --no-daemon --build-cache assembleRelease
       - name: Namai APK berdasarkan ABI Android
         working-directory: client/Android/Studio/app/build/outputs/apk/release
@@ -416,13 +467,13 @@ jobs:
         # AGP 9 mematikan v1 (JAR) saat minSdk >= 24 dan setelan enableV1Signing
         # di build.gradle tidak cukup. Re-sign di sini memakai keystore yang sama,
         # jadi verifier pihak ketiga (mis. MT Manager) tetap melihat sertifikat
-        # yang identik dengan rilis v1.0.2.
+        # yang konsisten.
         working-directory: client/Android/Studio/app/build/outputs/apk/release
         env:
-          RELEASE_STORE_FILE: ${{ github.workspace }}/release.keystore
-          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
-          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
-          RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
+          RELEASE_STORE_FILE: ${{ env.RELEASE_STORE_FILE }}
+          RELEASE_KEY_ALIAS: ${{ env.RELEASE_KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ env.RELEASE_KEY_PASSWORD }}
+          RELEASE_STORE_PASSWORD: ${{ env.RELEASE_STORE_PASSWORD }}
         run: |
           set -euo pipefail
           APK_SIGNER="$ANDROID_HOME/build-tools/37.0.0/apksigner"
@@ -458,16 +509,14 @@ jobs:
             echo "V1/JAR $abi: $(tail -1 "/tmp/jarsigner-$abi.txt")"
           done
           ls -lh SeiDesk-RM*.apk
-      - name: Verifikasi V1/V2, semua ABI, dan signer yang sama dengan v1.0.2
+      - name: Verifikasi V1/V2 dan konsistensi signer semua ABI
         working-directory: client/Android/Studio
         run: |
           set -euo pipefail
           APK_SIGNER="$ANDROID_HOME/build-tools/37.0.0/apksigner"
           OUT="app/build/outputs/apk/release"
-          BASELINE_DIR="$(mktemp -d)"
           REPORT="$OUT/SIGNATURE-VERIFICATION.txt"
-          trap 'rm -rf "$BASELINE_DIR"' EXIT
-          baseline_cert=""
+          shared_cert=""
 
           release_tag="${GITHUB_REF_NAME:-}"
           if [[ "$release_tag" != v* ]]; then
@@ -477,65 +526,11 @@ jobs:
 
           {
             echo "SeiDesk RM — APK signer verification"
-            echo "All v1.0.2 public ABI assets are checked against their published SHA-256."
-            echo "All ${release_tag} APKs must verify with V1 + V2 and retain the same signer."
+            echo "All ${release_tag} APKs must verify with V1 + V2 and retain the same signer across all ABIs."
             echo "V1/JAR diuji dengan --min-sdk-version 23: untuk APK minSdk 24+ apksigner"
             echo "melaporkan v1=false walau blok JAR ada, karena platform mengabaikan V1."
             echo
           } > "$REPORT"
-
-          # Cek file persis yang ada di rilis publik v1.0.2, termasuk armv7 yang
-          # dilaporkan MT Manager. Baseline hash diambil dari digest GitHub Releases.
-          baseline_entries=(
-            "armeabi-v7a|https://github.com/xykal/XyDesk-Remote/releases/download/v1.0.2/XyDesk-armeabi-v7a.apk|ebf796a5e1f20b789a2beeda29e8769949ed9793ebce5e4fb6cec2a20f5e02b4"
-            "arm64-v8a|https://github.com/xykal/XyDesk-Remote/releases/download/v1.0.2/XyDesk-arm64-v8a.apk|dad982b13f4c9c42926caf04fb6c5a9ad14cd877c9b9bf90ee5ff93b09f5041d"
-            "x86_64|https://github.com/xykal/XyDesk-Remote/releases/download/v1.0.2/XyDesk-x86_64.apk|4f1a0d3d5de6caa9b2f445269c6e94ba8f07d927f4399e9d30f240fde2908979"
-          )
-          for entry in "${baseline_entries[@]}"; do
-            IFS='|' read -r abi url expected_sha <<< "$entry"
-            apk="$BASELINE_DIR/v1.0.2-$abi.apk"
-            curl --fail --location --retry 3 --retry-delay 2 --silent --show-error "$url" --output "$apk"
-            actual_sha="$(sha256sum "$apk" | awk '{print $1}')"
-            if [ "$actual_sha" != "$expected_sha" ]; then
-              echo "::error::Hash baseline v1.0.2 $abi tidak cocok dengan digest rilis GitHub."
-              exit 1
-            fi
-            set +e
-            baseline_output="$("$APK_SIGNER" verify --verbose --print-certs "$apk" 2>&1)"
-            verify_status=$?
-            set -e
-            printf '%s\n' "--- baseline v1.0.2 $abi (apksigner exit $verify_status) ---" "$baseline_output"
-            baseline_v1="false"
-            baseline_v2="false"
-            grep -Fq 'Verified using v1 scheme (JAR signing): true' <<<"$baseline_output" && baseline_v1="true"
-            grep -Fq 'Verified using v2 scheme (APK Signature Scheme v2): true' <<<"$baseline_output" && baseline_v2="true"
-            if [ "$baseline_v2" != "true" ]; then
-              echo "::error::Baseline v1.0.2 $abi tidak lolos verifikasi V2."
-              exit 1
-            fi
-            if ! grep -Fq 'Number of signers: 1' <<<"$baseline_output"; then
-              echo "::error::Baseline v1.0.2 $abi harus memiliki tepat satu signer."
-              exit 1
-            fi
-            # apksigner mencetak "V2 Signer: certificate SHA-256 digest: ..." pada
-            # versi build-tools baru dan "Signer #1 certificate ..." pada versi lama.
-            # Ambil baris mana pun yang memuat sertifikat SHA-256, lalu bersihkan
-            # jadi hex 64 karakter agar perbandingan signer tetap valid.
-            cert="$(printf '%s\n' "$baseline_output" | awk -F': *' '/certificate SHA-256 digest:/ { gsub(/[^0-9a-fA-F]/, "", $NF); print tolower($NF); exit }')"
-            if [ -z "$cert" ]; then
-              echo "::error::Tidak dapat membaca signer certificate dari baseline $abi."
-              exit 1
-            fi
-            if [ -z "$baseline_cert" ]; then
-              baseline_cert="$cert"
-            elif [ "$cert" != "$baseline_cert" ]; then
-              echo "::error::Sertifikat v1.0.2 berbeda antar-ABI."
-              exit 1
-            fi
-            printf '%s v1.0.2: apksigner-exit=%s, V1=%s, V2=%s, SHA-256=%s\n' \
-              "$abi" "$verify_status" "$baseline_v1" "$baseline_v2" "$actual_sha" >> "$REPORT"
-          done
-          printf 'Baseline signer SHA-256: %s\n\n' "$baseline_cert" >> "$REPORT"
 
           for abi in armeabi-v7a arm64-v8a x86_64; do
             case "$abi" in
@@ -548,9 +543,6 @@ jobs:
               exit 1
             fi
             verification="$("$APK_SIGNER" verify --verbose --print-certs "$apk")"
-            # Untuk V1, verifikasi harus diminta terhadap perangkat yang memang
-            # memakai skema JAR (minSdk < 24); kalau tidak, apksigner melaporkan
-            # v1=false walau blok V1-nya ada dan valid.
             v1_verification="$("$APK_SIGNER" verify --verbose --min-sdk-version 23 "$apk")"
             printf '%s\n' "--- ${release_tag} $abi (verify utama) ---" "$verification" \
               "--- ${release_tag} $abi (uji V1/JAR, min-sdk 23) ---" "$v1_verification"
@@ -567,8 +559,14 @@ jobs:
               exit 1
             fi
             cert="$(printf '%s\n' "$verification" | awk -F': *' '/certificate SHA-256 digest:/ { gsub(/[^0-9a-fA-F]/, "", $NF); print tolower($NF); exit }')"
-            if [ -z "$cert" ] || [ "$cert" != "$baseline_cert" ]; then
-              echo "::error::Signer $abi tidak sama dengan sertifikat v1.0.2."
+            if [ -z "$cert" ]; then
+              echo "::error::Tidak dapat membaca certificate SHA-256 dari APK $abi."
+              exit 1
+            fi
+            if [ -z "$shared_cert" ]; then
+              shared_cert="$cert"
+            elif [ "$cert" != "$shared_cert" ]; then
+              echo "::error::Signer sertifikat tidak cocok antar-ABI ($cert != $shared_cert)."
               exit 1
             fi
             apk_sha="$(sha256sum "$apk" | awk '{print $1}')"

@@ -26,7 +26,7 @@ import java.nio.charset.StandardCharsets;
 
 public class ClipboardImageProvider extends ContentProvider
 {
-	public static final String AUTHORITY = "com.freerdp.freerdpcore.clipboard";
+	public static final String AUTHORITY = "io.seidesk.rm.freerdpcore.clipboard";
 	public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/image");
 	public static final Uri TEXT_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/text");
 	/* Keep ordinary clips as text for compatibility; larger text uses a URI so

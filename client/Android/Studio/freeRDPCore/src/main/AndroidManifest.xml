@@ -110,7 +110,7 @@
 
         <provider
             android:name=".utils.ClipboardImageProvider"
-            android:authorities="com.freerdp.freerdpcore.clipboard"
+            android:authorities="${applicationId}.freerdpcore.clipboard"
             android:exported="false"
             android:grantUriPermissions="true" />
 
