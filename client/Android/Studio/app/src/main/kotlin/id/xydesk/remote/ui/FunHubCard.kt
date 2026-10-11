@@ -68,13 +68,15 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
     var reportedIds by remember { mutableStateOf(emptySet<String>()) }
     var showAll by remember { mutableStateOf(false) }
     var composerOpen by remember { mutableStateOf(false) }
+    var formMessage by remember { mutableStateOf<String?>(null) }
+    var formMessageIsError by remember { mutableStateOf(false) }
     var pendingAttachment by remember { mutableStateOf<FeedAttachment?>(null) }
     var editingJoke by remember { mutableStateOf<CommunityJoke?>(null) }
     var editRemoveAttachment by remember { mutableStateOf(false) }
     var deleteTarget by remember { mutableStateOf<CommunityJoke?>(null) }
     var deleting by remember { mutableStateOf(false) }
     val pickVisual = rememberLauncherForActivityResult(
-        ActivityResultContracts.PickVisualMedia(),
+        ActivityResultContracts.GetContent(),
     ) { uri ->
         if (uri != null) {
             scope.launch {
@@ -93,8 +95,6 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
         }
     }
     var feedError by remember { mutableStateOf<String?>(null) }
-    var formMessage by remember { mutableStateOf<String?>(null) }
-    var formMessageIsError by remember { mutableStateOf(false) }
     var feedMessage by remember { mutableStateOf<String?>(null) }
     var feedMessageIsError by remember { mutableStateOf(false) }
 
@@ -328,11 +328,7 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
                     XyPillButton(
                         text = xy(" Foto / stiker / GIF", "📷 Photo / sticker / GIF"),
                         onClick = {
-                            pickVisual.launch(
-                                ActivityResultContracts.PickVisualMedia.Request(
-                                    ActivityResultContracts.PickVisualMedia.ImageOnly,
-                                ),
-                            )
+                            pickVisual.launch("image/*")
                         },
                         primary = false,
                         compact = true,

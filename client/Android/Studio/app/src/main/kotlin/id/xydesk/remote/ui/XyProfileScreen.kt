@@ -256,7 +256,7 @@ private fun CommunityAccountCard() {
     var githubBusy by remember { mutableStateOf(false) }
     var githubUser by remember { mutableStateOf<String?>(null) }
     val pickAvatar = androidx.activity.compose.rememberLauncherForActivityResult(
-        androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia(),
+        androidx.activity.result.contract.ActivityResultContracts.GetContent(),
     ) { uri ->
         if (uri != null) {
             scope.launch {
@@ -380,11 +380,7 @@ private fun CommunityAccountCard() {
             XyPillButton(
                 text = if (avatarBusy) xy("Menyimpan…", "Saving…") else xy("Ganti foto", "Change photo"),
                 onClick = {
-                    pickAvatar.launch(
-                        androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.Request(
-                            androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.ImageOnly,
-                        ),
-                    )
+                    pickAvatar.launch("image/*")
                 },
                 primary = false,
                 compact = true,
