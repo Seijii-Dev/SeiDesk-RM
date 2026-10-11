@@ -626,13 +626,13 @@ fun SessionControls(
                         scaleIn(
                             androidx.compose.animation.core.tween(230, easing = androidx.compose.animation.core.FastOutSlowInEasing),
                             initialScale = 0.25f,
-                            transformOrigin = androidx.compose.ui.layout.TransformOrigin(0.5f, 1f),
+                            transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0.5f, 1f),
                         ),
                     exit = fadeOut(androidx.compose.animation.core.tween(120)) +
                         scaleOut(
-                            androidx.compose.animation.core.tween(170, easing = androidx.compose.animation.core.FastOutInEasing),
+                            androidx.compose.animation.core.tween(170, easing = androidx.compose.animation.core.FastOutLinearInEasing),
                             targetScale = 0.2f,
-                            transformOrigin = androidx.compose.ui.layout.TransformOrigin(0.5f, 1f),
+                            transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0.5f, 1f),
                         ),
                 ) {
                     Column(
@@ -2095,13 +2095,14 @@ private fun InputTab(
         }
 
     section("tombol-notifikasi-kustom", xy("Tombol notifikasi sesi", "Session notification buttons"), advanced = true) {
-        val notifPrefs = remember { AppPrefs(context) }
+        val notifContext = androidx.compose.ui.platform.LocalContext.current
+        val notifPrefs = remember { AppPrefs(notifContext) }
         var notifHome by remember { mutableStateOf(notifPrefs.notifHomeButton) }
         var notifMusic by remember { mutableStateOf(notifPrefs.notifMusicButton) }
         fun refreshNotif() {
             runCatching {
-                context.startService(
-                    android.content.Intent(context, id.xydesk.remote.XySessionService::class.java),
+                notifContext.startService(
+                    android.content.Intent(notifContext, id.xydesk.remote.XySessionService::class.java),
                 )
             }
         }
