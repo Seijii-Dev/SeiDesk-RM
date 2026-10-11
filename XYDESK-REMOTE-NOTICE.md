@@ -1,4 +1,4 @@
-# XyDesk Remote — NOTICE
+# SeiDesk RM (formerly XyDesk Remote) — NOTICE
 
 Repo `xykal/XyDesk-Remote` mengandung **tree sumber FreeRDP versi 3.32.0**
 (vendored, pin via git) sebagai fondasi klien RDP Android-nya, sesuai lisensi
@@ -8,7 +8,7 @@ FreeRDP — A Remote Desktop Protocol Implementation
 Copyright (C) 2012-2026 FreeRDP contributors (Thincast/FreeRDP project)
 https://freerdp.com · https://github.com/FreeRDP/FreeRDP
 
-## Perubahan XyDesk terhadap tree FreeRDP
+## Perubahan SeiDesk RM terhadap tree FreeRDP
 
 Daftar ini disengaja dipertahankan sekecil mungkin agar upgrade FreeRDP
 nantinya (re-merge tree) tetap murah:
@@ -18,13 +18,13 @@ nantinya (re-merge tree) tetap murah:
    dari `release.properties`); default split/ABI disesuaikan (arm64-v8a +
    x86_64, satu APK universal).
 2. `client/Android/Studio/settings.gradle` — modul `:aFreeRDP` diganti
-   `:app` (aplikasi XyDesk Remote).
+   `:app` (aplikasi SeiDesk RM).
 3. `client/Android/Studio/aFreeRDP/` — dihapus (digantikan modul `:app`).
 4. `client/Android/Studio/release.properties` — file baru (konfigurasi build).
-5. `client/Android/Studio/app/` — modul aplikasi XyDesk (baru, milik XyVerse).
-6. `.github/workflows/build-apk.yml` — CI XyDesk (workflow CI upstream
+5. `client/Android/Studio/app/` — modul aplikasi SeiDesk RM (baru, milik XyVerse).
+6. `.github/workflows/build-apk.yml` — CI SeiDesk RM (workflow CI upstream
    FreeRDP dihapus agar tidak ter-trigger di repo ini).
-7. `README.md` — README XyDesk; README upstream diarsipkan sebagai
+7. `README.md` — README SeiDesk RM; README upstream diarsipkan sebagai
    `FreeRDP-README.md`.
 8. `.gitignore` — ditambah entri artifact Android/Gradle.
 
@@ -32,9 +32,9 @@ Seluruh file lain di dalam tree FreeRDP (termasuk
 `client/Android/Studio/freeRDPCore/`) **tidak dimodifikasi** per kondisi
 milestone M0.
 
-## Lisensi kode XyDesk
+## Lisensi kode SeiDesk RM
 
-Kode di `client/Android/Studio/app/` dan dokumen XyDesk (`README.md`,
+Kode di `client/Android/Studio/app/` dan dokumen SeiDesk RM (`README.md`,
 `PLAN.md`, `docs/BUILD.md`, file ini) adalah © XyVerse.
 Lisensi distribusi akan ditetapkan saat milestone M5.
 

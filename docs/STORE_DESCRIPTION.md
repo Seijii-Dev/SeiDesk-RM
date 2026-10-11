@@ -7,8 +7,8 @@ Brand: `XyVerse Technology Global`. Versi acuan rilis: `0.5.35 (52)` (tag GitHub
 
 | Field | Isi |
 | --- | --- |
-| Nama aplikasi | XyDesk Remote |
-| Nama paket | `id.xydesk.remote` |
+| Nama aplikasi | SeiDesk RM |
+| Nama paket | `io.seidesk.rm` |
 | Kategori | Tools / Produktivitas |
 | Pengembang | XyVerse Technology Global |
 | Situs / portal | https://rdp.xydesk.my.id |
@@ -24,7 +24,7 @@ EN: `Lightweight Remote Desktop (RDP) for Windows: audio, mic, clipboard, GPU.`
 
 ## Deskripsi lengkap (Indonesia)
 
-XyDesk Remote adalah klien Remote Desktop Protocol (RDP) untuk Android yang
+SeiDesk RM adalah klien Remote Desktop Protocol (RDP) untuk Android yang
 dirancang untuk mengendalikan PC atau server Windows dengan latensi rendah.
 
 Fitur utama:
@@ -53,7 +53,7 @@ dan izin mikrofon di Android harus diberikan.
 
 ## Full description (English)
 
-XyDesk Remote is a Remote Desktop Protocol (RDP) client for Android built for
+SeiDesk RM is a Remote Desktop Protocol (RDP) client for Android built for
 low-latency control of Windows PCs and servers.
 
 Highlights:

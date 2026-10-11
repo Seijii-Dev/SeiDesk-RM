@@ -557,10 +557,10 @@ test("PC signaling room creation is rate-limited per hashed client IP and valida
 });
 
 test("Android active-session reporting defaults on, remains easy to disable, and sends only a random session ID", async () => {
-  const prefs = await readFile(new URL("../client/Android/Studio/app/src/main/kotlin/id/xydesk/remote/ui/AppPrefs.kt", import.meta.url), "utf8");
-  const reporter = await readFile(new URL("../client/Android/Studio/app/src/main/kotlin/id/xydesk/remote/privacy/ActiveSessionStatsReporter.kt", import.meta.url), "utf8");
-  const session = await readFile(new URL("../client/Android/Studio/app/src/main/kotlin/id/xydesk/remote/ui/XyDeskSession.kt", import.meta.url), "utf8");
-  const settings = await readFile(new URL("../client/Android/Studio/app/src/main/kotlin/id/xydesk/remote/ui/Screens.kt", import.meta.url), "utf8");
+  const prefs = await readFile(new URL("../client/Android/Studio/app/src/main/kotlin/io/seidesk/rm/ui/AppPrefs.kt", import.meta.url), "utf8");
+  const reporter = await readFile(new URL("../client/Android/Studio/app/src/main/kotlin/io/seidesk/rm/privacy/ActiveSessionStatsReporter.kt", import.meta.url), "utf8");
+  const session = await readFile(new URL("../client/Android/Studio/app/src/main/kotlin/io/seidesk/rm/ui/SeiDeskSession.kt", import.meta.url), "utf8");
+  const settings = await readFile(new URL("../client/Android/Studio/app/src/main/kotlin/io/seidesk/rm/ui/Screens.kt", import.meta.url), "utf8");
   assert.match(prefs, /getBoolean\(KEY_SHARE_ACTIVE_SESSION_STATS,\s*true\)/);
   assert.match(settings, /appPrefs\.shareActiveSessionStats = it/);
   assert.match(settings, /Matikan sakelar ini kapan saja/);

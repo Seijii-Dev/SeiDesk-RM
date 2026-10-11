@@ -1,4 +1,4 @@
-# XyDesk Remote Security Policy
+# SeiDesk RM Security Policy
 
 ## Supported versions
 
@@ -10,7 +10,7 @@ Use [GitHub Private Vulnerability Reporting](https://github.com/xykal/XyDesk-Rem
 
 Include the affected release or commit, Android version/device, Windows host version where relevant, a minimal reproduction, and the security impact. Remove passwords, tokens, public IPs, certificate private material, and unrelated personal data from logs or screenshots.
 
-Test only systems you own or are explicitly authorized to assess. For a vulnerability in unmodified upstream FreeRDP code, also follow the [FreeRDP security policy](https://github.com/FreeRDP/FreeRDP/blob/master/SECURITY.md); XyDesk Remote reports should still describe any product-specific impact here.
+Test only systems you own or are explicitly authorized to assess. For a vulnerability in unmodified upstream FreeRDP code, also follow the [FreeRDP security policy](https://github.com/FreeRDP/FreeRDP/blob/master/SECURITY.md); SeiDesk RM reports should still describe any product-specific impact here.
 
 ## Response
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- XyDesk Remote: tidak ada data app yang boleh ikut backup/transfer.
+<!-- SeiDesk RM: tidak ada data app yang boleh ikut backup/transfer.
      Ciphertext vault (AES-GCM) memang tidak berguna tanpa kunci Android
      Keystore, tapi perilakunya dibikin eksplisit: tidak ada yang keluar
      dari perangkat. -->

@@ -1,10 +1,10 @@
-# XyDesk diagnostics and log location
+# SeiDesk RM diagnostics and log location
 
 The diagnostic logs are initialized **before** `GlobalApp` starts the FreeRDP JNI layer, so startup failures are recorded too.
 
-On Android, XyDesk writes both logs to:
+On Android, SeiDesk RM writes both logs to:
 
-`Internal storage/Android/media/id.xydesk.remote/log/`
+`Internal storage/Android/media/io.seidesk.rm/log/`
 
 - `xydesk-boot.log` — app startup, connection lifecycle, and JNI callback diagnostics.
 - `xydesk-crash.log` — uncaught JVM crash stacks and recorded fatal setup errors.

@@ -8,7 +8,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'com.google.devtools.ksp'
 
 android {
-    namespace 'id.xydesk.remote.sessions'
+    namespace 'io.seidesk.rm.sessions'
     compileSdkVersion rootProject.ext.compileApi
     buildToolsVersion rootProject.ext.toolsVersion
 

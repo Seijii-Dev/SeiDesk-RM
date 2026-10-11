@@ -3,12 +3,12 @@ apply plugin: 'kotlin-android'
 apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
 android {
-    namespace 'id.xydesk.remote'
+    namespace 'io.seidesk.rm'
     compileSdkVersion rootProject.ext.compileApi
     buildToolsVersion rootProject.ext.toolsVersion
 
     defaultConfig {
-        applicationId "id.xydesk.remote"
+        applicationId "io.seidesk.rm"
         minSdkVersion rootProject.ext.minApi
         targetSdkVersion rootProject.ext.targetApi
         versionName rootProject.ext.versionName

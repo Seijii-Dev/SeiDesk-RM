@@ -43,14 +43,21 @@ def verify(directory: Path) -> None:
             f"found {', '.join(sorted(reported)) or 'none'}"
         )
 
-    # Sejak v1.1.8 nama aset memakai bit arsitektur, bukan nama ABI.
+    # Sejak SeiDesk RM nama aset memakai SeiDesk-RM<bits>.apk.
     NAMES = {
+        "armeabi-v7a": "SeiDesk-RM32bit.apk",
+        "arm64-v8a": "SeiDesk-RM64bit.apk",
+        "x86_64": "SeiDesk-RM64bit-x86.apk",
+    }
+    LEGACY_NAMES = {
         "armeabi-v7a": "XyDesk-Remote32bit.apk",
         "arm64-v8a": "XyDesk-Remote64bit.apk",
         "x86_64": "XyDesk-Remote64bit-x86.apk",
     }
     for abi in ABIS:
         filename = NAMES[abi]
+        if not (directory / filename).is_file() and (directory / LEGACY_NAMES[abi]).is_file():
+            filename = LEGACY_NAMES[abi]
         apk_path = directory / filename
         if not apk_path.is_file():
             raise SystemExit(f"FAIL: missing {apk_path}")

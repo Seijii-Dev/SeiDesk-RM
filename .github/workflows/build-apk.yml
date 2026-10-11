@@ -1,6 +1,6 @@
 name: Build APK
 
-# XyDesk Remote — CI/CD
+# SeiDesk RM — CI/CD
 #  - push ke main        -> compile gate + debug per-ABI (kecuali commit [skip-debug])
 #  - tag v* / manual     -> build RELEASE (R8 + signing resmi, per-ABI) + GitHub Release
 #  - manual (dispatch)   -> gate saja (default), atau build debug / release
@@ -238,7 +238,7 @@ jobs:
         if: steps.tagcheck.outputs.tagged != 'true'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: xydesk-remote-debug-per-abi
+          name: seidesk-rm-debug-per-abi
           path: client/Android/Studio/app/build/outputs/apk/debug/*.apk
           retention-days: 7
 
@@ -398,20 +398,20 @@ jobs:
         working-directory: client/Android/Studio/app/build/outputs/apk/release
         run: |
           set -euo pipefail
-          mv app-armeabi-v7a-release.apk XyDesk-Remote-armeabi-v7a.apk
-          mv app-arm64-v8a-release.apk XyDesk-Remote-arm64-v8a.apk
-          mv app-x86_64-release.apk XyDesk-Remote-x86_64.apk
-          ls -lh XyDesk-Remote-*.apk
+          mv app-armeabi-v7a-release.apk SeiDesk-RM-armeabi-v7a.apk
+          mv app-arm64-v8a-release.apk SeiDesk-RM-arm64-v8a.apk
+          mv app-x86_64-release.apk SeiDesk-RM-x86_64.apk
+          ls -lh SeiDesk-RM-*.apk
       - name: Nama akhir APK untuk user (32bit/64bit)
         working-directory: client/Android/Studio/app/build/outputs/apk/release
         run: |
-          set -euo pipefail
-          # Nama internal per-ABI dipakai sampai verifikasi tanda tangan selesai;
-          # nama yang dipublikasikan mengikuti bit arsitektur yang mudah dipahami.
-          mv XyDesk-Remote-armeabi-v7a.apk XyDesk-Remote32bit.apk
-          mv XyDesk-Remote-arm64-v8a.apk XyDesk-Remote64bit.apk
-          mv XyDesk-Remote-x86_64.apk XyDesk-Remote64bit-x86.apk
-          ls -lh XyDesk-Remote*.apk
+            set -euo pipefail
+            # Nama internal per-ABI dipakai sampai verifikasi tanda tangan selesai;
+            # nama yang dipublikasikan mengikuti bit arsitektur yang mudah dipahami.
+            mv SeiDesk-RM-armeabi-v7a.apk SeiDesk-RM32bit.apk
+            mv SeiDesk-RM-arm64-v8a.apk SeiDesk-RM64bit.apk
+            mv SeiDesk-RM-x86_64.apk SeiDesk-RM64bit-x86.apk
+            ls -lh SeiDesk-RM*.apk
       - name: Tanda tangani ulang APK dengan skema V1 + V2 (deterministik)
         # AGP 9 mematikan v1 (JAR) saat minSdk >= 24 dan setelan enableV1Signing
         # di build.gradle tidak cukup. Re-sign di sini memakai keystore yang sama,
@@ -428,9 +428,9 @@ jobs:
           APK_SIGNER="$ANDROID_HOME/build-tools/37.0.0/apksigner"
           for abi in armeabi-v7a arm64-v8a x86_64; do
             case "$abi" in
-              armeabi-v7a) apk="XyDesk-Remote32bit.apk" ;;
-              arm64-v8a)   apk="XyDesk-Remote64bit.apk" ;;
-              *)           apk="XyDesk-Remote64bit-x86.apk" ;;
+              armeabi-v7a) apk="SeiDesk-RM32bit.apk" ;;
+              arm64-v8a)   apk="SeiDesk-RM64bit.apk" ;;
+              *)           apk="SeiDesk-RM64bit-x86.apk" ;;
             esac
             if [ ! -s "$apk" ]; then
               echo "::error::$apk tidak ditemukan untuk ditandatangani ulang."
@@ -457,7 +457,7 @@ jobs:
             fi
             echo "V1/JAR $abi: $(tail -1 "/tmp/jarsigner-$abi.txt")"
           done
-          ls -lh XyDesk-Remote*.apk
+          ls -lh SeiDesk-RM*.apk
       - name: Verifikasi V1/V2, semua ABI, dan signer yang sama dengan v1.0.2
         working-directory: client/Android/Studio
         run: |
@@ -476,7 +476,7 @@ jobs:
           fi
 
           {
-            echo "XyDesk Remote — APK signer verification"
+            echo "SeiDesk RM — APK signer verification"
             echo "All v1.0.2 public ABI assets are checked against their published SHA-256."
             echo "All ${release_tag} APKs must verify with V1 + V2 and retain the same signer."
             echo "V1/JAR diuji dengan --min-sdk-version 23: untuk APK minSdk 24+ apksigner"
@@ -539,9 +539,9 @@ jobs:
 
           for abi in armeabi-v7a arm64-v8a x86_64; do
             case "$abi" in
-              armeabi-v7a) apk="$OUT/XyDesk-Remote32bit.apk" ;;
-              arm64-v8a)   apk="$OUT/XyDesk-Remote64bit.apk" ;;
-              *)           apk="$OUT/XyDesk-Remote64bit-x86.apk" ;;
+              armeabi-v7a) apk="$OUT/SeiDesk-RM32bit.apk" ;;
+              arm64-v8a)   apk="$OUT/SeiDesk-RM64bit.apk" ;;
+              *)           apk="$OUT/SeiDesk-RM64bit-x86.apk" ;;
             esac
             if [ ! -s "$apk" ]; then
               echo "::error::APK untuk ABI $abi tidak ditemukan."
@@ -583,9 +583,9 @@ jobs:
         run: |
           set -euo pipefail
           python3 "$GITHUB_WORKSPACE/ci/verify_android_apks.py" \
-            app/build/outputs/apk/release/XyDesk-Remote32bit.apk \
-            app/build/outputs/apk/release/XyDesk-Remote64bit.apk \
-            app/build/outputs/apk/release/XyDesk-Remote64bit-x86.apk
+            app/build/outputs/apk/release/SeiDesk-RM32bit.apk \
+            app/build/outputs/apk/release/SeiDesk-RM64bit.apk \
+            app/build/outputs/apk/release/SeiDesk-RM64bit-x86.apk
       - name: Build Windows Native C++17 Host Agent & DLLs (xydesk_quic.dll + xydesk_host_core.dll + XyDeskRemoteHost.exe)
         run: |
           set -euo pipefail
@@ -636,15 +636,15 @@ jobs:
           cp "$STAGE_DIR/xydesk_host_core.dll" "$OUT_DIR/xydesk_host_core.dll"
           cp "$STAGE_DIR/XyDeskRemoteHost.exe" "$OUT_DIR/XyDeskRemoteHost.exe"
           cp "$STAGE_DIR/XyDeskRemoteHost-Standalone.exe" "$OUT_DIR/XyDeskRemoteHost-Standalone.exe"
-          (cd "$STAGE_DIR" && zip -q -r "$GITHUB_WORKSPACE/$OUT_DIR/XyDesk-Remote-Host-Agent-win64.zip" .)
+          (cd "$STAGE_DIR" && zip -q -r "$GITHUB_WORKSPACE/$OUT_DIR/SeiDesk-RM-Host-Agent-win64.zip" .)
           ls -lh "$OUT_DIR"
       - name: Upload signed APKs & Windows Host Agent for publishing
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: xydesk-remote-release-apks
+          name: seidesk-rm-release-apks
           path: |
             client/Android/Studio/app/build/outputs/apk/release/*.apk
-            client/Android/Studio/app/build/outputs/apk/release/XyDesk-Remote-Host-Agent-win64.zip
+            client/Android/Studio/app/build/outputs/apk/release/SeiDesk-RM-Host-Agent-win64.zip
             client/Android/Studio/app/build/outputs/apk/release/XyDeskRemoteHost.exe
             client/Android/Studio/app/build/outputs/apk/release/XyDeskRemoteHost-Standalone.exe
             client/Android/Studio/app/build/outputs/apk/release/xydesk_quic.dll
@@ -675,7 +675,7 @@ jobs:
       - name: Download signed APKs
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
-          name: xydesk-remote-release-apks
+          name: seidesk-rm-release-apks
           path: release-apks
       - name: Buat SHA256SUMS.txt (integritas aset rilis)
         run: |
@@ -693,7 +693,7 @@ jobs:
         with:
           files: |
             release-apks/*.apk
-            release-apks/XyDesk-Remote-Host-Agent-win64.zip
+            release-apks/SeiDesk-RM-Host-Agent-win64.zip
             release-apks/XyDeskRemoteHost.exe
             release-apks/XyDeskRemoteHost-Standalone.exe
             release-apks/xydesk_quic.dll

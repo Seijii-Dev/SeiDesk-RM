@@ -7,7 +7,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
 android {
-    namespace 'id.xydesk.remote.core'
+    namespace 'io.seidesk.rm.core'
     compileSdkVersion rootProject.ext.compileApi
     buildToolsVersion rootProject.ext.toolsVersion
 

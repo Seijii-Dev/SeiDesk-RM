@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- M1.2: tema untuk XyDeskHomeActivity (Compose, tanpa ActionBar) -->
-    <style name="Theme.XyDeskHome" parent="Theme.AppCompat.DayNight.NoActionBar">
-        <!-- Tanpa kilatan putih: latar jendela = arang, sama seperti tema gelap app -->
+    <!-- SeiDesk RM: theme for SeiDeskHomeActivity (Compose, no ActionBar) -->
+    <style name="Theme.SeiDeskHome" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <!-- Window background: dark charcoal matching dark theme -->
         <item name="android:windowBackground">@color/xy_window_bg</item>
     </style>
+    <style name="Theme.XyDeskHome" parent="Theme.SeiDeskHome" />
 </resources>

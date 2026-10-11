@@ -11,6 +11,9 @@ ABIS = ("armeabi-v7a", "arm64-v8a", "x86_64")
 
 # Sejak v1.1.8 nama aset memakai bit arsitektur tanpa token ABI.
 BIT_NAMES = {
+    "SeiDesk-RM32bit.apk": "armeabi-v7a",
+    "SeiDesk-RM64bit.apk": "arm64-v8a",
+    "SeiDesk-RM64bit-x86.apk": "x86_64",
     "XyDesk-Remote32bit.apk": "armeabi-v7a",
     "XyDesk-Remote64bit.apk": "arm64-v8a",
     "XyDesk-Remote64bit-x86.apk": "x86_64",

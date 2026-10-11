@@ -1,4 +1,4 @@
-# Build XyDesk Remote
+# Build SeiDesk RM
 
 This guide describes the current Android project configuration. The source tree includes the FreeRDP native client, so the first complete APK build may take substantially longer than a Kotlin-only check.
 
