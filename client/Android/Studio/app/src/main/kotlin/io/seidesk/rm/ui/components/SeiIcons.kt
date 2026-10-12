@@ -433,6 +433,22 @@ object SeiIcons {
         close()
     }
 
+    val List: ImageVector = seiIcon("SeiList") {
+        moveTo(4f, 6f); lineTo(20f, 6f)
+        moveTo(4f, 12f); lineTo(20f, 12f)
+        moveTo(4f, 18f); lineTo(20f, 18f)
+    }
+
+    val MoreVertical: ImageVector = xySolid("SeiMoreVertical") {
+        moveTo(12f, 5f); arcToRelative(1.5f, 1.5f, 0f, true, false, 0f, 3f); arcToRelative(1.5f, 1.5f, 0f, true, false, 0f, -3f); close()
+        moveTo(12f, 10.5f); arcToRelative(1.5f, 1.5f, 0f, true, false, 0f, 3f); arcToRelative(1.5f, 1.5f, 0f, true, false, 0f, -3f); close()
+        moveTo(12f, 16f); arcToRelative(1.5f, 1.5f, 0f, true, false, 0f, 3f); arcToRelative(1.5f, 1.5f, 0f, true, false, 0f, -3f); close()
+    }
+
+    val Zap: ImageVector = seiIcon("SeiZap") {
+        moveTo(13f, 2f); lineTo(3f, 14f); lineTo(12f, 14f); lineTo(11f, 22f); lineTo(21f, 10f); lineTo(12f, 10f); close()
+    }
+
     val Menu: ImageVector = seiIcon("XyMenu") {
         moveTo(4f, 7f); lineTo(20f, 7f)
         moveTo(4f, 12f); lineTo(14f, 12f)

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Latar ikon launcher: netral gelap, bukan ungu. Mark-nya monokrom putih. -->
-    <color name="sei_launcher_bg">#10041A</color>
-    <!-- Latar jendela sebelum Compose menggambar: sama dengan splash Compose -->
-    <color name="sei_window_bg">#14161A</color>
+    <!-- Launcher icon background: neutral dark obsidian #0A0C10 matching app theme -->
+    <color name="sei_launcher_bg">#0A0C10</color>
+    <!-- Window background before Compose draws: identical to dark app bg #0A0C10 -->
+    <color name="sei_window_bg">#0A0C10</color>
 </resources>

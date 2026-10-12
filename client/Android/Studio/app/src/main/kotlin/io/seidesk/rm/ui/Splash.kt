@@ -143,7 +143,7 @@ fun SeiSplashScreen(
             )
         }
         Text(
-            text = AppBrand.PUBLISHER,
+            text = "Powered by ${AppBrand.PUBLISHER}",
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 14.dp),

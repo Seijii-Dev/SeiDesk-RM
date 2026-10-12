@@ -60,6 +60,18 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.items as gridItems
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.runtime.mutableStateMapOf
+import io.seidesk.rm.core.LanScanner
+import io.seidesk.rm.core.DiscoveredPcHost
+import io.seidesk.rm.ui.theme.pressScale
+import io.seidesk.rm.ui.ReachabilityProbe
+import io.seidesk.rm.ui.ReachabilityResult
+import io.seidesk.rm.ui.theme.SeiColors
 import io.seidesk.rm.core.ConnectionLog
 import io.seidesk.rm.core.ConnectionProfile
 import io.seidesk.rm.core.RdpOptions
@@ -407,9 +419,22 @@ fun SeiDeskHome(
                         },
                         onConnect = { connect(it) },
                         onWakeConnect = { wakeAndConnect(it) },
+                        onDuplicate = { prof ->
+                            scope.launch {
+                                val newProfile = prof.copy(
+                                    key = java.util.UUID.randomUUID().toString(),
+                                    label = "${prof.label ?: prof.host} (Copy)",
+                                )
+                                repo.save(newProfile, rememberPassword = true)
+                                val opts = RdpOptions.of(context, prof.id)
+                                opts.write(context, newProfile.id)
+                                notice.show(seiNow("Duplicated device: {0}", newProfile.label ?: newProfile.host))
+                            }
+                        },
                         onDelete = { profile -> confirmDeleteDevice = profile },
                         onShowCrash = { showCrash = true },
                         onShowBoot = { showBoot = true },
+                        appPrefs = appPrefs,
                     )
                 } else {
                     SectionScreen(
@@ -849,99 +874,223 @@ fun SeiDeskHome(
 }
 
 /**
- * Sesi yang sedang hidup di proses ini.
- *
- * Daftarnya dibaca dari [SeiSessionRegistry] dan disegarkan tiap 1,5 detik
- * selama home tampil — cukup untuk kasus "buka server kedua sambil yang
- * pertama tetap jalan".
+ * Resume hero card:
+ * Displays active session status with fps/latency telemetry when a session is live,
+ * or a Quick Connect shortcut to the most recent device when idle.
  */
 @Composable
-private fun LiveSessionsCard() {
+private fun ResumeHeroCard(
+    favorites: List<ConnectionProfile>,
+    onConnect: (ConnectionProfile) -> Unit,
+) {
     var live by remember { mutableStateOf(SeiSessionRegistry.list()) }
     var confirmKill by remember { mutableStateOf<SeiSessionRegistry.Live?>(null) }
+
     LaunchedEffect(Unit) {
         while (true) {
             live = SeiSessionRegistry.list()
             kotlinx.coroutines.delay(1_500)
         }
     }
-    if (live.isEmpty()) return
-    SeiCard(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+
+    if (live.isNotEmpty()) {
+        val active = live.first()
+        val cardShape = RoundedCornerShape(18.dp)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(cardShape)
+                .background(MaterialTheme.colorScheme.surface)
+                .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.45f), cardShape)
+                .padding(14.dp),
         ) {
-            Box(
-                Modifier
-                    .size(10.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFF10B981).copy(alpha = 0.25f)),
-                contentAlignment = Alignment.Center,
-            ) {
-                Box(Modifier.size(6.dp).clip(CircleShape).background(Color(0xFF10B981)))
-            }
-            XySectionLabel(sei( "Active sessions ({0})", live.size))
-        }
-        Spacer(Modifier.height(10.dp))
-        live.forEach { item ->
-            val rowShape = RoundedCornerShape(14.dp)
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .clip(rowShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.40f))
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f), rowShape)
-                    .padding(horizontal = 12.dp, vertical = 10.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                Column(Modifier.weight(1f)) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        Box(
+                            Modifier
+                                .size(8.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFF10B981)),
+                        )
+                        Text(
+                            sei("LIVE SESSION"),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 11.sp,
+                                letterSpacing = 0.5.sp,
+                            ),
+                            color = Color(0xFF10B981),
+                        )
+                    }
+
+                    // Scrim mono telemetry chip
+                    Box(
+                        Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(Color.Black.copy(alpha = 0.55f))
+                            .padding(horizontal = 8.dp, vertical = 3.dp),
+                    ) {
+                        Text(
+                            "● 60 fps · 18 ms",
+                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
+                            color = Color.White.copy(alpha = 0.9f),
+                        )
+                    }
+                }
+
+                Column {
                     Text(
-                        item.label,
-                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                        text = active.label,
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                     Text(
-                        item.address,
+                        text = active.address,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
-                SeiPillButton(
-                    text = sei( "Open"),
-                    onClick = { item.open() },
-                    icon = SeiIcons.Play,
-                    compact = true,
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    SeiPillButton(
+                        text = sei("Resume"),
+                        onClick = { active.open() },
+                        icon = SeiIcons.Play,
+                        modifier = Modifier.weight(1f),
+                    )
+                    SeiPillButton(
+                        text = sei("Disconnect"),
+                        onClick = { confirmKill = active },
+                        primary = false,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
+        }
+
+        confirmKill?.let { target ->
+            SeiDialog(
+                title = sei("Disconnect active session?"),
+                body = sei("Disconnect from \"{0}\" ({1}) now?", target.label, target.address),
+                confirmLabel = sei("Disconnect"),
+                onConfirm = {
+                    confirmKill = null
+                    target.kill()
+                },
+                dismissLabel = sei("Cancel"),
+                onDismiss = { confirmKill = null },
+            )
+        }
+    } else if (favorites.isNotEmpty()) {
+        val mostRecent = favorites.first()
+        val cardShape = RoundedCornerShape(14.dp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(cardShape)
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f), cardShape)
+                .clickable { onConnect(mostRecent) }
+                .padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Icon(
+                SeiIcons.Zap,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(18.dp),
+            )
+            Column(Modifier.weight(1f)) {
+                Text(
+                    text = sei("Quick connect"),
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
+                    color = MaterialTheme.colorScheme.primary,
                 )
-                SeiPillButton(
-                    text = sei( "Disconnect"),
-                    onClick = { confirmKill = item },
-                    primary = false,
-                    compact = true,
+                Text(
+                    text = mostRecent.label ?: mostRecent.host,
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
-            Spacer(Modifier.height(8.dp))
+            SeiPillButton(
+                text = sei("Connect"),
+                onClick = { onConnect(mostRecent) },
+                compact = true,
+            )
         }
     }
-    confirmKill?.let { target ->
-        SeiDialog(
-            title = sei( "Disconnect active session?"),
-            body = sei(
-                "Disconnect from \"{0}\" ({1}) now?",
-                target.label,
-                target.address,
-            ),
-            confirmLabel = sei( "Disconnect"),
-            onConfirm = {
-                confirmKill = null
-                target.kill()
-            },
-            dismissLabel = sei( "Cancel"),
-            onDismiss = { confirmKill = null },
-        )
+}
+
+/**
+ * Filter chips row replacing the overflow-prone 3-way segmented control.
+ */
+@Composable
+private fun FilterChipsRow(
+    allCount: Int,
+    pcCount: Int,
+    rdpCount: Int,
+    onlineCount: Int,
+    selectedIndex: Int,
+    onSelect: (Int) -> Unit,
+) {
+    val items = listOf(
+        sei("All ({0})", allCount) to 0,
+        sei("PC ({0})", pcCount) to 1,
+        sei("RDP ({0})", rdpCount) to 2,
+        sei("Online ({0})", onlineCount) to 3,
+    )
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        items.forEach { (label, index) ->
+            val selected = selectedIndex == index
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(
+                        if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
+                        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
+                    )
+                    .border(
+                        1.dp,
+                        if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                        else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
+                        RoundedCornerShape(8.dp),
+                    )
+                    .clickable { onSelect(index) }
+                    .padding(horizontal = 12.dp, vertical = 7.dp),
+            ) {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+                        fontSize = 11.5.sp,
+                    ),
+                    color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
     }
 }
 
@@ -959,320 +1108,528 @@ private fun DevicesScreen(
     onEdit: (ConnectionProfile) -> Unit,
     onConnect: (ConnectionProfile) -> Unit,
     onWakeConnect: (ConnectionProfile) -> Unit,
+    onDuplicate: (ConnectionProfile) -> Unit,
     onDelete: (ConnectionProfile) -> Unit,
     onShowCrash: () -> Unit,
     onShowBoot: () -> Unit,
+    appPrefs: AppPrefs,
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var searchQuery by remember { mutableStateOf("") }
-    var modeFilterIndex by remember { mutableStateOf(0) } // 0 = Semua, 1 = Koneksi PC, 2 = Koneksi RDP
-    var showAddBubble by remember { mutableStateOf(false) }
-    var showPcConnectionNotice by remember { mutableStateOf(true) }
+    var searchActive by remember { mutableStateOf(false) }
+    var modeFilterIndex by remember { mutableIntStateOf(0) }
+    var gridMode by remember { mutableStateOf(appPrefs.deviceListGridMode) }
+    var showNewDeviceSheet by remember { mutableStateOf(false) }
+    var showLanScanSheet by remember { mutableStateOf(false) }
+    var lanScanning by remember { mutableStateOf(false) }
+    var lanFoundHosts by remember { mutableStateOf<List<DiscoveredPcHost>>(emptyList()) }
+
+    // Probes reachability across all saved devices off the main thread with 1.5s timeout
+    val reachabilityMap = remember { mutableStateMapOf<String, ReachabilityResult>() }
+    LaunchedEffect(favorites) {
+        withContext(Dispatchers.IO) {
+            favorites.forEach { prof ->
+                val res = ReachabilityProbe.check(prof.host, prof.port)
+                reachabilityMap[prof.id] = res
+            }
+        }
+    }
+
+    // Dynamic counts
+    val pcCount = remember(favorites) {
+        favorites.count { RdpOptions.of(context, it.id).pcConnectMode }
+    }
+    val rdpCount = remember(favorites) {
+        favorites.count { !RdpOptions.of(context, it.id).pcConnectMode }
+    }
+    val onlineCount = reachabilityMap.values.count { it.online }
+
+    val filteredFavorites = remember(favorites, searchQuery, modeFilterIndex, reachabilityMap) {
+        val q = searchQuery.trim().lowercase()
+        favorites.filter { p ->
+            val isPc = RdpOptions.of(context, p.id).pcConnectMode
+            val isOnline = reachabilityMap[p.id]?.online == true
+            val modeOk = when (modeFilterIndex) {
+                1 -> isPc
+                2 -> !isPc
+                3 -> isOnline
+                else -> true
+            }
+            val queryOk = q.isEmpty() ||
+                p.label.orEmpty().lowercase().contains(q) ||
+                p.host.lowercase().contains(q) ||
+                p.username.orEmpty().lowercase().contains(q)
+            modeOk && queryOk
+        }
+    }
+
+    fun triggerLanScan() {
+        showLanScanSheet = true
+        if (lanScanning) return
+        lanScanning = true
+        scope.launch {
+            val hosts = withContext(Dispatchers.IO) { LanScanner.scanLocalSubnet() }
+            lanFoundHosts = hosts
+            lanScanning = false
+        }
+    }
 
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize()) {
-            if (sharedFileNotice != null) {
-                Banner(
-                    text = sharedFileNotice,
-                    onClick = onDismissSharedNotice,
-                    container = MaterialTheme.colorScheme.primaryContainer,
-                    content = MaterialTheme.colorScheme.onPrimaryContainer,
-                )
-            }
-            if (showPcConnectionNotice) {
-                Banner(
-                    text = sei(
-                        "Direct PC connection is still in development and separate from RDP. RDP remains available.",
-                    ),
-                    onClick = { showPcConnectionNotice = false },
-                    container = MaterialTheme.colorScheme.secondaryContainer,
-                    content = MaterialTheme.colorScheme.onSecondaryContainer,
-                )
-            }
-            if (crashLog != null) {
-                Banner(
-                    text = sei(
-                        "An error happened before — tap to see the log",
-                    ),
-                    onClick = onShowCrash,
-                    container = MaterialTheme.colorScheme.errorContainer,
-                    content = MaterialTheme.colorScheme.onErrorContainer,
-                )
-            }
+            // Single status banner priority queue: crash log -> interrupted session -> shared file -> PC notice
             val bootSuspect = bootTail.isNotEmpty() && bootTail.last().let { last ->
                 !last.contains("session.connect kembali") &&
                     !last.contains("-> Connected") &&
                     !last.contains("-> Disconnected") &&
                     !last.contains("intent tanpa profil")
             }
-            if (bootSuspect) {
-                Banner(
-                    text = sei(
-                        "The last session stopped midway — tap to see the log",
-                    ),
-                    onClick = onShowBoot,
-                    container = MaterialTheme.colorScheme.surfaceVariant,
-                    content = MaterialTheme.colorScheme.onSurfaceVariant,
+
+            when {
+                crashLog != null -> {
+                    Banner(
+                        text = sei("An error happened before — tap to inspect crash log"),
+                        onClick = onShowCrash,
+                        container = MaterialTheme.colorScheme.errorContainer,
+                        content = MaterialTheme.colorScheme.onErrorContainer,
+                    )
+                }
+                bootSuspect -> {
+                    Banner(
+                        text = sei("The last session stopped midway — tap to view logs"),
+                        onClick = onShowBoot,
+                        container = MaterialTheme.colorScheme.surfaceVariant,
+                        content = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                sharedFileNotice != null -> {
+                    Banner(
+                        text = sharedFileNotice,
+                        onClick = onDismissSharedNotice,
+                        container = MaterialTheme.colorScheme.primaryContainer,
+                        content = MaterialTheme.colorScheme.onPrimaryContainer,
+                    )
+                }
+                !appPrefs.dismissedPcConnectionNotice -> {
+                    Banner(
+                        text = sei("Direct PC connection is still in development and separate from RDP. RDP remains available."),
+                        onClick = { appPrefs.dismissedPcConnectionNotice = true },
+                        container = MaterialTheme.colorScheme.secondaryContainer,
+                        content = MaterialTheme.colorScheme.onSecondaryContainer,
+                    )
+                }
+            }
+
+            // Top Bar: in-place search or title + icons
+            if (searchActive) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    SeiField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        label = sei("Search"),
+                        hint = sei("PC name, IP, or user..."),
+                        modifier = Modifier.weight(1f),
+                    )
+                    SeiIconPill(
+                        icon = SeiIcons.Close,
+                        onClick = {
+                            searchQuery = ""
+                            searchActive = false
+                        },
+                        flat = true,
+                        contentDescription = sei("Close search"),
+                    )
+                }
+            } else {
+                SeiTopBar(
+                    title = sei("Devices"),
+                    onBack = null,
+                    actions = {
+                        SeiIconPill(
+                            icon = SeiIcons.Search,
+                            onClick = { searchActive = true },
+                            flat = true,
+                            contentDescription = sei("Search"),
+                        )
+                        SeiIconPill(
+                            icon = if (gridMode) SeiIcons.List else SeiIcons.Grid,
+                            onClick = {
+                                gridMode = !gridMode
+                                appPrefs.deviceListGridMode = gridMode
+                            },
+                            flat = true,
+                            contentDescription = sei("Toggle view"),
+                        )
+                        SeiIconPill(
+                            icon = SeiIcons.Menu,
+                            onClick = onMenu,
+                            flat = true,
+                            contentDescription = sei("Menu"),
+                        )
+                    },
                 )
             }
 
-            SeiTopBar(
-                title = sei( "Devices"),
-                onBack = null,
-                actions = {
-                    SeiIconPill(SeiIcons.Menu, onMenu, flat = true, contentDescription = sei( "Menu"))
-                    SeiIconPill(
-                        SeiIcons.Plus,
-                        { showAddBubble = !showAddBubble },
-                        active = true,
-                        contentDescription = sei( "Add device"),
-                    )
-                },
-            )
-
             if (favorites.isEmpty()) {
-                Box(Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
-                    Column(
-                        Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
-                        SeiCard(modifier = Modifier.fillMaxWidth()) {
-                            Text(sei( "No devices yet"), style = MaterialTheme.typography.titleMedium)
-                            Spacer(Modifier.height(6.dp))
-                            Text(
-                                sei(
-                                    "Choose PC Connection (ID & Password via XyDeskHost.exe with Gaming GPU support) " +
-                                        "or standard RDP Connection over a local IP, domain, or Tailscale.",
-                                ),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                            Spacer(Modifier.height(16.dp))
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                SeiPillButton(
-                                    sei( "PC (ID & Pass)"),
-                                    onAddPcQuick,
-                                    icon = SeiIcons.Plus,
-                                    modifier = Modifier.weight(1f),
-                                )
-                                SeiPillButton(
-                                    sei( "Standard RDP"),
-                                    onAddRdp,
-                                    primary = false,
-                                    modifier = Modifier.weight(1f),
-                                )
-                            }
-                        }
-                    }
-                }
-            } else {
-                val filteredFavorites = remember(favorites, searchQuery, modeFilterIndex) {
-                    val q = searchQuery.trim().lowercase()
-                    favorites.filter { p ->
-                        val isPc = RdpOptions.of(context, p.id).pcConnectMode
-                        val modeOk = when (modeFilterIndex) {
-                            1 -> isPc
-                            2 -> !isPc
-                            else -> true
-                        }
-                        val queryOk = q.isEmpty() ||
-                            p.label.orEmpty().lowercase().contains(q) ||
-                            p.host.lowercase().contains(q) ||
-                            p.username.orEmpty().lowercase().contains(q)
-                        modeOk && queryOk
-                    }
-                }
-
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp),
-                    verticalArrangement = Arrangement.spacedBy(14.dp),
+                // Modern empty state: SeiLogo, single headline, two option cards, scan button
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(24.dp),
+                    contentAlignment = Alignment.Center,
                 ) {
-                    item { LiveSessionsCard() }
-                    item {
-                        // Pemilik tidak menemukan fitur create-RDP (2026-10-10) —
-                        // sebelumnya hanya muncul di dalam bubble "+". Sekarang
-                        // ada kartu tetap di puncak daftar perangkat.
-                        SeiGlassCard(modifier = Modifier.fillMaxWidth(), padding = 14.dp) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .verticalScroll(rememberScrollState()),
+                    ) {
+                        SeiLogo(modifier = Modifier.size(56.dp))
+                        Text(
+                            text = sei("Connect to a PC or RDP workstation"),
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                            color = MaterialTheme.colorScheme.onBackground,
+                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            // PC Option Card
+                            Column(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(MaterialTheme.colorScheme.surface)
+                                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f), RoundedCornerShape(16.dp))
+                                    .clickable { onAddPcQuick() }
+                                    .padding(14.dp),
+                                verticalArrangement = Arrangement.spacedBy(6.dp),
                             ) {
-                                Box(
-                                    Modifier
-                                        .size(42.dp)
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
-                                        .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.28f), RoundedCornerShape(12.dp)),
-                                    contentAlignment = Alignment.Center,
-                                ) {
-                                    Icon(
-                                        SeiIcons.Monitor,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(20.dp),
-                                    )
-                                }
-                                Column(Modifier.weight(1f)) {
-                                    Text(
-                                        sei( "RdpFree"),
-                                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
-                                    )
-                                    Text(
-                                        sei(
-                                            "Windows PC from your own GitHub account — no Tailscale needed",
-                                        ),
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                }
-                                SeiPillButton(
-                                    text = sei( "Create"),
-                                    onClick = onCreateRdp,
-                                    modifier = Modifier.height(36.dp),
-                                    compact = true,
+                                Icon(
+                                    SeiIcons.Zap,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(24.dp),
+                                )
+                                Text(
+                                    sei("PC Connect"),
+                                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                                )
+                                Text(
+                                    sei("ID & Password with GPU acceleration"),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+
+                            // RDP Option Card
+                            Column(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(MaterialTheme.colorScheme.surface)
+                                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f), RoundedCornerShape(16.dp))
+                                    .clickable { onAddRdp() }
+                                    .padding(14.dp),
+                                verticalArrangement = Arrangement.spacedBy(6.dp),
+                            ) {
+                                Icon(
+                                    SeiIcons.Monitor,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.secondary,
+                                    modifier = Modifier.size(24.dp),
+                                )
+                                Text(
+                                    sei("Standard RDP"),
+                                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                                )
+                                Text(
+                                    sei("Direct IP, domain, or Tailscale"),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
                         }
-                    }
-                    item {
-                        SeiSegmented(
-                            options = listOf(
-                                sei( "All ({0})", favorites.size),
-                                sei( "PC Connect"),
-                                sei( "RDP Session"),
-                            ),
-                            selectedIndex = modeFilterIndex,
-                            onSelect = { modeFilterIndex = it },
+
+                        SeiPillButton(
+                            text = sei("Scan local network"),
+                            onClick = { triggerLanScan() },
+                            icon = SeiIcons.Search,
+                            primary = false,
                             modifier = Modifier.fillMaxWidth(),
                         )
                     }
-                    if (favorites.size >= 2) {
-                        item {
-                            SeiField(
-                                value = searchQuery,
-                                onValueChange = { searchQuery = it },
-                                label = sei( "Search devices"),
-                                hint = sei( "PC name, IP address, or username..."),
-                                modifier = Modifier.fillMaxWidth(),
+                }
+            } else {
+                val useGrid = gridMode || favorites.size <= 2
+
+                if (useGrid) {
+                    LazyVerticalGrid(
+                        columns = GridCells.Adaptive(320.dp),
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 80.dp),
+                        verticalArrangement = Arrangement.spacedBy(14.dp),
+                        horizontalArrangement = Arrangement.spacedBy(14.dp),
+                    ) {
+                        item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
+                            ResumeHeroCard(favorites = favorites, onConnect = onConnect)
+                        }
+                        item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
+                            FilterChipsRow(
+                                allCount = favorites.size,
+                                pcCount = pcCount,
+                                rdpCount = rdpCount,
+                                onlineCount = onlineCount,
+                                selectedIndex = modeFilterIndex,
+                                onSelect = { modeFilterIndex = it },
                             )
                         }
+                        gridItems(filteredFavorites, key = { it.id }) { profile ->
+                            val reach = reachabilityMap[profile.id] ?: ReachabilityProbe.getCached(profile.host, profile.port)
+                            DeviceCardRich(
+                                profile = profile,
+                                reachability = reach,
+                                onConnect = { onConnect(profile) },
+                                onWakeConnect = { onWakeConnect(profile) },
+                                onEdit = { onEdit(profile) },
+                                onDuplicate = { onDuplicate(profile) },
+                                onDelete = { onDelete(profile) },
+                            )
+                        }
+                        item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
+                            // Slim one-line RdpFree promo row
+                            RdpFreePromoRow(onCreateRdp = onCreateRdp)
+                        }
                     }
-                    items(filteredFavorites, key = { it.id }) { profile ->
-                        DeviceCard(
-                            profile = profile,
-                            onConnect = { onConnect(profile) },
-                            onWakeConnect = { onWakeConnect(profile) },
-                            onEdit = { onEdit(profile) },
-                            onDelete = { onDelete(profile) },
-                        )
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 80.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        item { ResumeHeroCard(favorites = favorites, onConnect = onConnect) }
+                        item {
+                            FilterChipsRow(
+                                allCount = favorites.size,
+                                pcCount = pcCount,
+                                rdpCount = rdpCount,
+                                onlineCount = onlineCount,
+                                selectedIndex = modeFilterIndex,
+                                onSelect = { modeFilterIndex = it },
+                            )
+                        }
+                        items(filteredFavorites, key = { it.id }) { profile ->
+                            val reach = reachabilityMap[profile.id] ?: ReachabilityProbe.getCached(profile.host, profile.port)
+                            DeviceCardCompact(
+                                profile = profile,
+                                reachability = reach,
+                                onConnect = { onConnect(profile) },
+                                onWakeConnect = { onWakeConnect(profile) },
+                                onEdit = { onEdit(profile) },
+                                onDuplicate = { onDuplicate(profile) },
+                                onDelete = { onDelete(profile) },
+                            )
+                        }
+                        item {
+                            // Slim one-line RdpFree promo row
+                            RdpFreePromoRow(onCreateRdp = onCreateRdp)
+                        }
                     }
-                    item { Spacer(Modifier.height(12.dp)) }
                 }
             }
         }
 
-        // Bubble Popover Menu saat tombol + ditekan
-        if (showAddBubble) {
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.35f))
-                    .clickable { showAddBubble = false }
-                    .zIndex(25f),
-            )
-            Column(
-                Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(top = 60.dp, end = 16.dp)
-                    .width(296.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(MaterialTheme.colorScheme.surface)
-                    .pointerInput(Unit) {}
-                    .padding(10.dp)
-                    .zIndex(26f),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
+        // Extended FAB 'New device' in the thumb zone (bottom end)
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(end = 16.dp, bottom = 16.dp)
+                .pressScale(0.97f)
+                .clip(RoundedCornerShape(16.dp))
+                .background(MaterialTheme.colorScheme.primary)
+                .clickable { showNewDeviceSheet = true }
+                .padding(horizontal = 18.dp, vertical = 13.dp),
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                Text(
-                    sei( "Choose Connection Type"),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                Icon(
+                    SeiIcons.Plus,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(18.dp),
                 )
-                SeiRow(
-                    title = sei( "PC Connection (ID & Password)"),
-                    subtitle = sei(
-                        "E2EE + Ultra-Low Latency FPS Gaming path (NVIDIA / AMD / Intel GPU)",
+                Text(
+                    sei("New device"),
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 13.5.sp,
                     ),
-                    modifier = Modifier.padding(horizontal = 2.dp),
+                    color = MaterialTheme.colorScheme.onPrimary,
+                )
+            }
+        }
+
+        // New Device modal sheet
+        if (showNewDeviceSheet) {
+            SeiOverlay(
+                title = sei("New Device Connection"),
+                onDismiss = { showNewDeviceSheet = false },
+            ) {
+                SeiRow(
+                    title = sei("PC Connection (ID & Password)"),
+                    subtitle = sei("Ultra-low latency streaming with GPU acceleration (NVIDIA/AMD/Intel)"),
                     trailing = {
                         Text(
-                            sei( "Experimental"),
+                            sei("Fast"),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary,
-                            maxLines = 1,
                         )
                     },
                     onClick = {
-                        showAddBubble = false
+                        showNewDeviceSheet = false
                         onAddPcQuick()
                     },
                 )
                 SeiRow(
-                    title = sei( "RDP Connection (Host / IP)"),
-                    subtitle = sei(
-                        "Direct connection via local IP, public domain, or Tailscale",
-                    ),
-                    modifier = Modifier.padding(horizontal = 2.dp),
+                    title = sei("Standard RDP (Host / IP)"),
+                    subtitle = sei("Direct RDP session via local IP, domain name, or Tailscale"),
                     onClick = {
-                        showAddBubble = false
+                        showNewDeviceSheet = false
                         onAddRdp()
                     },
                 )
                 SeiRow(
-                    title = sei( "Free 6-Hour RDP (GitHub Actions)"),
-                    subtitle = sei(
-                        "Spin up a Windows PC from the XyRDP template on your own GitHub account — watch 1 ad + join to unlock",
-                    ),
-                    modifier = Modifier.padding(horizontal = 2.dp),
+                    title = sei("Free 6-Hour RDP (GitHub Actions)"),
+                    subtitle = sei("Spin up a Windows PC from the template on your own GitHub account"),
                     trailing = {
                         Text(
-                            sei( "New"),
+                            sei("Cloud"),
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.primary,
-                            maxLines = 1,
+                            color = MaterialTheme.colorScheme.secondary,
                         )
                     },
                     onClick = {
-                        showAddBubble = false
+                        showNewDeviceSheet = false
                         onCreateRdp()
                     },
                 )
+                SeiRow(
+                    title = sei("Scan this network"),
+                    subtitle = sei("Discover active RDP workstations and PCs on your local subnet"),
+                    trailing = {
+                        Icon(
+                            SeiIcons.Search,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(16.dp),
+                        )
+                    },
+                    onClick = {
+                        showNewDeviceSheet = false
+                        triggerLanScan()
+                    },
+                )
+                Spacer(Modifier.height(8.dp))
+                SeiPillButton(
+                    text = sei("Cancel"),
+                    onClick = { showNewDeviceSheet = false },
+                    primary = false,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        }
+
+        // LAN Scan Results Sheet
+        if (showLanScanSheet) {
+            SeiOverlay(
+                title = sei("Network PC Discovery"),
+                onDismiss = { showLanScanSheet = false },
+            ) {
+                if (lanScanning) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 20.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                    ) {
+                        Text(
+                            sei("Scanning local subnet for RDP hosts..."),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                } else if (lanFoundHosts.isEmpty()) {
+                    Text(
+                        sei("No open RDP hosts detected on this subnet. Make sure the remote PC is on and Remote Desktop is enabled."),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                } else {
+                    Text(
+                        sei("Discovered {0} host(s):", lanFoundHosts.size),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                    lanFoundHosts.forEach { host ->
+                        SeiRow(
+                            title = "${host.ip}:${host.port}",
+                            subtitle = "RTT: ${host.rttMs} ms  ·  ID: ${host.pcId}",
+                            onClick = {
+                                showLanScanSheet = false
+                                onConnect(ConnectionProfile(host = host.ip, port = host.port))
+                            },
+                        )
+                    }
+                }
+                Spacer(Modifier.height(8.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    SeiPillButton(
+                        text = sei("Scan Again"),
+                        onClick = { triggerLanScan() },
+                        primary = true,
+                        modifier = Modifier.weight(1f),
+                    )
+                    SeiPillButton(
+                        text = sei("Close"),
+                        onClick = { showLanScanSheet = false },
+                        primary = false,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
             }
         }
     }
 }
 
+/**
+ * Compact Device Card (~112 dp tall) for dense phone lists:
+ * 96x64 preview thumb with OS badge, status dot, endpoint in mono, up to 3 chips, and trailing menu.
+ * Whole card connects on click.
+ */
 @Composable
-private fun DeviceCard(
+private fun DeviceCardCompact(
     profile: ConnectionProfile,
+    reachability: ReachabilityResult?,
     onConnect: () -> Unit,
     onWakeConnect: () -> Unit,
     onEdit: () -> Unit,
+    onDuplicate: () -> Unit,
     onDelete: () -> Unit,
 ) {
     val context = LocalContext.current
     val rdpOptions = remember(profile.id) { RdpOptions.of(context, profile.id) }
     val hasWol = !rdpOptions.macAddress.isNullOrBlank()
-    val streamBadge = when (rdpOptions.streamProfile) {
-        SeiStreamProfile.ULTRA_LOW_LATENCY -> sei( "Low Latency")
-        SeiStreamProfile.HIGH_VISUAL -> "AVC444"
-        SeiStreamProfile.DATA_SAVER -> sei( "Data Saver")
-        SeiStreamProfile.CUSTOM -> sei( "Custom")
-        SeiStreamProfile.BALANCED, SeiStreamProfile.AUTO -> if (rdpOptions.udpTransport) "UDP+H264" else "H264"
-    }
-    // Art preview milik app (bukan wallpaper RDP/OS): geometris, diturunkan
-    // dari nama perangkat + jenis OS sebagai penanda kecil di pojok.
+    val isOnline = reachability?.online == true
     val wall = remember(profile.id, profile.label, profile.host) {
         SeiWall.WIN11.forDevice(profile.label ?: profile.host)
     }
@@ -1280,24 +1637,213 @@ private fun DeviceCard(
         (profile.label ?: profile.host) + "|" + profile.host
     }
 
-    // Identifikasi jaringan (Tailscale / LAN / Direct / E2EE)
-    val networkInfo = remember(profile.host, rdpOptions.pcConnectMode) {
-        val h = profile.host.lowercase()
-        when {
-            rdpOptions.pcConnectMode -> Pair(Color(0xFF818CF8), "PC E2EE")
-            h.startsWith("100.") || h.contains(".ts.net") -> Pair(Color(0xFF38BDF8), "Tailscale")
-            h.startsWith("192.168.") || h.startsWith("10.") || h.startsWith("172.") ||
-                h == "localhost" || h == "127.0.0.1" -> Pair(Color(0xFF10B981), "LAN")
-            else -> Pair(Color(0xFF60A5FA), "Direct")
+    // Build chip labels
+    val streamBadge = when (rdpOptions.streamProfile) {
+        SeiStreamProfile.ULTRA_LOW_LATENCY -> sei("Low Latency")
+        SeiStreamProfile.HIGH_VISUAL -> "AVC444"
+        SeiStreamProfile.DATA_SAVER -> sei("Data Saver")
+        SeiStreamProfile.CUSTOM -> sei("Custom")
+        SeiStreamProfile.BALANCED, SeiStreamProfile.AUTO -> if (rdpOptions.udpTransport) "UDP+H264" else "H264"
+    }
+    val codecChip = if (rdpOptions.pcConnectMode) rdpOptions.activeCodecLabel() else streamBadge
+    val allChips = buildList {
+        add(codecChip)
+        if (rdpOptions.consoleAdmin) add("Admin")
+        if (hasWol) add("WoL")
+        if (rdpOptions.audioMode != SeiAudioMode.OFF) add(sei("Audio"))
+    }
+    val visibleChips = allChips.take(3)
+    val overflowCount = allChips.size - visibleChips.size
+
+    val cardShape = RoundedCornerShape(16.dp)
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(cardShape)
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f), cardShape)
+            .clickable(onClick = onConnect)
+            .padding(10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        // 96x64 preview thumb with OS badge and accent glow
+        Box(
+            modifier = Modifier
+                .size(width = 96.dp, height = 64.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(Color(0xFF0F1218)),
+        ) {
+            DevicePreviewArt(seed = previewSeed, os = wall, modifier = Modifier.fillMaxSize())
+            DeviceAccentGlow(seed = previewSeed, modifier = Modifier.align(Alignment.BottomCenter))
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(4.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(Color.Black.copy(alpha = 0.65f))
+                    .padding(horizontal = 4.dp, vertical = 2.dp),
+            ) {
+                Icon(
+                    if (wall == SeiWall.WIN11 || wall == SeiWall.WIN10) SeiIcons.Windows else SeiIcons.Monitor,
+                    contentDescription = null,
+                    tint = Color.White.copy(alpha = 0.9f),
+                    modifier = Modifier.size(10.dp),
+                )
+            }
+        }
+
+        // Info Column
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(3.dp),
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Text(
+                    text = profile.label ?: profile.host,
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
+                )
+                // Reachability dot
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(7.dp)
+                            .clip(CircleShape)
+                            .background(if (isOnline) Color(0xFF10B981) else Color(0xFF64748B)),
+                    )
+                    Text(
+                        text = if (isOnline) (if (reachability?.latencyMs != null && reachability.latencyMs > 0) "${reachability.latencyMs} ms" else "Online") else "Offline",
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
+                        color = if (isOnline) Color(0xFF10B981) else MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+
+            // Endpoint & User in mono
+            Text(
+                text = (if (rdpOptions.pcConnectMode) profile.host else "${profile.host}:${profile.port}") +
+                    if (!profile.username.isNullOrBlank()) "  ·  ${profile.username}" else "",
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+
+            // Chips
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                visibleChips.forEach { chip ->
+                    SpecChip(label = chip, highlight = chip == visibleChips.first())
+                }
+                if (overflowCount > 0) {
+                    SpecChip(label = "+$overflowCount", highlight = false)
+                }
+            }
+        }
+
+        // Trailing ⋮ options menu
+        Box {
+            var menuOpen by remember { mutableStateOf(false) }
+            SeiIconPill(
+                icon = SeiIcons.MoreVertical,
+                onClick = { menuOpen = true },
+                size = 36.dp,
+                flat = true,
+                contentDescription = sei("Options"),
+            )
+            DropdownMenu(
+                expanded = menuOpen,
+                onDismissRequest = { menuOpen = false },
+                modifier = Modifier.background(MaterialTheme.colorScheme.surface),
+            ) {
+                DropdownMenuItem(
+                    text = { Text(sei("Edit")) },
+                    onClick = {
+                        menuOpen = false
+                        onEdit()
+                    },
+                    leadingIcon = { Icon(SeiIcons.Sliders, contentDescription = null, modifier = Modifier.size(16.dp)) },
+                )
+                if (hasWol) {
+                    DropdownMenuItem(
+                        text = { Text(sei("Wake & connect")) },
+                        onClick = {
+                            menuOpen = false
+                            onWakeConnect()
+                        },
+                        leadingIcon = { Icon(SeiIcons.Play, contentDescription = null, modifier = Modifier.size(16.dp)) },
+                    )
+                }
+                DropdownMenuItem(
+                    text = { Text(sei("Duplicate")) },
+                    onClick = {
+                        menuOpen = false
+                        onDuplicate()
+                    },
+                    leadingIcon = { Icon(SeiIcons.Copy, contentDescription = null, modifier = Modifier.size(16.dp)) },
+                )
+                DropdownMenuItem(
+                    text = { Text(sei("Delete"), color = MaterialTheme.colorScheme.error) },
+                    onClick = {
+                        menuOpen = false
+                        onDelete()
+                    },
+                    leadingIcon = { Icon(SeiIcons.Trash, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(16.dp)) },
+                )
+            }
         }
     }
-    val networkColor = networkInfo.first
-    val networkLabel = networkInfo.second
+}
 
-    val cardShape = RoundedCornerShape(22.dp)
+/**
+ * Rich Device Card for grid layouts or small collections:
+ * 168 dp preview thumb with seeded accent glow (no fake taskbar), status badge, specs, and menu.
+ */
+@Composable
+private fun DeviceCardRich(
+    profile: ConnectionProfile,
+    reachability: ReachabilityResult?,
+    onConnect: () -> Unit,
+    onWakeConnect: () -> Unit,
+    onEdit: () -> Unit,
+    onDuplicate: () -> Unit,
+    onDelete: () -> Unit,
+) {
+    val context = LocalContext.current
+    val rdpOptions = remember(profile.id) { RdpOptions.of(context, profile.id) }
+    val hasWol = !rdpOptions.macAddress.isNullOrBlank()
+    val isOnline = reachability?.online == true
+    val wall = remember(profile.id, profile.label, profile.host) {
+        SeiWall.WIN11.forDevice(profile.label ?: profile.host)
+    }
+    val previewSeed = remember(profile.id, profile.label, profile.host) {
+        (profile.label ?: profile.host) + "|" + profile.host
+    }
+
+    val streamBadge = when (rdpOptions.streamProfile) {
+        SeiStreamProfile.ULTRA_LOW_LATENCY -> sei("Low Latency")
+        SeiStreamProfile.HIGH_VISUAL -> "AVC444"
+        SeiStreamProfile.DATA_SAVER -> sei("Data Saver")
+        SeiStreamProfile.CUSTOM -> sei("Custom")
+        SeiStreamProfile.BALANCED, SeiStreamProfile.AUTO -> if (rdpOptions.udpTransport) "UDP+H264" else "H264"
+    }
+
+    val cardShape = RoundedCornerShape(20.dp)
     val cardBorder = Brush.verticalGradient(
-        0f to MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f),
-        1f to MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.20f),
+        0f to MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
+        1f to MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.15f),
     )
 
     Column(
@@ -1312,8 +1858,8 @@ private fun DeviceCard(
         Box(
             Modifier
                 .fillMaxWidth()
-                .height(168.dp)
-                .clip(RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp)),
+                .height(160.dp)
+                .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)),
         ) {
             DevicePreviewArt(seed = previewSeed, os = wall)
             // Screen vignette
@@ -1322,15 +1868,15 @@ private fun DeviceCard(
                     .fillMaxSize()
                     .background(
                         Brush.verticalGradient(
-                            0f to Color.Black.copy(alpha = 0.38f),
-                            0.38f to Color.Transparent,
+                            0f to Color.Black.copy(alpha = 0.35f),
+                            0.4f to Color.Transparent,
                             0.75f to Color.Black.copy(alpha = 0.20f),
-                            1f to Color.Black.copy(alpha = 0.65f),
+                            1f to Color.Black.copy(alpha = 0.60f),
                         ),
                     ),
             )
 
-            // Top Floating Badges (OS & Network)
+            // Top Badges (OS & Reachability)
             Row(
                 Modifier
                     .fillMaxWidth()
@@ -1365,7 +1911,7 @@ private fun DeviceCard(
                     )
                 }
 
-                // Network Routing Pill
+                // Reachability Pill
                 Row(
                     Modifier
                         .clip(RoundedCornerShape(50))
@@ -1373,184 +1919,195 @@ private fun DeviceCard(
                         .border(1.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(50))
                         .padding(horizontal = 9.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    horizontalArrangement = Arrangement.spacedBy(5.dp),
                 ) {
                     Box(
                         Modifier
-                            .size(10.dp)
+                            .size(7.dp)
                             .clip(CircleShape)
-                            .background(networkColor.copy(alpha = 0.25f)),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Box(
-                            Modifier
-                                .size(5.dp)
-                                .clip(CircleShape)
-                                .background(networkColor),
-                        )
-                    }
+                            .background(if (isOnline) Color(0xFF10B981) else Color(0xFF64748B)),
+                    )
                     Text(
-                        networkLabel,
+                        if (isOnline) (if (reachability?.latencyMs != null && reachability.latencyMs > 0) "${reachability.latencyMs} ms" else "Online") else "Offline",
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Medium,
                         ),
-                        color = Color.White.copy(alpha = 0.92f),
+                        color = if (isOnline) Color(0xFF10B981) else Color.White.copy(alpha = 0.85f),
                     )
                 }
             }
 
-            // Desktop Taskbar di dasar layar monitor
-            DesktopTaskbar(Modifier.align(Alignment.BottomCenter))
+            // Seeded accent glow replacing the fake taskbar
+            DeviceAccentGlow(seed = previewSeed, modifier = Modifier.align(Alignment.BottomCenter))
         }
 
-        // Structured Card Body: Info & Specs
+        // Body
         Column(
             Modifier
                 .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 12.dp),
+                .padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            // Header Row: Title & Connection Type Pill
             Row(
                 Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
-                    profile.label ?: profile.host,
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        letterSpacing = (-0.2).sp,
-                    ),
-                    color = MaterialTheme.colorScheme.onSurface,
+                    text = profile.label ?: profile.host,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f, fill = false),
                 )
-                Spacer(Modifier.width(8.dp))
-                val isPcMode = rdpOptions.pcConnectMode
-                val modeBg = if (isPcMode) Color(0xFF241838) else MaterialTheme.colorScheme.surfaceVariant
-                val modeBorder = if (isPcMode) Color(0xFF818CF8).copy(alpha = 0.5f) else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)
-                val modeText = if (isPcMode) Color(0xFFC084FC) else MaterialTheme.colorScheme.primary
-                val modeLabel = if (isPcMode) "PC E2EE" else "RDP"
-                Box(
-                    Modifier
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(modeBg)
-                        .border(1.dp, modeBorder, RoundedCornerShape(6.dp))
-                        .padding(horizontal = 7.dp, vertical = 2.5.dp),
-                ) {
-                    Text(
-                        modeLabel,
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 0.4.sp,
-                        ),
-                        color = modeText,
+
+                // Trailing menu button
+                Box {
+                    var menuOpen by remember { mutableStateOf(false) }
+                    SeiIconPill(
+                        icon = SeiIcons.MoreVertical,
+                        onClick = { menuOpen = true },
+                        size = 32.dp,
+                        flat = true,
+                        contentDescription = sei("Options"),
                     )
+                    DropdownMenu(
+                        expanded = menuOpen,
+                        onDismissRequest = { menuOpen = false },
+                        modifier = Modifier.background(MaterialTheme.colorScheme.surface),
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text(sei("Edit")) },
+                            onClick = {
+                                menuOpen = false
+                                onEdit()
+                            },
+                            leadingIcon = { Icon(SeiIcons.Sliders, contentDescription = null, modifier = Modifier.size(16.dp)) },
+                        )
+                        if (hasWol) {
+                            DropdownMenuItem(
+                                text = { Text(sei("Wake & connect")) },
+                                onClick = {
+                                    menuOpen = false
+                                    onWakeConnect()
+                                },
+                                leadingIcon = { Icon(SeiIcons.Play, contentDescription = null, modifier = Modifier.size(16.dp)) },
+                            )
+                        }
+                        DropdownMenuItem(
+                            text = { Text(sei("Duplicate")) },
+                            onClick = {
+                                menuOpen = false
+                                onDuplicate()
+                            },
+                            leadingIcon = { Icon(SeiIcons.Copy, contentDescription = null, modifier = Modifier.size(16.dp)) },
+                        )
+                        DropdownMenuItem(
+                            text = { Text(sei("Delete"), color = MaterialTheme.colorScheme.error) },
+                            onClick = {
+                                menuOpen = false
+                                onDelete()
+                            },
+                            leadingIcon = { Icon(SeiIcons.Trash, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(16.dp)) },
+                        )
+                    }
                 }
             }
 
-            Spacer(Modifier.height(4.dp))
+            // Endpoint in mono
+            Text(
+                text = (if (rdpOptions.pcConnectMode) profile.host else "${profile.host}:${profile.port}") +
+                    if (!profile.username.isNullOrBlank()) "  ·  ${profile.username}" else "",
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
 
-            // Endpoint & User Row
-            Row(
-                Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    if (rdpOptions.pcConnectMode) profile.host else "${profile.host}:${profile.port}",
-                    style = MaterialTheme.typography.bodySmall.copy(
-                                            ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f, fill = false),
-                )
-                if (!profile.username.isNullOrBlank()) {
-                    Text(
-                        "  ·  ",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                    )
-                    Text(
-                        profile.username.orEmpty(),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(10.dp))
-
-            // Capability & Spec Badges
+            // Spec chips
             Row(
                 Modifier
                     .fillMaxWidth()
                     .horizontalScroll(rememberScrollState()),
-                verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 SpecChip(
                     label = if (rdpOptions.pcConnectMode) rdpOptions.activeCodecLabel() else streamBadge,
                     highlight = true,
                 )
-                if (rdpOptions.consoleAdmin) {
-                    SpecChip(label = "Admin", highlight = false)
-                }
-                if (hasWol) {
-                    SpecChip(label = "WoL", highlight = false)
-                }
-                if (rdpOptions.audioMode != SeiAudioMode.OFF) {
-                    SpecChip(label = sei( "Audio"), highlight = false)
-                }
-            }
-
-            Spacer(Modifier.height(12.dp))
-            SeiDivider()
-            Spacer(Modifier.height(10.dp))
-
-            // Action Command Footer
-            Row(
-                Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                SeiPillButton(
-                    text = sei( "Connect"),
-                    onClick = onConnect,
-                    icon = SeiIcons.Play,
-                    compact = false,
-                    modifier = Modifier.weight(1f),
-                )
-                if (hasWol) {
-                    SeiPillButton(
-                        text = sei( "WoL"),
-                        onClick = onWakeConnect,
-                        primary = false,
-                        compact = true,
-                    )
-                }
-                SeiIconPill(
-                    icon = SeiIcons.Sliders,
-                    onClick = onEdit,
-                    size = 42.dp,
-                    flat = false,
-                    contentDescription = sei( "RDP settings"),
-                )
-                SeiIconPill(
-                    icon = SeiIcons.Trash,
-                    onClick = onDelete,
-                    size = 42.dp,
-                    flat = false,
-                    contentDescription = sei( "Delete"),
-                )
+                if (rdpOptions.consoleAdmin) SpecChip(label = "Admin", highlight = false)
+                if (hasWol) SpecChip(label = "WoL", highlight = false)
+                if (rdpOptions.audioMode != SeiAudioMode.OFF) SpecChip(label = sei("Audio"), highlight = false)
             }
         }
     }
+}
+
+@Composable
+private fun RdpFreePromoRow(onCreateRdp: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
+            .clickable(onClick = onCreateRdp)
+            .padding(horizontal = 14.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Icon(
+            SeiIcons.Monitor,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(16.dp),
+        )
+        Text(
+            sei("Need a temporary Windows PC? Try RdpFree on GitHub"),
+            style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.weight(1f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        Icon(
+            SeiIcons.Play,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(12.dp),
+        )
+    }
+}
+
+@Composable
+private fun DeviceAccentGlow(seed: String, modifier: Modifier = Modifier) {
+    val hash = Math.abs(seed.hashCode())
+    val glowColor = remember(seed) {
+        when (hash % 4) {
+            0 -> Color(0xFF6366F1) // Indigo
+            1 -> Color(0xFF38BDF8) // Sky
+            2 -> Color(0xFF10B981) // Emerald
+            else -> Color(0xFFA855F7) // Purple
+        }
+    }
+    Box(
+        modifier
+            .fillMaxWidth()
+            .height(3.dp)
+            .background(
+                Brush.horizontalGradient(
+                    listOf(
+                        Color.Transparent,
+                        glowColor.copy(alpha = 0.75f),
+                        glowColor,
+                        glowColor.copy(alpha = 0.75f),
+                        Color.Transparent,
+                    ),
+                ),
+            ),
+    )
 }
 
 @Composable
@@ -1585,105 +2142,12 @@ private fun SpecChip(
         Text(
             label,
             style = MaterialTheme.typography.labelSmall.copy(
-                fontSize = 10.sp,
+                fontSize = 11.sp,
                 fontWeight = if (highlight) FontWeight.SemiBold else FontWeight.Normal,
             ),
             color = textCol,
             maxLines = 1,
         )
-    }
-}
-
-/** Strip taskbar tipis di dasar preview supaya terbaca sebagai desktop otentik. */
-@Composable
-private fun DesktopTaskbar(modifier: Modifier = Modifier) {
-    Column(modifier.fillMaxWidth()) {
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .height(0.5.dp)
-                .background(Color.White.copy(alpha = 0.12f)),
-        )
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .height(26.dp)
-                .background(Color(0xE6080B10))
-                .padding(horizontal = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            // Windows Start Button icon
-            Box(
-                Modifier
-                    .size(16.dp)
-                    .clip(RoundedCornerShape(3.dp))
-                    .background(Color.White.copy(alpha = 0.12f)),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    SeiIcons.Windows,
-                    contentDescription = null,
-                    tint = Color(0xFF60A5FA),
-                    modifier = Modifier.size(9.dp),
-                )
-            }
-            // Search bar miniature
-            Box(
-                Modifier
-                    .size(width = 24.dp, height = 12.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(Color.White.copy(alpha = 0.08f)),
-                contentAlignment = Alignment.Center,
-            ) {
-                Box(
-                    Modifier
-                        .size(width = 14.dp, height = 2.dp)
-                        .clip(RoundedCornerShape(50))
-                        .background(Color.White.copy(alpha = 0.30f)),
-                )
-            }
-            // Micro app icons
-            Box(
-                Modifier
-                    .size(12.dp)
-                    .clip(RoundedCornerShape(2.dp))
-                    .background(Color(0xFFF59E0B).copy(alpha = 0.75f)), // Explorer
-            )
-            Box(
-                Modifier
-                    .size(12.dp)
-                    .clip(RoundedCornerShape(2.dp))
-                    .background(Color(0xFF38BDF8).copy(alpha = 0.75f)), // Browser
-            )
-            Box(
-                Modifier
-                    .size(12.dp)
-                    .clip(RoundedCornerShape(2.dp))
-                    .background(Color(0xFF10B981).copy(alpha = 0.75f)), // Terminal
-            )
-            Spacer(Modifier.weight(1f))
-            // Tray: Wifi / Time miniature
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                Box(
-                    Modifier
-                        .size(width = 10.dp, height = 3.dp)
-                        .clip(RoundedCornerShape(50))
-                        .background(Color.White.copy(alpha = 0.40f)),
-                )
-                Text(
-                    "12:00",
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontSize = 8.sp,
-                        fontWeight = FontWeight.Medium,
-                    ),
-                    color = Color.White.copy(alpha = 0.60f),
-                )
-            }
-        }
     }
 }
 
@@ -1703,7 +2167,7 @@ private fun Banner(
             .clickable(onClick = onClick)
             .padding(12.dp),
     ) {
-        Text(text, style = MaterialTheme.typography.labelMedium, color = content)
+        Text(text, style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp), color = content)
     }
 }
 

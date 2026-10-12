@@ -34,30 +34,30 @@ import io.seidesk.rm.ui.AppPrefs
 // high-contrast obsidian dark surfaces, and vivid semantic indicators.
 // =============================================================
 
-// Tema gelap modern: latar obsidian pekat, permukaan berlapis dengan kontras terukur.
-val SeiBg = Color(0xFF0A0C10)
-val SeiSurface = Color(0xFF131722)
-val SeiSurfaceAlt = Color(0xFF1B2030)
-val SeiPrimaryContainer = Color(0xFF23293E)
-val SeiLine = Color(0xFF262C3D)
-val SeiLineStrong = Color(0xFF384259)
-val SeiText = Color(0xFFF8FAFC)
-val SeiTextDim = Color(0xFF94A3B8)
-val SeiTextFaint = Color(0xFF64748B)
+// Dark theme tokens mapped from SeiColors
+val SeiBg = SeiColors.DarkBg
+val SeiSurface = SeiColors.DarkSurface
+val SeiSurfaceAlt = SeiColors.DarkSurfaceAlt
+val SeiPrimaryContainer = SeiColors.DarkSurfaceRaised
+val SeiLine = SeiColors.DarkLine
+val SeiLineStrong = SeiColors.DarkLineStrong
+val SeiText = SeiColors.DarkText
+val SeiTextDim = SeiColors.DarkTextDim
+val SeiTextFaint = SeiColors.DarkTextFaint
 
-// Aksen modern: Electric Indigo & Cyber Sky
-val SeiAccent = Color(0xFF6366F1)
+// Accent & Status
+val SeiAccent = SeiColors.DarkAccent
+val SeiAccentText = SeiColors.DarkAccentText
 val XyAccentInk = Color(0xFFFFFFFF)
 
-// Indikator status hidup (vivid status colors)
-val SeiOk = Color(0xFF10B981)      // Emerald Green
-val SeiWarn = Color(0xFFF59E0B)    // Vibrant Amber
-val SeiDanger = Color(0xFFF43F5E)  // Vivid Rose Red
+val SeiOk = SeiColors.StatusOk
+val SeiWarn = SeiColors.StatusWarn
+val SeiDanger = SeiColors.StatusDanger
 
 val DarkScheme = darkColorScheme(
-    primary = SeiAccent,
+    primary = SeiColors.DarkPrimaryButton,
     onPrimary = Color.White,
-    primaryContainer = SeiPrimaryContainer,
+    primaryContainer = SeiColors.DarkSurfaceRaised,
     onPrimaryContainer = Color(0xFFE0E7FF),
     secondary = Color(0xFF38BDF8),
     onSecondary = Color(0xFF03223A),

@@ -57,6 +57,14 @@ class AppPrefs(context: Context) {
         get() = sp.getBoolean(KEY_KEEP_SYSTEM_BARS_HIDDEN_ON_IME, false)
         set(v) = sp.edit().putBoolean(KEY_KEEP_SYSTEM_BARS_HIDDEN_ON_IME, v).apply()
 
+    var dismissedPcConnectionNotice: Boolean
+        get() = sp.getBoolean("dismissed_pc_notice", false)
+        set(v) = sp.edit().putBoolean("dismissed_pc_notice", v).apply()
+
+    var deviceListGridMode: Boolean
+        get() = sp.getBoolean("device_list_grid", false)
+        set(v) = sp.edit().putBoolean("device_list_grid", v).apply()
+
     val autoResumeProfileId: String?
         get() = sp.getString(KEY_AUTO_RESUME_PROFILE_ID, null)
 
