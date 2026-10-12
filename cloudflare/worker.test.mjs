@@ -23,7 +23,7 @@ afterEach(() => {
 
 const releaseState = {
   service: "xydesk-remote",
-  brand: "XyVerse Technology Global",
+  brand: "Seijixinghe888",
   release_state: "published",
   release_tag: "v1.0.2",
   app_build: { version: "1.0.2", version_code: 53 },
@@ -563,7 +563,7 @@ test("Android active-session reporting defaults on, remains easy to disable, and
   const settings = await readFile(new URL("../client/Android/Studio/app/src/main/kotlin/io/seidesk/rm/ui/Screens.kt", import.meta.url), "utf8");
   assert.match(prefs, /getBoolean\(KEY_SHARE_ACTIVE_SESSION_STATS,\s*true\)/);
   assert.match(settings, /appPrefs\.shareActiveSessionStats = it/);
-  assert.match(settings, /Matikan sakelar ini kapan saja/);
+  assert.match(settings, /Turn this switch off any time/);
   assert.match(session, /if \(!appPrefs\.shareActiveSessionStats\) return@LaunchedEffect/);
   assert.match(reporter, /\.put\("session_id",\s*sessionId\.toString\(\)\)/);
   assert.doesNotMatch(reporter, /\.put\("(?:host|profile|username|password|clipboard)"/i);

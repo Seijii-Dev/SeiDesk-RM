@@ -315,8 +315,8 @@ async function healthResponse(request, env) {
     return jsonResponse({
       status: "operational",
       service: state.service || "xydesk-remote",
-      app: "XyDesk Remote",
-      vendor: state.brand || "XyVerse Technology Global",
+      app: "SeiDesk RM",
+      vendor: state.brand || "Seijixinghe888",
       version: state.release_tag || "",
       target_version: state.release_tag || "",
       qaBuild: state.app_build?.version || "",
@@ -338,8 +338,8 @@ async function statusResponse(request, env) {
   try {
     const state = await getReleaseMetadata(request, env);
     return jsonResponse({
-      app: "XyDesk Remote",
-      vendor: state.brand || "XyVerse Technology Global",
+      app: "SeiDesk RM",
+      vendor: state.brand || "Seijixinghe888",
       version: String(state.release_tag || "").replace(/^v/i, ""),
       qaBuild: state.app_build?.version || "",
       qaVersionCode: state.app_build?.version_code || 0,

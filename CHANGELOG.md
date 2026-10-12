@@ -1,4 +1,4 @@
-# Changelog XyDesk Remote
+# Changelog SeiDesk RM
 
 Semua perubahan sejak rilis publik v1.0.2 sampai v1.1.8.
 Format: versi (kode) — tanggal — poin perubahan.

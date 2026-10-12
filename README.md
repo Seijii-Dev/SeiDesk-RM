@@ -111,5 +111,5 @@ cd client/Android/Studio
 ## Licensing & Attribution
 
 - FreeRDP is licensed under Apache-2.0. Copyright (C) 2012-2026 FreeRDP contributors.
-- SeiDesk RM application code: (C) XyVerse Technology Global.
+- SeiDesk RM application code: (C) Seijixinghe888.
 - Upstream notices and modification records: see [`XYDESK-REMOTE-NOTICE.md`](XYDESK-REMOTE-NOTICE.md).
