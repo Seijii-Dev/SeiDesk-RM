@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -16,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.zIndex
 import androidx.compose.foundation.background
@@ -62,6 +64,7 @@ import io.seidesk.rm.core.ConnectionLog
 import io.seidesk.rm.core.ConnectionProfile
 import io.seidesk.rm.core.RdpOptions
 import io.seidesk.rm.core.WakeOnLan
+import io.seidesk.rm.core.XyAudioMode
 import io.seidesk.rm.core.XyStreamProfile
 import io.seidesk.rm.security.CrashLog
 import io.seidesk.rm.sessions.SessionsRepository
@@ -874,32 +877,54 @@ private fun LiveSessionsCard() {
         }
     }
     if (live.isEmpty()) return
-    XyCard {
-        XySectionLabel(xy("Sesi aktif ({0})", "Active sessions ({0})", live.size))
-        Spacer(Modifier.height(6.dp))
+    XyCard(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Box(
+                Modifier
+                    .size(10.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFF10B981).copy(alpha = 0.25f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Box(Modifier.size(6.dp).clip(CircleShape).background(Color(0xFF10B981)))
+            }
+            XySectionLabel(xy("Sesi aktif ({0})", "Active sessions ({0})", live.size))
+        }
+        Spacer(Modifier.height(10.dp))
         live.forEach { item ->
+            val rowShape = RoundedCornerShape(14.dp)
             Row(
-                Modifier.fillMaxWidth(),
+                Modifier
+                    .fillMaxWidth()
+                    .clip(rowShape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.40f))
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f), rowShape)
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 Column(Modifier.weight(1f)) {
                     Text(
                         item.label,
-                        style = MaterialTheme.typography.titleSmall,
+                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                     Text(
                         item.address,
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
                 XyPillButton(
                     text = xy("Buka", "Open"),
                     onClick = { item.open() },
+                    icon = XyIcons.Play,
                     compact = true,
                 )
                 XyPillButton(
@@ -1092,22 +1117,23 @@ private fun DevicesScreen(
                             ) {
                                 Box(
                                     Modifier
-                                        .size(40.dp)
+                                        .size(42.dp)
                                         .clip(RoundedCornerShape(12.dp))
-                                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)),
+                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+                                        .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.28f), RoundedCornerShape(12.dp)),
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     Icon(
                                         XyIcons.Monitor,
                                         contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onSurface,
+                                        tint = MaterialTheme.colorScheme.primary,
                                         modifier = Modifier.size(20.dp),
                                     )
                                 }
                                 Column(Modifier.weight(1f)) {
                                     Text(
                                         xy("RdpFree", "RdpFree"),
-                                        style = MaterialTheme.typography.titleSmall,
+                                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
                                     )
                                     Text(
                                         xy(
@@ -1122,6 +1148,7 @@ private fun DevicesScreen(
                                     text = xy("Buat", "Create"),
                                     onClick = onCreateRdp,
                                     modifier = Modifier.height(36.dp),
+                                    compact = true,
                                 )
                             }
                         }
@@ -1273,132 +1300,412 @@ private fun DeviceCard(
     val previewSeed = remember(profile.id, profile.label, profile.host) {
         (profile.label ?: profile.host) + "|" + profile.host
     }
-    val cardShape = RoundedCornerShape(18.dp)
+
+    // Identifikasi jaringan (Tailscale / LAN / Direct / E2EE)
+    val networkInfo = remember(profile.host, rdpOptions.pcConnectMode) {
+        val h = profile.host.lowercase()
+        when {
+            rdpOptions.pcConnectMode -> Pair(Color(0xFF818CF8), "PC E2EE")
+            h.startsWith("100.") || h.contains(".ts.net") -> Pair(Color(0xFF38BDF8), "Tailscale")
+            h.startsWith("192.168.") || h.startsWith("10.") || h.startsWith("172.") ||
+                h == "localhost" || h == "127.0.0.1" -> Pair(Color(0xFF10B981), "LAN")
+            else -> Pair(Color(0xFF60A5FA), "Direct")
+        }
+    }
+    val networkColor = networkInfo.first
+    val networkLabel = networkInfo.second
+
+    val cardShape = RoundedCornerShape(22.dp)
+    val cardBorder = Brush.verticalGradient(
+        0f to MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f),
+        1f to MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.20f),
+    )
+
     Column(
         Modifier
             .fillMaxWidth()
             .clip(cardShape)
             .background(MaterialTheme.colorScheme.surface)
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.40f), cardShape)
+            .border(1.dp, cardBorder, cardShape)
             .clickable(onClick = onConnect),
     ) {
-        // Preview desktop penuh yang lebih tinggi (212.dp) supaya proporsi
-        // monitor desktop terlihat lega dan jelas di layar Home.
+        // Monitor Display Frame
         Box(
             Modifier
                 .fillMaxWidth()
-                .height(212.dp)
-                .clip(RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp)),
+                .height(168.dp)
+                .clip(RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp)),
         ) {
             DevicePreviewArt(seed = previewSeed, os = wall)
+            // Screen vignette
             Box(
                 Modifier
                     .fillMaxSize()
                     .background(
                         Brush.verticalGradient(
-                            0.45f to Color.Transparent,
-                            1f to Color.Black.copy(alpha = 0.62f),
+                            0f to Color.Black.copy(alpha = 0.38f),
+                            0.38f to Color.Transparent,
+                            0.75f to Color.Black.copy(alpha = 0.20f),
+                            1f to Color.Black.copy(alpha = 0.65f),
                         ),
                     ),
             )
-            Column(
+
+            // Top Floating Badges (OS & Network)
+            Row(
                 Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(start = 14.dp, end = 14.dp, bottom = 40.dp),
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 10.dp)
+                    .align(Alignment.TopCenter),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                // OS Platform Pill
+                Row(
+                    Modifier
+                        .clip(RoundedCornerShape(50))
+                        .background(Color(0xB30B0F17))
+                        .border(1.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(50))
+                        .padding(horizontal = 9.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                ) {
+                    Icon(
+                        if (wall == XyWall.WIN11 || wall == XyWall.WIN10) XyIcons.Windows else XyIcons.Monitor,
+                        contentDescription = null,
+                        tint = Color.White.copy(alpha = 0.90f),
+                        modifier = Modifier.size(11.dp),
+                    )
+                    Text(
+                        wall.label,
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                        ),
+                        color = Color.White.copy(alpha = 0.92f),
+                    )
+                }
+
+                // Network Routing Pill
+                Row(
+                    Modifier
+                        .clip(RoundedCornerShape(50))
+                        .background(Color(0xB30B0F17))
+                        .border(1.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(50))
+                        .padding(horizontal = 9.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Box(
+                        Modifier
+                            .size(10.dp)
+                            .clip(CircleShape)
+                            .background(networkColor.copy(alpha = 0.25f)),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Box(
+                            Modifier
+                                .size(5.dp)
+                                .clip(CircleShape)
+                                .background(networkColor),
+                        )
+                    }
+                    Text(
+                        networkLabel,
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium,
+                        ),
+                        color = Color.White.copy(alpha = 0.92f),
+                    )
+                }
+            }
+
+            // Desktop Taskbar di dasar layar monitor
+            DesktopTaskbar(Modifier.align(Alignment.BottomCenter))
+        }
+
+        // Structured Card Body: Info & Specs
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 12.dp),
+        ) {
+            // Header Row: Title & Connection Type Pill
+            Row(
+                Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
                     profile.label ?: profile.host,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Color.White,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = (-0.2).sp,
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
                 )
+                Spacer(Modifier.width(8.dp))
+                val isPcMode = rdpOptions.pcConnectMode
+                val modeBg = if (isPcMode) Color(0xFF241838) else MaterialTheme.colorScheme.surfaceVariant
+                val modeBorder = if (isPcMode) Color(0xFF818CF8).copy(alpha = 0.5f) else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)
+                val modeText = if (isPcMode) Color(0xFFC084FC) else MaterialTheme.colorScheme.primary
+                val modeLabel = if (isPcMode) "PC E2EE" else "RDP"
+                Box(
+                    Modifier
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(modeBg)
+                        .border(1.dp, modeBorder, RoundedCornerShape(6.dp))
+                        .padding(horizontal = 7.dp, vertical = 2.5.dp),
+                ) {
+                    Text(
+                        modeLabel,
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.4.sp,
+                        ),
+                        color = modeText,
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(4.dp))
+
+            // Endpoint & User Row
+            Row(
+                Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 Text(
-                    if (rdpOptions.pcConnectMode) {
-                        buildString {
-                            append(xy("Koneksi PC", "Connect PC"))
-                            append("  ·  ")
-                            append(profile.host)
-                            append("  ·  ")
-                            append(rdpOptions.activeCodecLabel())
-                        }
-                    } else {
-                        buildString {
-                            append(profile.host).append(':').append(profile.port)
-                            if (!profile.username.isNullOrBlank()) append("  ·  ").append(profile.username)
-                            append("  ·  ").append(streamBadge)
-                            if (rdpOptions.consoleAdmin) append("  ·  Admin")
-                        }
-                    },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.82f),
+                    if (rdpOptions.pcConnectMode) profile.host else "${profile.host}:${profile.port}",
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontFamily = FontFamily.Monospace,
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
                 )
+                if (!profile.username.isNullOrBlank()) {
+                    Text(
+                        "  ·  ",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                    )
+                    Text(
+                        profile.username.orEmpty(),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
-            DesktopTaskbar(Modifier.align(Alignment.BottomCenter))
-        }
-        Row(
-            Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            XyPillButton(xy("Connect", "Connect"), onConnect, compact = true)
-            if (hasWol) {
+
+            Spacer(Modifier.height(10.dp))
+
+            // Capability & Spec Badges
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                SpecChip(
+                    label = if (rdpOptions.pcConnectMode) rdpOptions.activeCodecLabel() else streamBadge,
+                    highlight = true,
+                )
+                if (rdpOptions.consoleAdmin) {
+                    SpecChip(label = "Admin", highlight = false)
+                }
+                if (hasWol) {
+                    SpecChip(label = "WoL", highlight = false)
+                }
+                if (rdpOptions.audioMode != XyAudioMode.OFF) {
+                    SpecChip(label = xy("Audio", "Audio"), highlight = false)
+                }
+            }
+
+            Spacer(Modifier.height(12.dp))
+            XyDivider()
+            Spacer(Modifier.height(10.dp))
+
+            // Action Command Footer
+            Row(
+                Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 XyPillButton(
-                    xy("Bangunkan (WoL)", "Wake (WoL)"),
-                    onWakeConnect,
-                    primary = false,
-                    compact = true,
+                    text = xy("Hubungkan", "Connect"),
+                    onClick = onConnect,
+                    icon = XyIcons.Play,
+                    compact = false,
+                    modifier = Modifier.weight(1f),
+                )
+                if (hasWol) {
+                    XyPillButton(
+                        text = xy("WoL", "WoL"),
+                        onClick = onWakeConnect,
+                        primary = false,
+                        compact = true,
+                    )
+                }
+                XyIconPill(
+                    icon = XyIcons.Sliders,
+                    onClick = onEdit,
+                    size = 42.dp,
+                    flat = false,
+                    contentDescription = xy("Pengaturan RDP", "RDP settings"),
+                )
+                XyIconPill(
+                    icon = XyIcons.Trash,
+                    onClick = onDelete,
+                    size = 42.dp,
+                    flat = false,
+                    contentDescription = xy("Hapus", "Delete"),
                 )
             }
-            Spacer(Modifier.weight(1f))
-            XyIconPill(
-                XyIcons.Sliders,
-                onEdit,
-                size = 40.dp,
-                flat = true,
-                contentDescription = xy("Pengaturan RDP", "RDP settings"),
-            )
-            XyIconPill(
-                XyIcons.Trash,
-                onDelete,
-                size = 40.dp,
-                flat = true,
-                contentDescription = xy("Hapus", "Delete"),
-            )
         }
     }
 }
 
-/** Strip taskbar tipis di dasar preview supaya terbaca sebagai desktop. */
+@Composable
+private fun SpecChip(
+    label: String,
+    highlight: Boolean = false,
+    modifier: Modifier = Modifier,
+) {
+    val chipShape = RoundedCornerShape(6.dp)
+    val bg = if (highlight) {
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+    } else {
+        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
+    }
+    val border = if (highlight) {
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
+    } else {
+        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
+    }
+    val textCol = if (highlight) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
+    Box(
+        modifier
+            .clip(chipShape)
+            .background(bg)
+            .border(1.dp, border, chipShape)
+            .padding(horizontal = 7.dp, vertical = 2.5.dp),
+    ) {
+        Text(
+            label,
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontSize = 10.sp,
+                fontWeight = if (highlight) FontWeight.SemiBold else FontWeight.Normal,
+            ),
+            color = textCol,
+            maxLines = 1,
+        )
+    }
+}
+
+/** Strip taskbar tipis di dasar preview supaya terbaca sebagai desktop otentik. */
 @Composable
 private fun DesktopTaskbar(modifier: Modifier = Modifier) {
-    Row(
-        modifier
-            .fillMaxWidth()
-            .height(28.dp)
-            .background(Color(0xFF090B0E))
-            .padding(horizontal = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(7.dp),
-    ) {
-        Box(Modifier.size(9.dp).clip(RoundedCornerShape(2.dp)).background(Color.White.copy(alpha = 0.85f)))
-        repeat(3) {
-            Box(
-                Modifier
-                    .size(9.dp)
-                    .clip(RoundedCornerShape(2.dp))
-                    .background(Color.White.copy(alpha = 0.45f)),
-            )
-        }
-        Spacer(Modifier.weight(1f))
+    Column(modifier.fillMaxWidth()) {
         Box(
             Modifier
-                .size(width = 18.dp, height = 5.dp)
-                .clip(RoundedCornerShape(50))
-                .background(Color.White.copy(alpha = 0.35f)),
+                .fillMaxWidth()
+                .height(0.5.dp)
+                .background(Color.White.copy(alpha = 0.12f)),
         )
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .height(26.dp)
+                .background(Color(0xE6080B10))
+                .padding(horizontal = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            // Windows Start Button icon
+            Box(
+                Modifier
+                    .size(16.dp)
+                    .clip(RoundedCornerShape(3.dp))
+                    .background(Color.White.copy(alpha = 0.12f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    XyIcons.Windows,
+                    contentDescription = null,
+                    tint = Color(0xFF60A5FA),
+                    modifier = Modifier.size(9.dp),
+                )
+            }
+            // Search bar miniature
+            Box(
+                Modifier
+                    .size(width = 24.dp, height = 12.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(Color.White.copy(alpha = 0.08f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Box(
+                    Modifier
+                        .size(width = 14.dp, height = 2.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(Color.White.copy(alpha = 0.30f)),
+                )
+            }
+            // Micro app icons
+            Box(
+                Modifier
+                    .size(12.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(Color(0xFFF59E0B).copy(alpha = 0.75f)), // Explorer
+            )
+            Box(
+                Modifier
+                    .size(12.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(Color(0xFF38BDF8).copy(alpha = 0.75f)), // Browser
+            )
+            Box(
+                Modifier
+                    .size(12.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(Color(0xFF10B981).copy(alpha = 0.75f)), // Terminal
+            )
+            Spacer(Modifier.weight(1f))
+            // Tray: Wifi / Time miniature
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                Box(
+                    Modifier
+                        .size(width = 10.dp, height = 3.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(Color.White.copy(alpha = 0.40f)),
+                )
+                Text(
+                    "12:00",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 8.sp,
+                        fontWeight = FontWeight.Medium,
+                    ),
+                    color = Color.White.copy(alpha = 0.60f),
+                )
+            }
+        }
     }
 }
 
