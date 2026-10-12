@@ -113,15 +113,12 @@ internal object SessionFileTransfer {
                 update(job.id) { it.copy(phase = TransferPhase.DONE, doneBytes = it.bytes) }
                 done++
             }.onFailure { error ->
-                ConnectionLog.addThrowable("SES: transfer ke PC gagal ($name)", error)
+                ConnectionLog.addThrowable("SES: transfer to PC failed ($name)", error)
                 runCatching { File(root.dir, name).delete() }
                 update(job.id) {
                     it.copy(
                         phase = TransferPhase.FAILED,
-                        message = xyn(
-                            "Gagal: ${error.message ?: error.javaClass.simpleName}",
-                            "Failed: ${error.message ?: error.javaClass.simpleName}",
-                        ),
+                        message = "Failed: ${error.message ?: error.javaClass.simpleName}",
                     )
                 }
             }
@@ -208,11 +205,11 @@ internal object SessionFileTransfer {
                         "${Environment.DIRECTORY_DOWNLOADS}/$REMOTE_DRIVE_NAME/$fileName",
                     )
                 } catch (t: Throwable) {
-                    ConnectionLog.addThrowable("SES: terima dari PC gagal ($fileName)", t)
+                    ConnectionLog.addThrowable("SES: receive from PC failed ($fileName)", t)
                     update(job.id) {
                         it.copy(
                             phase = TransferPhase.FAILED,
-                            message = xyn("Gagal: ${t.message}", "Failed: ${t.message}"),
+                            message = "Failed: ${t.message}",
                         )
                     }
                     ReceiveResult.Failed(t.message ?: t.javaClass.simpleName)

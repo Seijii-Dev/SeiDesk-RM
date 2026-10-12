@@ -15,26 +15,26 @@ import org.json.JSONObject
  * Semua tombol disimpan per perangkat (layar sesi bisa beda-beda layout).
  */
 enum class HudAction(val title: String, val titleEn: String, val detail: String, val detailEn: String) {
-    TAP("Sekali klik", "Single tap", "Tekan lalu lepas", "Press and release"),
-    ONE_SHOT("Sekali pakai", "One-shot", "Aktif untuk 1 tombol/klik berikutnya lalu lepas otomatis", "Arms for the next key/click then auto-releases"),
-    HOLD("Tahan", "Hold", "Aktif selama ditahan (drag, pilih banyak)", "Active while held (drag, multi-select)"),
-    TOGGLE("Toggle", "Toggle", "Sekali klik nyala, klik lagi mati", "Tap to turn on, tap again to turn off"),
+    TAP("Single tap", "Single tap", "Press and release", "Press and release"),
+    ONE_SHOT("One-shot", "One-shot", "Arms for the next key/click then auto-releases", "Arms for the next key/click then auto-releases"),
+    HOLD("Hold", "Hold", "Active while held (drag, multi-select)", "Active while held (drag, multi-select)"),
+    TOGGLE("Toggle", "Toggle", "Tap to turn on, tap again to turn off", "Tap to turn on, tap again to turn off"),
 }
 
 enum class HudKind(val title: String, val titleEn: String) {
-    MOUSE_LEFT("Klik kiri", "Left click"),
-    MOUSE_RIGHT("Klik kanan", "Right click"),
-    MOUSE_MIDDLE("Klik tengah", "Middle click"),
-    MOUSE_SWAP("Tukar klik kiri/kanan", "Swap left/right click"),
-    SCROLL_UP("Scroll naik", "Scroll up"),
-    SCROLL_DOWN("Scroll turun", "Scroll down"),
-    SCROLL_SLIDER("Geser scroll", "Swipe to scroll"),
-    PAD_STICK("Joystick analog", "Analog stick"),
-    INPUT_SWITCH("Ganti mode input", "Switch input mode"),
-    KEYBOARD("Buka keyboard", "Show keyboard"),
-    KEY("Tombol keyboard", "Keyboard key"),
-    COMBO("Kombinasi", "Combo"),
-    MACRO("Makro otomatis", "Auto macro"),
+    MOUSE_LEFT("Left click", "Left click"),
+    MOUSE_RIGHT("Right click", "Right click"),
+    MOUSE_MIDDLE("Middle click", "Middle click"),
+    MOUSE_SWAP("Swap left/right click", "Swap left/right click"),
+    SCROLL_UP("Scroll up", "Scroll up"),
+    SCROLL_DOWN("Scroll down", "Scroll down"),
+    SCROLL_SLIDER("Swipe to scroll", "Swipe to scroll"),
+    PAD_STICK("Analog stick", "Analog stick"),
+    INPUT_SWITCH("Switch input mode", "Switch input mode"),
+    KEYBOARD("Show keyboard", "Show keyboard"),
+    KEY("Keyboard key", "Keyboard key"),
+    COMBO("Combo", "Combo"),
+    MACRO("Auto macro", "Auto macro"),
 }
 
 enum class HudProfilePreset(
@@ -44,45 +44,45 @@ enum class HudProfilePreset(
     val detailEn: String,
 ) {
     STANDARD(
-        "Standar",
         "Standard",
-        "Klik kiri/kanan/tengah, scroll, tukar klik, dan ganti mode",
+        "Standard",
+        "Left/right/middle click, scroll, swap click, and input mode switch",
         "Left/right/middle click, scroll, swap click, and input mode switch",
     ),
     CODING(
         "Coding / Terminal",
         "Coding / Terminal",
-        "Esc, Tab, Ctrl 1x, Copy/Paste/Save, Alt+Tab, Enter, dan klik",
+        "Esc, Tab, Ctrl 1x, Copy/Paste/Save, Alt+Tab, Enter, and clicks",
         "Esc, Tab, Ctrl 1x, Copy/Paste/Save, Alt+Tab, Enter, and clicks",
     ),
     GAMING(
         "Gaming / WASD",
         "Gaming / WASD",
-        "D-pad WASD di kiri, Space/Shift/E/Esc & klik di kanan",
+        "WASD cluster on left, Space/Shift/E/Esc & mouse clicks on right",
         "WASD cluster on left, Space/Shift/E/Esc & mouse clicks on right",
     ),
     OFFICE(
-        "Office / Kerja",
         "Office / Work",
-        "Copy, Paste, Undo, Find, Alt+Tab, Win+D, Geser Scroll, dan klik",
+        "Office / Work",
+        "Copy, Paste, Undo, Find, Alt+Tab, Win+D, Swipe Scroll, and clicks",
         "Copy, Paste, Undo, Find, Alt+Tab, Win+D, Swipe Scroll, and clicks",
     ),
     MEDIA(
-        "Desain / Video",
         "Design / Video",
-        "Play/Pause (Space), Step ◀/▶, Undo/Redo, Del, Save, dan klik",
+        "Design / Video",
+        "Play/Pause (Space), Step ◀/▶, Undo/Redo, Del, Save, and clicks",
         "Play/Pause (Space), Step ◀/▶, Undo/Redo, Del, Save, and clicks",
     ),
     CUSTOM(
-        "Kustom (Buat Sendiri)",
         "Custom (Build Your Own)",
-        "Susun dan simpan tata letak tombol HUD sesuai kebutuhanmu sendiri",
+        "Custom (Build Your Own)",
+        "Create and save your own custom HUD button layout",
         "Create and save your own custom HUD button layout",
     ),
     FULLPAD(
-        "Gamepad Lengkap",
         "Full Gamepad",
-        "Dua stik analog, D-Pad, A/B/X/Y, L1/R1/L2/R2, Start & Select — siap main",
+        "Full Gamepad",
+        "Two analog sticks, D-Pad, A/B/X/Y, L1/R1/L2/R2, Start & Select — ready to play",
         "Two analog sticks, D-Pad, A/B/X/Y, L1/R1/L2/R2, Start & Select — ready to play",
     ),
 }
@@ -726,11 +726,10 @@ object HudKeyCatalog {
     }
 }
 
-/** Satu-satunya tempat yang tahu arti SeiAudioMode buat label UI. */
 internal fun SeiAudioMode.shortTitle(): String = when (this) {
-    SeiAudioMode.DEVICE -> "Perangkat"
+    SeiAudioMode.DEVICE -> "Device"
     SeiAudioMode.REMOTE -> "Remote"
-    SeiAudioMode.OFF -> "Mati"
+    SeiAudioMode.OFF -> "Off"
 }
 
 internal fun SeiAudioMode.shortTitleEn(): String = when (this) {

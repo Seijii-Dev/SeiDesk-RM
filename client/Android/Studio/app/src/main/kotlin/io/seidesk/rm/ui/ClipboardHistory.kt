@@ -73,7 +73,7 @@ object ClipboardHistory {
     fun copyToPhone(context: Context, entry: Entry): Boolean = runCatching {
         val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
             ?: return@runCatching false
-        cm.setPrimaryClip(ClipData.newPlainText("XyDesk", entry.text))
+        cm.setPrimaryClip(ClipData.newPlainText("SeiDesk", entry.text))
         true
     }.getOrDefault(false)
 

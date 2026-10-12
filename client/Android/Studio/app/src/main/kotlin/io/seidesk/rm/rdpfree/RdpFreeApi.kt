@@ -16,7 +16,7 @@ class RdpFreeApi(private val token: () -> String?) {
         request("PUT", "/settings", JSONObject().put("inputs", inputs))
     suspend fun start(): JSONObject = request("POST", "/runs", JSONObject().put("confirm", true))
     suspend fun stop(runId: Long): JSONObject {
-        require(runId > 0) { "Run ID tidak valid" }
+        require(runId > 0) { "Invalid run ID" }
         return request("POST", "/runs/$runId/cancel", JSONObject().put("confirm", true))
     }
     suspend fun runs(): JSONObject = request("GET", "/runs")
@@ -25,7 +25,7 @@ class RdpFreeApi(private val token: () -> String?) {
     private suspend fun request(method: String, path: String, body: JSONObject? = null): JSONObject =
         withContext(Dispatchers.IO) {
             val bearer = token()?.trim().orEmpty()
-            if (!TOKEN_PATTERN.matches(bearer)) throw ApiException(401, "Masukkan token perangkat RdpFree yang valid")
+            if (!TOKEN_PATTERN.matches(bearer)) throw ApiException(401, "Enter a valid RdpFree device token")
             val connection = URL(BASE_URL + path).openConnection() as HttpsURLConnection
             connection.instanceFollowRedirects = false
             connection.connectTimeout = 15000
@@ -47,7 +47,7 @@ class RdpFreeApi(private val token: () -> String?) {
                     while (true) {
                         val count = reader.read(buffer)
                         if (count < 0) break
-                        if (out.length + count > 1_048_576) throw ApiException(502, "Respons server terlalu besar")
+                        if (out.length + count > 1_048_576) throw ApiException(502, "Server response too large")
                         out.append(buffer, 0, count)
                     }
                     out.toString()
@@ -55,9 +55,9 @@ class RdpFreeApi(private val token: () -> String?) {
                 val result = runCatching { JSONObject(text) }.getOrNull()
                 if (code !in 200..299) {
                     throw ApiException(code, result?.optString("error")?.takeIf { it.isNotBlank() }
-                        ?: "Server RdpFree mengembalikan HTTP $code")
+                        ?: "RdpFree server returned HTTP $code")
                 }
-                result ?: throw ApiException(502, "Respons server bukan JSON")
+                result ?: throw ApiException(502, "Server response is not valid JSON")
             } finally {
                 connection.disconnect()
             }
@@ -68,10 +68,10 @@ class RdpFreeApi(private val token: () -> String?) {
         const val CONNECTION_URL = "https://rdpfree.projectkal.my.id/dashboard/connection"
         const val SETUP_URL = "https://rdpfree.projectkal.my.id/dashboard/setup"
         val ONBOARDING_STEPS = listOf(
-            "Buat repo dari template di GitHub (isi nama repo, lalu Create repository).",
-            "Kembali ke dashboard: Repo saya sudah dibuat → Izinkan akses repository. Pilih Only select repositories dan centang repo tadi.",
-            "Pilih repo di dashboard, lalu isi Tailscale auth key dan password RDP pada Setup.",
-            "Buka menu XyDesk di website, buat token perangkat, lalu tempel token di aplikasi ini.",
+            "Create a repository from template on GitHub (enter repo name, then click Create repository).",
+            "Return to the dashboard: choose 'My repo is created' -> Grant repository access. Select 'Only select repositories' and check the newly created repo.",
+            "Select the repo in the dashboard, then configure Tailscale auth key and RDP password under Setup.",
+            "Open the SeiDesk menu on the website, create a device token, and paste the token into this app.",
         )
         const val DEVICES_URL = "https://rdpfree.projectkal.my.id/dashboard/devices"
         const val VAULT_KEY = "rdpfree-api-device-v1"

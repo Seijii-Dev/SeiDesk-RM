@@ -380,18 +380,18 @@ class SeiDeskSessionActivity : ComponentActivity() {
             manager.setGraphicsSink(controller)
             ConnectionLog.add("SES: manager+controller ok, sink set")
         } catch (t: Throwable) {
-            ConnectionLog.addThrowable("SES: FAIL inisialisasi", t)
-            Log.e(TAG, "gagal inisialisasi sesi", t)
-            CrashLog.note(this, "inisialisasi sesi gagal: ${t.stackTraceToString().take(12_000)}")
-            SeiNoticeBus.post("Gagal menyiapkan sesi: ${t.message}")
+            ConnectionLog.addThrowable("SES: FAIL initialization", t)
+            Log.e(TAG, "session initialization failed", t)
+            CrashLog.note(this, "session initialization failed: ${t.stackTraceToString().take(12_000)}")
+            SeiNoticeBus.post("Failed to prepare session: ${t.message}")
             finish()
             return
         }
 
         val profile = profileFromIntent(getIntent())
         if (profile == null) {
-            ConnectionLog.add("SES: intent tanpa profil valid — keluar")
-            Log.w(TAG, "intent tanpa profil valid — keluar")
+            ConnectionLog.add("SES: intent without valid profile — exiting")
+            Log.w(TAG, "intent without valid profile — exiting")
             finish()
             return
         }
@@ -497,7 +497,7 @@ class SeiDeskSessionActivity : ComponentActivity() {
         )
 
         if (deferConnectForPermission) {
-            ConnectionLog.add("SES: koneksi menunggu hasil izin kamera/mikrofon")
+            ConnectionLog.add("SES: connection waiting for camera/microphone permission result")
         } else {
             connectProfile(profile)
         }
@@ -821,14 +821,14 @@ class SeiDeskSessionActivity : ComponentActivity() {
     }
 
     private fun connectProfile(profile: ConnectionProfile) {
-        ConnectionLog.add("SES: memanggil manager.connect (native createSession + parse args)")
+        ConnectionLog.add("SES: calling manager.connect (native createSession + parse args)")
         try {
             manager.connect(profile)
-            ConnectionLog.add("SES: manager.connect kembali (worker jalan async)")
+            ConnectionLog.add("SES: manager.connect returned (worker running async)")
         } catch (t: Throwable) {
             ConnectionLog.addThrowable("SES: connect() JVM-exception", t)
-            Log.e(TAG, "connect() gagal", t)
-            CrashLog.note(this, "connect() gagal: ${t.stackTraceToString().take(12_000)}")
+            Log.e(TAG, "connect() failed", t)
+            CrashLog.note(this, "connect() failed: ${t.stackTraceToString().take(12_000)}")
         }
     }
 

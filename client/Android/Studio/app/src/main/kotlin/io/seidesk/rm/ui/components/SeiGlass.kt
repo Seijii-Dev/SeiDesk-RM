@@ -260,7 +260,7 @@ fun SeiGlassTile(
  * dengan `Spacer` berbobot supaya tepinya tetap rata — itulah bagian "rapi"
  * yang diminta pengguna.
  */
-class XyTileGridScope internal constructor() {
+class SeiTileGridScope internal constructor() {
     internal val items: MutableList<@Composable () -> Unit> = mutableListOf()
 
     /** Menambahkan satu ubin ke grid. */
@@ -274,12 +274,12 @@ fun SeiTileGrid(
     modifier: Modifier = Modifier,
     columns: Int = 2,
     spacing: Dp = 10.dp,
-    content: @Composable XyTileGridScope.() -> Unit,
+    content: @Composable SeiTileGridScope.() -> Unit,
 ) {
     // Builder dipanggil langsung (bukan lewat `apply`) karena bertanda
     // @Composable: pemanggil boleh memakai fungsi composable seperti
     // sectionTitle() saat menyusun ubin.
-    val scope = XyTileGridScope()
+    val scope = SeiTileGridScope()
     scope.content()
     val tiles = scope.items
     val span = columns.coerceAtLeast(1)

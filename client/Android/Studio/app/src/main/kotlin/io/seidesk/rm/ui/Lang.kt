@@ -16,8 +16,6 @@ enum class SeiLang(val code: String, val label: String) {
     }
 }
 
-typealias XyLang = SeiLang
-
 /**
  * String lookup table for official key-based UI strings (US English).
  */

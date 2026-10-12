@@ -211,9 +211,6 @@ fun SeiSectionLabel(text: String, modifier: Modifier = Modifier) {
     )
 }
 
-@Deprecated("Use SeiSectionLabel", ReplaceWith("SeiSectionLabel(text, modifier)"))
-@Composable
-fun XySectionLabel(text: String, modifier: Modifier = Modifier) = SeiSectionLabel(text, modifier)
 
 /** Baris daftar: judul + subjudul opsional + trailing. */
 @Composable

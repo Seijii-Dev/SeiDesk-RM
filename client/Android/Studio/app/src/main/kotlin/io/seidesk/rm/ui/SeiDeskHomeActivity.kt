@@ -197,7 +197,7 @@ class SeiDeskHomeActivity : ComponentActivity() {
                     }
                     runOnUiThread {
                         sharedFileBanner.value = seiNow(
-                            "File '${targetFile.name}' is ready in the remote PC 'XyDesk' drive. Select a device to connect.",
+                            "File '${targetFile.name}' is ready in the remote PC 'SeiDesk' drive. Select a device to connect.",
                         )
                     }
                 } else if (!sharedText.isNullOrBlank()) {
@@ -207,7 +207,7 @@ class SeiDeskHomeActivity : ComponentActivity() {
                         val cm = getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
                         cm?.setPrimaryClip(ClipData.newPlainText("SeiDesk RM Share", sharedText))
                         sharedFileBanner.value = seiNow(
-                            "Text copied to clipboard & saved as '${noteFile.name}' in the XyDesk drive.",
+                            "Text copied to clipboard & saved as '${noteFile.name}' in the SeiDesk drive.",
                         )
                     }
                 }

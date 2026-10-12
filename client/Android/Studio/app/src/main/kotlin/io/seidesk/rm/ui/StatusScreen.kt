@@ -34,7 +34,7 @@ import io.seidesk.rm.ui.components.SeiCard
 import io.seidesk.rm.ui.components.SeiIconPill
 import io.seidesk.rm.ui.components.SeiIcons
 import io.seidesk.rm.ui.components.SeiPillButton
-import io.seidesk.rm.ui.components.XySectionLabel
+import io.seidesk.rm.ui.components.SeiSectionLabel
 import io.seidesk.rm.ui.components.SeiTopBar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -104,8 +104,8 @@ fun StatusScreen(
             }
         }
         portalLoading = false
-        result.onSuccess { portalSummary = it.ifBlank { "(kosong)" } }
-            .onFailure { portalError = it.message ?: "gagal menghubungi portal" }
+        result.onSuccess { portalSummary = it.ifBlank { "(empty)" } }
+            .onFailure { portalError = it.message ?: "cannot reach portal" }
     }
 
     LaunchedEffect(Unit) { fetchPortal() }
@@ -116,10 +116,10 @@ fun StatusScreen(
             .padding(horizontal = 16.dp),
     ) {
         SeiTopBar(
-            title = sei( "Status"),
+            title = sei("Status"),
             onBack = onBack,
             actions = {
-                SeiIconPill(SeiIcons.Info, onShowLog, flat = true, contentDescription = sei( "Session log"))
+                SeiIconPill(SeiIcons.Info, onShowLog, flat = true, contentDescription = sei("Session log"))
             },
         )
         Column(
@@ -128,25 +128,25 @@ fun StatusScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            XySectionLabel(sei( "This app"))
+            SeiSectionLabel(sei("This app"))
             SeiCard {
-                KeyValue("Versi", "$versionName ($versionCode)")
+                KeyValue("Version", "$versionName ($versionCode)")
                 KeyValue("ABI", abi)
-                KeyValue("Paket", context.packageName)
+                KeyValue("Package", context.packageName)
                 KeyValue(
-                    sei( "Microphone"),
+                    sei("Microphone"),
                     if (micGranted) {
-                        sei( "permission granted")
+                        sei("permission granted")
                     } else {
-                        sei( "permission not granted")
+                        sei("permission not granted")
                     },
                 )
             }
 
-            XySectionLabel(sei( "Release portal"))
+            SeiSectionLabel(sei("Release portal"))
             SeiCard {
                 if (portalLoading) {
-                    Text(sei( "Loading…"), style = MaterialTheme.typography.bodyMedium)
+                    Text(sei("Loading…"), style = MaterialTheme.typography.bodyMedium)
                 } else if (portalError != null) {
                     Text(
                         text = sei(
@@ -164,14 +164,14 @@ fun StatusScreen(
                 Spacer(Modifier.height(10.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     SeiPillButton(
-                        text = sei( "Reload"),
+                        text = sei("Reload"),
                         onClick = { scope.launch { fetchPortal() } },
                         icon = SeiIcons.Rotate,
                         compact = true,
                         modifier = Modifier.weight(1f),
                     )
                     SeiPillButton(
-                        text = sei( "Copy diagnostics"),
+                        text = sei("Copy diagnostics"),
                         onClick = {
                             val tail = ConnectionLog.last(25).joinToString("\n")
                             copyToClipboard(
@@ -189,12 +189,12 @@ fun StatusScreen(
                 }
             }
 
-            XySectionLabel(sei( "If audio/mic misbehaves"))
+            SeiSectionLabel(sei("If audio/mic misbehaves"))
             SeiCard {
                 Text(
                     text = sei(
                         "1. Audio mode \"Play on this device\" = sound + mic over the RDP channel (no host agent).\n" +
-                            "2. \"Play on the remote computer\" = through XyDeskRemoteHost.exe on the PC (UDP 4433).\n" +
+                            "2. \"Play on the remote computer\" = through SeiDeskRemoteHost.exe on the PC (UDP 4433).\n" +
                             "3. Mic not working: check the permission row above, then make sure the PC has " +
                             "fDisableAudioCapture=0 on RDP-Tcp.",
                     ),

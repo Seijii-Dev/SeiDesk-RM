@@ -50,7 +50,7 @@ class SeiNoticeState {
 }
 
 @Composable
-fun rememberXyNotice(): SeiNoticeState = remember { SeiNoticeState() }
+fun rememberSeiNotice(): SeiNoticeState = remember { SeiNoticeState() }
 
 /**
  * Jalur pesan untuk kejadian yang tidak punya layar lagi saat pesannya jadi

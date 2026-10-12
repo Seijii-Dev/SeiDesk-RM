@@ -49,7 +49,7 @@ import io.seidesk.rm.ui.components.SeiIcons
 import io.seidesk.rm.ui.components.SeiLogo
 import io.seidesk.rm.ui.components.SeiPillButton
 import io.seidesk.rm.ui.components.SeiRow
-import io.seidesk.rm.ui.components.XySectionLabel
+import io.seidesk.rm.ui.components.SeiSectionLabel
 import io.seidesk.rm.ui.components.SeiSegmented
 import io.seidesk.rm.ui.components.SeiToggleRow
 import io.seidesk.rm.ui.components.SeiTopBar
@@ -121,7 +121,7 @@ private fun DisplaySection(
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        XySectionLabel(sei( "Devices"))
+        SeiSectionLabel(sei( "Devices"))
         SeiSegmented(
             options = favorites.map { it.label ?: it.host },
             selectedIndex = index.coerceIn(0, favorites.lastIndex),
@@ -142,7 +142,7 @@ private fun DisplaySection(
                 },
             )
             Spacer(Modifier.height(8.dp))
-            XySectionLabel(sei( "Remote desktop resolution"))
+            SeiSectionLabel(sei( "Remote desktop resolution"))
             Spacer(Modifier.height(8.dp))
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 DisplayPrefs.resolutionOptions.chunked(2).forEachIndexed { rowIndex, row ->
@@ -165,7 +165,7 @@ private fun DisplaySection(
                 }
             }
             Spacer(Modifier.height(16.dp))
-            XySectionLabel(sei( "Orientation"))
+            SeiSectionLabel(sei( "Orientation"))
             Spacer(Modifier.height(8.dp))
             SeiSegmented(
                 options = DisplayPrefs.rotations,
@@ -177,7 +177,7 @@ private fun DisplaySection(
                 modifier = Modifier.fillMaxWidth(),
             )
             Spacer(Modifier.height(16.dp))
-            XySectionLabel(sei( "Initial local zoom"))
+            SeiSectionLabel(sei( "Initial local zoom"))
             Text(
                 "$scale%",
                 style = MaterialTheme.typography.titleMedium,
@@ -231,7 +231,7 @@ private fun CredentialsSection(
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        XySectionLabel(sei( "Saved passwords"))
+        SeiSectionLabel(sei( "Saved passwords"))
         SeiCard {
             Text(
                 sei(
@@ -379,7 +379,7 @@ private fun GeneralSection(
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        XySectionLabel(sei( "App appearance"))
+        SeiSectionLabel(sei( "App appearance"))
         SeiCard {
             SeiSegmented(
                 options = listOf(sei( "Follow system"), sei( "Dark"), sei( "Light")),
@@ -407,7 +407,7 @@ private fun GeneralSection(
             )
         }
 
-        XySectionLabel(sei( "Last session"))
+        SeiSectionLabel(sei( "Last session"))
         SeiCard {
             SeiToggleRow(
                 title = sei( "Automatically resume the last session"),
@@ -422,7 +422,7 @@ private fun GeneralSection(
             )
         }
 
-        XySectionLabel(sei( "Session controls"))
+        SeiSectionLabel(sei( "Session controls"))
         SeiCard {
             Text(sei( "Default input mode"), style = MaterialTheme.typography.titleSmall)
             Spacer(Modifier.height(8.dp))
@@ -494,7 +494,7 @@ private fun GeneralSection(
             )
         }
 
-        XySectionLabel(sei( "HUD buttons"))
+        SeiSectionLabel(sei( "HUD buttons"))
         SeiCard {
             Text(
                 sei(
@@ -545,7 +545,7 @@ private fun GeneralSection(
             )
         }
 
-        XySectionLabel(sei( "Keyboard"))
+        SeiSectionLabel(sei( "Keyboard"))
         SeiCard {
             Text(
                 sei(
@@ -577,7 +577,7 @@ private fun GeneralSection(
             )
         }
 
-        XySectionLabel(sei( "Keyboard & HUD"))
+        SeiSectionLabel(sei( "Keyboard & HUD"))
         SeiCard {
             Text(
                 sei( "Default HUD button size: {0} dp", hudSize.toInt()),
@@ -600,7 +600,7 @@ private fun GeneralSection(
         }
 
 
-        XySectionLabel(sei( "Streaming & Latency (new device defaults)"))
+        SeiSectionLabel(sei( "Streaming & Latency (new device defaults)"))
         SeiCard {
             Text(
                 sei(
@@ -687,7 +687,7 @@ private fun GeneralSection(
             )
         }
 
-        XySectionLabel(sei( "Connection issues"))
+        SeiSectionLabel(sei( "Connection issues"))
         SeiCard {
             Text(
                 sei(
@@ -748,7 +748,7 @@ private fun SecuritySection(appPrefs: AppPrefs) {
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        XySectionLabel(sei( "Screen & Session Protection"))
+        SeiSectionLabel(sei( "Screen & Session Protection"))
         SeiCard {
             SeiToggleRow(
                 title = sei( "Screen capture protection (FLAG_SECURE)"),
@@ -796,7 +796,7 @@ private fun SecuritySection(appPrefs: AppPrefs) {
             )
         }
 
-        XySectionLabel(sei( "Active session status"))
+        SeiSectionLabel(sei( "Active session status"))
         SeiCard {
             SeiToggleRow(
                 title = sei( "Count active sessions anonymously"),
@@ -819,7 +819,7 @@ private fun SecuritySection(appPrefs: AppPrefs) {
             )
         }
 
-        XySectionLabel(sei( "Default Protocol & Encryption"))
+        SeiSectionLabel(sei( "Default Protocol & Encryption"))
         SeiCard {
             Text(
                 sei( "Default security protocol (new devices)"),
@@ -873,7 +873,7 @@ private fun SecuritySection(appPrefs: AppPrefs) {
             )
         }
 
-        XySectionLabel(sei( "Credential storage"))
+        SeiSectionLabel(sei( "Credential storage"))
         SeiCard {
             Bullet(sei(
                 "Passwords: AES-256-GCM, non-exportable key in the Android Keystore"))
@@ -884,7 +884,7 @@ private fun SecuritySection(appPrefs: AppPrefs) {
             Bullet(sei(
                 "No credentials are sent to any third-party service"))
         }
-        XySectionLabel(sei( "Trusted server certificates"))
+        SeiSectionLabel(sei( "Trusted server certificates"))
         SeiCard {
             Row(Modifier.fillMaxWidth().clickable { showTrustedCertificates = !showTrustedCertificates },
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
@@ -1077,7 +1077,7 @@ private fun AboutSection() {
 internal fun SupportCard() {
     val context = LocalContext.current
     SeiCard {
-        XySectionLabel(t("about.support.title").uppercase())
+        SeiSectionLabel(t("about.support.title").uppercase())
         Text(
             t("about.support.body"),
             style = MaterialTheme.typography.bodySmall,

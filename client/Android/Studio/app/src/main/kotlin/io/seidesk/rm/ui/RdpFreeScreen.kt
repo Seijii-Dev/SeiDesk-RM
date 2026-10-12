@@ -67,14 +67,14 @@ fun RdpFreeScreen(onBack: () -> Unit, onConnect: (ConnectionProfile) -> Unit) {
 
     fun error(e: Exception) {
         if (e is CancellationException) throw e
-        message = e.message ?: "Koneksi RdpFree gagal. Coba lagi."
+        message = e.message ?: seiNow("RdpFree connection failed. Try again.")
         status = null // Never connect using a stale address after an API error.
         if (e is RdpFreeApi.ApiException && e.status == 401) {
             vault.remove(RdpFreeApi.VAULT_KEY)
             connected = false
             inputs = null
             password = ""
-            message += " Buka panduan repo, lalu buat token perangkat baru."
+            message += seiNow(" Open repository guide, then create a new device token.")
         }
     }
 
@@ -95,8 +95,8 @@ fun RdpFreeScreen(onBack: () -> Unit, onConnect: (ConnectionProfile) -> Unit) {
         scope.launch {
             try {
                 when (action) {
-                    "start" -> { api.start(); message = "Workflow dikirim. Tunggu status berikutnya." }
-                    "stop" -> { api.stop(stopRunId ?: throw IllegalStateException("Run tidak tersedia")); message = "Permintaan stop dikirim." }
+                    "start" -> { api.start(); message = seiNow("Workflow triggered. Awaiting next status update.") }
+                    "stop" -> { api.stop(stopRunId ?: throw IllegalStateException(seiNow("Run is unavailable"))); message = seiNow("Stop request submitted.") }
                     "replace" -> {
                         vault.remove(RdpFreeApi.VAULT_KEY)
                         connected = false
@@ -104,7 +104,7 @@ fun RdpFreeScreen(onBack: () -> Unit, onConnect: (ConnectionProfile) -> Unit) {
                         inputs = null
                         password = ""
                         microphone = false
-                        message = "Token lokal dilepas. Token lama belum dicabut di server; kelola melalui menu XyDesk website. Tempel token baru untuk repo yang dipilih."
+                        message = seiNow("Local token removed. Token is not revoked on server; manage via SeiDesk web menu. Paste a new token for the selected repo.")
                     }
                     "revoke" -> {
                         api.revoke()
@@ -113,7 +113,7 @@ fun RdpFreeScreen(onBack: () -> Unit, onConnect: (ConnectionProfile) -> Unit) {
                         status = null
                         inputs = null
                         password = ""
-                        message = "Akses perangkat dicabut."
+                        message = seiNow("Device access revoked.")
                     }
                 }
                 if (action != "revoke" && action != "replace") load()
@@ -122,33 +122,33 @@ fun RdpFreeScreen(onBack: () -> Unit, onConnect: (ConnectionProfile) -> Unit) {
     }
 
     Column(Modifier.fillMaxSize()) {
-        SeiTopBar(title = "RdpFree", onBack = onBack)
+        SeiTopBar(title = sei("RdpFree"), onBack = onBack)
         Column(
             Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Text("XyRDP · kontrol native", style = MaterialTheme.typography.titleLarge)
+            Text(sei("RdpFree · native control"), style = MaterialTheme.typography.titleLarge)
             if (message.isNotBlank()) Text(message, color = MaterialTheme.colorScheme.primary)
             if (!connected) {
                 SeiCard(Modifier.fillMaxWidth()) {
-                    Text("Hubungkan repo, lalu aplikasi", style = MaterialTheme.typography.titleMedium)
+                    Text(sei("Connect repository, then link application"), style = MaterialTheme.typography.titleMedium)
                     RdpFreeApi.ONBOARDING_STEPS.forEachIndexed { index, step ->
                         Spacer(Modifier.height(8.dp))
                         Text("${index + 1}. $step")
                     }
-                    Text("Install GitHub App berarti memberikan izin repository di GitHub, bukan memasang APK. Login saja belum memberi akses repo.")
+                    Text(sei("Installing the GitHub App grants repository permissions on GitHub, not installing an APK. Login alone does not grant repo access."))
                     Spacer(Modifier.height(12.dp))
-                    SeiPillButton("Mulai / lanjut panduan repo", { openBrowser(RdpFreeApi.CONNECTION_URL) }, primary = true)
+                    SeiPillButton(sei("Start / continue repository guide"), { openBrowser(RdpFreeApi.CONNECTION_URL) }, primary = true)
                     Spacer(Modifier.height(12.dp))
-                    Text("Sudah selesai setup? Buat token di menu XyDesk website. Jangan masukkan password admin atau token GitHub.")
+                    Text(sei("Completed setup? Create token in SeiDesk website menu. Do not enter admin password or GitHub token."))
                     Spacer(Modifier.height(12.dp))
-                    SeiPillButton("Buka halaman token", {
+                    SeiPillButton(sei("Open tokens page"), {
                         openBrowser(RdpFreeApi.DEVICES_URL)
                     }, primary = false)
                     Spacer(Modifier.height(12.dp))
-                    SeiField(tokenInput, { tokenInput = it.take(100) }, "Token perangkat", isPassword = true)
+                    SeiField(tokenInput, { tokenInput = it.take(100) }, sei("Device token"), isPassword = true)
                     Spacer(Modifier.height(12.dp))
-                    SeiPillButton("Hubungkan", {
+                    SeiPillButton(sei("Connect"), {
                         if (!busy) {
                             busy = true
                             scope.launch {
@@ -156,11 +156,11 @@ fun RdpFreeScreen(onBack: () -> Unit, onConnect: (ConnectionProfile) -> Unit) {
                                     val candidate = tokenInput.trim()
                                     RdpFreeApi { candidate }.settings() // Validate before replacing saved token.
                                     val saved = withContext(Dispatchers.IO) { vault.put(RdpFreeApi.VAULT_KEY, candidate) }
-                                    check(saved) { "Android Keystore tidak dapat menyimpan token" }
+                                    check(saved) { seiNow("Android Keystore could not save token") }
                                     tokenInput = ""
                                     inputs = null
                                     connected = true
-                                    message = "Perangkat terhubung."
+                                    message = seiNow("Device connected.")
                                 } catch (e: Exception) { error(e) } finally { busy = false }
                             }
                         }
@@ -168,14 +168,14 @@ fun RdpFreeScreen(onBack: () -> Unit, onConnect: (ConnectionProfile) -> Unit) {
                 }
             } else {
                 SeiCard(Modifier.fillMaxWidth()) {
-                    Text(status?.repo ?: "Memuat repository…", style = MaterialTheme.typography.titleMedium)
-                    Text("Status: ${status?.phase ?: "menunggu"}")
-                    status?.expiresAt?.let { Text("Berakhir (UTC): $it") }
+                    Text(status?.repo ?: seiNow("Loading repository…"), style = MaterialTheme.typography.titleMedium)
+                    Text(sei("Status: {0}", status?.phase ?: seiNow("waiting")))
+                    status?.expiresAt?.let { Text(sei("Expires (UTC): {0}", it)) }
                     Spacer(Modifier.height(12.dp))
-                    SeiPillButton("Durasi: $duration menit", { chooseDuration = true }, primary = false,
+                    SeiPillButton(sei("Duration: {0} min", duration), { chooseDuration = true }, primary = false,
                         enabled = !busy && durations.isNotEmpty())
                     Spacer(Modifier.height(8.dp))
-                    SeiPillButton("Simpan durasi", {
+                    SeiPillButton(sei("Save duration"), {
                         busy = true
                         scope.launch {
                             try {
@@ -183,18 +183,18 @@ fun RdpFreeScreen(onBack: () -> Unit, onConnect: (ConnectionProfile) -> Unit) {
                                 updated.put("durasi_menit", duration)
                                 api.saveSettings(updated)
                                 inputs = updated
-                                message = "Durasi tersimpan untuk run berikutnya."
+                                message = seiNow("Duration saved for next run.")
                             } catch (e: Exception) { error(e) } finally { busy = false }
                         }
                     }, primary = false, enabled = !busy && inputs != null)
                     Spacer(Modifier.height(12.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        SeiPillButton("Run", { confirmAction = "start" }, enabled = !busy && status != null && status?.active == false)
-                        SeiPillButton("Stop", { stopRunId = status?.runId; confirmAction = "stop" }, primary = false,
+                        SeiPillButton(sei("Run"), { confirmAction = "start" }, enabled = !busy && status != null && status?.active == false)
+                        SeiPillButton(sei("Stop"), { stopRunId = status?.runId; confirmAction = "stop" }, primary = false,
                             enabled = !busy && status?.active == true && status?.runId != null)
                     }
                     Spacer(Modifier.height(8.dp))
-                    SeiPillButton("Refresh", {
+                    SeiPillButton(sei("Refresh"), {
                         busy = true
                         scope.launch { try { load() } catch (e: Exception) { error(e) } finally { busy = false } }
                     }, primary = false, enabled = !busy)
@@ -203,26 +203,26 @@ fun RdpFreeScreen(onBack: () -> Unit, onConnect: (ConnectionProfile) -> Unit) {
                     SeiCard(Modifier.fillMaxWidth()) {
                         Text("${connection.host}:${connection.port}", style = MaterialTheme.typography.titleMedium)
                         Text("${connection.username} · ${connection.transport}")
-                        if (connection.transport == "tailscale") Text("Pastikan Tailscale di HP terhubung ke jaringan yang sama.")
+                        if (connection.transport == "tailscale") Text(sei("Ensure Tailscale on this device is connected to the same network."))
                         Spacer(Modifier.height(12.dp))
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Input mikrofon", modifier = Modifier.weight(1f))
+                            Text(sei("Microphone input"), modifier = Modifier.weight(1f))
                             Switch(checked = microphone, onCheckedChange = { microphone = it }, enabled = !busy)
                         }
-                        Text("Opsional: Android meminta izin mikrofon saat tersambung. Uji Windows Sound > Input, bukan hanya speaker. Wallpaper desktop aktif.")
+                        Text(sei("Optional: Android requests microphone permission when connected. Test Windows Sound > Input, not just speakers. Desktop wallpaper active."))
                         Spacer(Modifier.height(12.dp))
-                        SeiField(password, { password = it }, "Password RDP_PASSWORD", isPassword = true)
-                        Text("Password tidak dibaca dari GitHub dan tidak disimpan otomatis.")
+                        SeiField(password, { password = it }, sei("Password RDP_PASSWORD"), isPassword = true)
+                        Text(sei("Password is not read from GitHub and is not saved automatically."))
                         Spacer(Modifier.height(12.dp))
-                        SeiPillButton("Hubungkan RDP", {
+                        SeiPillButton(sei("Connect RDP"), {
                             busy = true
                             scope.launch {
                                 try {
-                                    val fresh = api.status().connection ?: throw IllegalStateException("Sesi tidak lagi siap")
+                                    val fresh = api.status().connection ?: throw IllegalStateException(seiNow("Session is no longer ready"))
                                     val profile = ConnectionProfile(host = fresh.host, port = fresh.port,
                                         username = fresh.username, password = password, label = "RdpFree",
                                         key = "rdpfree:${status?.repo ?: fresh.host}")
-                                    check(fresh.transport == "tailscale") { "Perbarui sesi ke Tailscale terlebih dahulu" }
+                                    check(fresh.transport == "tailscale") { seiNow("Switch session to Tailscale first") }
                                     RdpOptions.of(context, profile.id).forRdpFree(microphone).write(context, profile.id)
                                     password = ""
                                     onConnect(profile)
@@ -232,26 +232,26 @@ fun RdpFreeScreen(onBack: () -> Unit, onConnect: (ConnectionProfile) -> Unit) {
                     }
                 }
                 SeiCard(Modifier.fillMaxWidth()) {
-                    Text("Kelola repository", style = MaterialTheme.typography.titleMedium)
-                    Text("Token ini tetap terikat repo saat dibuat. Setelah ganti repo, buat token baru. Hapus repo hanya melalui browser pemilik dengan konfirmasi, bukan lewat token aplikasi.")
+                    Text(sei("Manage repository"), style = MaterialTheme.typography.titleMedium)
+                    Text(sei("This token remains bound to the repo when created. If you change repos, create a new token. Delete repo only through owner browser with confirmation, not via app token."))
                     Spacer(Modifier.height(12.dp))
-                    SeiPillButton("Panduan / pilih / hapus repo", { openBrowser(RdpFreeApi.CONNECTION_URL) }, primary = false)
+                    SeiPillButton(sei("Guide / select / remove repo"), { openBrowser(RdpFreeApi.CONNECTION_URL) }, primary = false)
                     Spacer(Modifier.height(8.dp))
-                    SeiPillButton("Setup Tailscale & password", { openBrowser(RdpFreeApi.SETUP_URL) }, primary = false)
+                    SeiPillButton(sei("Setup Tailscale & password"), { openBrowser(RdpFreeApi.SETUP_URL) }, primary = false)
                     Spacer(Modifier.height(8.dp))
-                    SeiPillButton("Ganti token perangkat", { confirmAction = "replace" }, primary = false, enabled = !busy)
+                    SeiPillButton(sei("Change device token"), { confirmAction = "replace" }, primary = false, enabled = !busy)
                 }
-                SeiPillButton("Cabut akses perangkat", { confirmAction = "revoke" }, primary = false, enabled = !busy)
+                SeiPillButton(sei("Revoke device access"), { confirmAction = "revoke" }, primary = false, enabled = !busy)
             }
             Text("Credit: KallAncrit", style = MaterialTheme.typography.labelSmall)
         }
     }
     if (chooseDuration) {
-        SeiOverlay(title = "Durasi sesi", onDismiss = { chooseDuration = false }) {
+        SeiOverlay(title = sei("Session duration"), onDismiss = { chooseDuration = false }) {
             Column(Modifier.heightIn(max = 360.dp).verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 durations.forEach { minutes ->
-                    SeiPillButton("$minutes menit", { duration = minutes; chooseDuration = false },
+                    SeiPillButton(sei("{0} min", minutes), { duration = minutes; chooseDuration = false },
                         primary = duration == minutes, modifier = Modifier.fillMaxWidth())
                 }
             }
@@ -259,15 +259,20 @@ fun RdpFreeScreen(onBack: () -> Unit, onConnect: (ConnectionProfile) -> Unit) {
     }
     confirmAction?.let { action ->
         SeiDialog(
-            title = when (action) { "start" -> "Mulai RDP?"; "stop" -> "Hentikan RDP?"; "replace" -> "Ganti token perangkat?"; else -> "Cabut token perangkat?" },
-            body = when (action) {
-                "start" -> "Menggunakan pengaturan tersimpan dan kuota GitHub Actions. Jangan kirim ulang jika koneksi terputus; periksa status dahulu."
-                "stop" -> "Sesi aktif akan dihentikan. Simpan pekerjaan terlebih dahulu."
-                "replace" -> "Hanya melepas token dari HP ini. Tidak menghapus repo, tidak menghentikan sesi, dan tidak mencabut token di server. Buat token baru setelah memilih repo di website."
-                else -> "Aplikasi ini tidak bisa mengontrol repository sampai token baru dipasang."
+            title = when (action) {
+                "start" -> sei("Start RDP?")
+                "stop" -> sei("Stop RDP?")
+                "replace" -> sei("Change device token?")
+                else -> sei("Revoke device token?")
             },
-            confirmLabel = "Lanjutkan", onConfirm = { confirmAction = null; operate(action) },
-            dismissLabel = "Batal", onDismiss = { confirmAction = null },
+            body = when (action) {
+                "start" -> sei("Uses saved settings and GitHub Actions quota. Do not resend if connection drops; check status first.")
+                "stop" -> sei("Active session will be terminated. Save your work first.")
+                "replace" -> sei("Only removes token from this phone. Does not delete repo, does not stop session, and does not revoke token on server. Create a new token after selecting repo on website.")
+                else -> sei("This app cannot control the repository until a new token is configured.")
+            },
+            confirmLabel = sei("Continue"), onConfirm = { confirmAction = null; operate(action) },
+            dismissLabel = sei("Cancel"), onDismiss = { confirmAction = null },
         )
     }
 }

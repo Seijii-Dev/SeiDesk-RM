@@ -38,3 +38,5 @@ kotlinc.zip
 /out/
 junit.jar
 hamcrest.jar
+__pycache__/
+*.pyc

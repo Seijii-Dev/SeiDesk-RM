@@ -50,9 +50,9 @@ import io.seidesk.rm.ui.components.seiSurface
  * lain sekarang hidup di drawer kiri dan di layar Profil.
  */
 internal enum class SeiTab(val title: String, val titleEn: String) {
-    HOME("Beranda", "Home"),
+    HOME("Home", "Home"),
     FEED("Feed", "Feed"),
-    PROFILE("Profil", "Profile"),
+    PROFILE("Profile", "Profile"),
 }
 
 /**

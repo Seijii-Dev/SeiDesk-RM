@@ -603,7 +603,7 @@ class SessionSurfaceController(private val activity: Activity) : GraphicsSink {
                 FileProvider.getUriForFile(activity, "${activity.packageName}.files", f)
             }
         } catch (t: Throwable) {
-            ConnectionLog.addThrowable("SES: screenshot gagal", t)
+            ConnectionLog.addThrowable("SES: screenshot failed", t)
             null
         } finally {
             shot.recycle()
@@ -683,7 +683,7 @@ class SessionSurfaceController(private val activity: Activity) : GraphicsSink {
                 setHasMipMap(false)
             }
         }.getOrElse {
-            ConnectionLog.addThrowable("SES: gagal alokasi surface ${width}x$height", it)
+            ConnectionLog.addThrowable("SES: failed to allocate surface ${width}x$height", it)
             return
         }
         bitmap = newBitmap

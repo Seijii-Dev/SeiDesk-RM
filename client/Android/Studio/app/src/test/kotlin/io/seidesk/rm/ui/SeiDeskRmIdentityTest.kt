@@ -16,7 +16,7 @@ class SeiDeskRmIdentityTest {
 
     @Test
     fun englishLanguageIsDefaultAndConsistent() {
-        assertEquals(XyLang.EN, SeiText.current())
+        assertEquals(SeiLang.EN, SeiText.current())
         assertEquals("Android RDP client for Windows and Windows Server.", SeiText.t("app.tagline"))
         assertEquals("Devices", SeiText.t("home.devices"))
         assertEquals("Thanks for using SeiDesk RM.", SeiText.t("about.thanks"))

@@ -123,7 +123,7 @@ object OnlineMusicPlayer {
         if (url == null) {
             _state.value = _state.value.copy(
                 status = Status.ERROR,
-                message = "Gagal memuat stream: ${track.title}",
+                message = "Failed to load stream: ${track.title}",
             )
             updateNotification()
             return
@@ -151,7 +151,7 @@ object OnlineMusicPlayer {
                     setOnErrorListener { _, what, extra ->
                         _state.value = _state.value.copy(
                             status = Status.ERROR,
-                            message = "Pemutaran gagal (kode $what/$extra)",
+                            message = "Playback failed (code $what/$extra)",
                         )
                         updateNotification()
                         true

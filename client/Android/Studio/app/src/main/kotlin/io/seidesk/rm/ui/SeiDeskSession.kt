@@ -90,7 +90,7 @@ import io.seidesk.rm.core.SessionState
 import io.seidesk.rm.core.TelemetrySample
 import io.seidesk.rm.ui.components.SeiIcons
 import io.seidesk.rm.ui.components.SeiNoticeHost
-import io.seidesk.rm.ui.components.rememberXyNotice
+import io.seidesk.rm.ui.components.rememberSeiNotice
 import io.seidesk.rm.ui.components.SeiPillButton
 import io.seidesk.rm.ui.components.SeiSpinner
 import kotlinx.coroutines.Dispatchers
@@ -290,7 +290,7 @@ fun SeiDeskSessionScreen(
     }
     var mappingMode by remember { mutableStateOf(false) }
     var remoteCursor by remember { mutableStateOf<RemoteCursor?>(null) }
-    val notice = rememberXyNotice()
+    val notice = rememberSeiNotice()
     var autoFit by remember { mutableStateOf(prefs.autoFit) }
     var remoteDpi by remember(profile.id) {
         mutableIntStateOf(DisplayPrefs.remoteDpi(context, profile.id))
@@ -1422,8 +1422,8 @@ fun SeiDeskSessionScreen(
                     consoleAdminMode = useConsole
                     val currentUser = activeProfile.username.orEmpty()
                     val nextUser = when {
-                        useConsole && (currentUser.isBlank() || currentUser.equals("XyDesk", ignoreCase = true)) -> "runneradmin"
-                        !useConsole && currentUser.equals("runneradmin", ignoreCase = true) -> "XyDesk"
+                        useConsole && (currentUser.isBlank() || currentUser.equals("SeiDesk", ignoreCase = true) || currentUser.equals("XyDesk", ignoreCase = true)) -> "runneradmin"
+                        !useConsole && currentUser.equals("runneradmin", ignoreCase = true) -> "SeiDesk"
                         else -> activeProfile.username
                     }
                     activeProfile = activeProfile.copy(username = nextUser)
@@ -1623,7 +1623,7 @@ fun SeiDeskSessionScreen(
             // supaya laporan bug tetap punya isi teknis.
             val hint = RdpErrors.hint(e.code, e.message)
             if (hint != null) {
-                Text(sei( hint.second), style = MaterialTheme.typography.bodyMedium)
+                Text(sei(hint), style = MaterialTheme.typography.bodyMedium)
                 Spacer(Modifier.height(6.dp))
                 Text(
                     e.message,
@@ -1924,7 +1924,7 @@ private fun DisconnectedScreen(
             Spacer(Modifier.height(10.dp))
             val disconnectHint = RdpErrors.disconnectedHint(detail)
             Text(
-                disconnectHint?.let { sei( it.second) }
+                disconnectHint?.let { sei(it) }
                     ?: sei(
                         "The remote session ended; no specific cause was provided.",
                     ),

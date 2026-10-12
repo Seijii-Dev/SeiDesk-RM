@@ -173,7 +173,7 @@ fun SeiWallpaper(
 
 /** Latar gelap polos untuk layar app (bukan wallpaper). */
 @Composable
-fun XyBackdrop(modifier: Modifier = Modifier) {
+fun SeiBackdrop(modifier: Modifier = Modifier) {
     Box(modifier.fillMaxSize().background(Color(0xFF07080A)))
 }
 

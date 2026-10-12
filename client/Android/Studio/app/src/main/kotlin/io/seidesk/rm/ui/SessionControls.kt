@@ -504,7 +504,7 @@ fun SessionControls(
 
     Box(Modifier.fillMaxSize().zIndex(10f)) {
         if (pointerVisible && !panelOpen && !monitorGridOpen) {
-            XyPointer(
+            SeiPointer(
                 position = pointerScreen,
                 sizeDp = pointerSize,
                 style = pointerStyle,
@@ -1470,7 +1470,7 @@ private fun PanelHandle(
  *  2. Kalau server tidak mengirim apa-apa: panah/titik bawaan app.
  */
 @Composable
-private fun XyPointer(
+private fun SeiPointer(
     position: Offset,
     sizeDp: Float,
     style: PointerStyle,
@@ -2929,7 +2929,7 @@ private fun MonitorAndUserGridModal(
     val allFavorites by repo.favorites().collectAsState(initial = emptyList())
     val savedAccounts = remember(allFavorites) {
         allFavorites
-            .filter { !it.username.isNullOrBlank() && !it.username.equals("XyDesk", ignoreCase = true) }
+            .filter { !it.username.isNullOrBlank() && !it.username.equals("SeiDesk", ignoreCase = true) && !it.username.equals("XyDesk", ignoreCase = true) }
             .distinctBy { "${it.domain.orEmpty().lowercase()}\\${it.username.orEmpty().lowercase()}" }
     }
     var customUserOpen by remember { mutableStateOf(false) }
@@ -3206,7 +3206,7 @@ private fun MonitorAndUserGridModal(
                     fontWeight = FontWeight.SemiBold,
                     letterSpacing = 1.1.sp,
                 )
-                val isConsole = consoleAdminMode && !activeUsername.equals("XyDesk", ignoreCase = true)
+                val isConsole = consoleAdminMode && !activeUsername.equals("SeiDesk", ignoreCase = true) && !activeUsername.equals("XyDesk", ignoreCase = true)
                 val isVirtualUser = !isConsole
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     // Card 1: Sesi Konsol Runner (/admin)
@@ -3306,7 +3306,7 @@ private fun MonitorAndUserGridModal(
                                 overflow = TextOverflow.Ellipsis,
                             )
                             Text(
-                                text = sei( "Separate Session 2 (XyDesk)"),
+                                text = sei( "Separate Session 2 (SeiDesk)"),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 9.5.sp,
                                 maxLines = 1,
@@ -3348,7 +3348,7 @@ private fun MonitorAndUserGridModal(
                             )
                         }
                     }
-                    val isXyDeskActive = activeUsername.equals("XyDesk", ignoreCase = true)
+                    val isSeiDeskActive = activeUsername.equals("SeiDesk", ignoreCase = true) || activeUsername.equals("XyDesk", ignoreCase = true)
                     Box(
                         modifier = Modifier
                             .weight(1f)
@@ -3356,18 +3356,18 @@ private fun MonitorAndUserGridModal(
                             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f))
                             .border(
                                 1.dp,
-                                if (isXyDeskActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                                if (isSeiDeskActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
                                 RoundedCornerShape(10.dp),
                             )
                             .clickable {
                                 RdpOptions.of(context, deviceId).copy(consoleAdmin = false).write(context, deviceId)
-                                onSwitchUserSession("XyDesk", null, null)
+                                onSwitchUserSession("SeiDesk", null, null)
                             }
                             .padding(9.dp),
                     ) {
                         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Text(
-                                text = "XyDesk (Multi-User)",
+                                text = "SeiDesk (Multi-User)",
                                 color = MaterialTheme.colorScheme.onSurface,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.SemiBold,
@@ -3452,7 +3452,7 @@ private fun MonitorAndUserGridModal(
                             value = customUsername,
                             onValueChange = { customUsername = it },
                             label = sei( "Windows Username"),
-                            hint = "runneradmin / Administrator / XyDesk",
+                            hint = "runneradmin / Administrator / SeiDesk",
                         )
                         SeiField(
                             value = customPassword,

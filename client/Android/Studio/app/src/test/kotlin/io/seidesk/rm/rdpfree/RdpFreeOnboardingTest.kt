@@ -20,6 +20,6 @@ class RdpFreeOnboardingTest {
         assertTrue(RdpFreeApi.ONBOARDING_STEPS[0].contains("template"))
         assertTrue(RdpFreeApi.ONBOARDING_STEPS[1].contains("Only select repositories"))
         assertTrue(RdpFreeApi.ONBOARDING_STEPS[2].contains("Setup"))
-        assertTrue(RdpFreeApi.ONBOARDING_STEPS[3].contains("token perangkat"))
+        assertTrue(RdpFreeApi.ONBOARDING_STEPS[3].contains("device token"))
     }
 }

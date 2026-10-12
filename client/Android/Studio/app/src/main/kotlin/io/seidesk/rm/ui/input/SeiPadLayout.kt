@@ -124,10 +124,10 @@ object SeiPadLayout {
             val kv = part.split(':')
             if (kv.size != 2) continue
             val cluster = SeiPadCluster.entries.firstOrNull { it.name == kv[0] } ?: continue
-            val xy = kv[1].split(',')
-            if (xy.size != 2) continue
-            val x = xy[0].toFloatOrNull() ?: continue
-            val y = xy[1].toFloatOrNull() ?: continue
+            val coords = kv[1].split(',')
+            if (coords.size != 2) continue
+            val x = coords[0].toFloatOrNull() ?: continue
+            val y = coords[1].toFloatOrNull() ?: continue
             out[cluster] = SeiPadPos(x, y)
         }
         return out.ifEmpty { null }

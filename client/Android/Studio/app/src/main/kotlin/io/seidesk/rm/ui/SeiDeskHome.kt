@@ -88,12 +88,12 @@ import io.seidesk.rm.ui.components.SeiDivider
 import io.seidesk.rm.ui.components.SeiIcons
 import io.seidesk.rm.ui.components.SeiNoticeHost
 import io.seidesk.rm.ui.components.SeiOverlay
-import io.seidesk.rm.ui.components.rememberXyNotice
+import io.seidesk.rm.ui.components.rememberSeiNotice
 import io.seidesk.rm.ui.components.SeiLogo
 import io.seidesk.rm.ui.components.SeiGlassCard
 import io.seidesk.rm.ui.components.SeiPillButton
 import io.seidesk.rm.ui.components.SeiRow
-import io.seidesk.rm.ui.components.XySectionLabel
+import io.seidesk.rm.ui.components.SeiSectionLabel
 import io.seidesk.rm.ui.components.SeiSegmented
 import io.seidesk.rm.ui.components.SeiTopBar
 import io.seidesk.rm.ui.components.SeiWordmark
@@ -104,12 +104,12 @@ import kotlinx.coroutines.withContext
 
 /** Seksi di drawer samping. Judul dua bahasa dibaca di [sectionTitle]. */
 internal enum class SeiSection(val title: String, val titleEn: String) {
-    PERANGKAT("Perangkat", "Devices"),
-    TAMPILAN("Tampilan", "Display"),
-    KREDENSIAL("Kredensial", "Credentials"),
-    UMUM("Umum", "General"),
-    KEAMANAN("Keamanan", "Security"),
-    TENTANG("Tentang", "About"),
+    PERANGKAT("Devices", "Devices"),
+    TAMPILAN("Display", "Display"),
+    KREDENSIAL("Credentials", "Credentials"),
+    UMUM("General", "General"),
+    KEAMANAN("Security", "Security"),
+    TENTANG("About", "About"),
 }
 
 /** Judul seksi yang ikut bahasa aktif. */
@@ -179,7 +179,7 @@ fun SeiDeskHome(
     var confirmExitApp by remember { mutableStateOf(false) }
     var wolWaitingProfile by remember { mutableStateOf<ConnectionProfile?>(null) }
     // Pesan app sendiri (bukan Toast bawaan Android).
-    val notice = rememberXyNotice()
+    val notice = rememberSeiNotice()
 
     fun connect(profile: ConnectionProfile) {
         onAuthenticateConnect {
@@ -581,14 +581,14 @@ fun SeiDeskHome(
     }
     wolWaitingProfile?.let { target ->
         SeiDialog(
-            title = sei( "Waking PC (Wake-on-LAN)"),
+            title = sei("Waking PC (Wake-on-LAN)"),
             body = sei(
-                "Magic Packet sent to \"{0}\" ({1}:{2}). XyDesk is automatically polling the RDP port for up to 35 seconds...",
+                "Magic Packet sent to \"{0}\" ({1}:{2}). SeiDesk is automatically polling the RDP port for up to 35 seconds...",
                 target.label ?: target.host,
                 target.host,
                 target.port,
             ),
-            confirmLabel = sei( "Connect Now"),
+            confirmLabel = sei("Connect Now"),
             onConfirm = {
                 wolWaitingProfile = null
                 connect(target)
@@ -1060,10 +1060,11 @@ private fun DevicesScreen(
         Column(Modifier.fillMaxSize()) {
             // Single status banner priority queue: crash log -> interrupted session -> shared file -> PC notice
             val bootSuspect = bootTail.isNotEmpty() && bootTail.last().let { last ->
-                !last.contains("session.connect kembali") &&
+                !last.contains("manager.connect") &&
+                    !last.contains("session.connect") &&
                     !last.contains("-> Connected") &&
                     !last.contains("-> Disconnected") &&
-                    !last.contains("intent tanpa profil")
+                    !last.contains("intent without valid profile")
             }
 
             when {
@@ -2115,9 +2116,9 @@ private fun fetchRemoteReleaseStatus(context: Context): String {
         val body = conn.inputStream.bufferedReader().use { it.readText() }
         val json = org.json.JSONObject(body)
         val latest = json.optString("version", "1.0.0")
-        val launchDate = json.optString("launchWib", "Sabtu, 3 Oktober 2026 · 10:00 WIB")
+        val launchDate = json.optString("launchWib", "Saturday, October 3, 2026 · 10:00 WIB")
         seiNow(
-            "Installed version: v{0} · Public Release Target: v{1} ({2}). Official XyVerse app store will be available at rilisin.xyverse.my.id.",
+            "Installed version: v{0} · Public Release Target: v{1} ({2}). Official release portal will be available at rilisin.xyverse.my.id.",
             current,
             latest,
             launchDate,

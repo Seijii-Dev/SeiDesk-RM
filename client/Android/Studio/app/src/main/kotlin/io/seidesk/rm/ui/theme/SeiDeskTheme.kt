@@ -48,7 +48,7 @@ val SeiTextFaint = SeiColors.DarkTextFaint
 // Accent & Status
 val SeiAccent = SeiColors.DarkAccent
 val SeiAccentText = SeiColors.DarkAccentText
-val XyAccentInk = Color(0xFFFFFFFF)
+val SeiAccentInk = Color(0xFFFFFFFF)
 
 val SeiOk = SeiColors.StatusOk
 val SeiWarn = SeiColors.StatusWarn
@@ -257,9 +257,3 @@ fun SeiDeskTheme(
         },
     )
 }
-
-@Composable
-fun XyDeskTheme(
-    dark: Boolean,
-    content: @Composable () -> Unit,
-) = SeiDeskTheme(dark = dark, content = content)

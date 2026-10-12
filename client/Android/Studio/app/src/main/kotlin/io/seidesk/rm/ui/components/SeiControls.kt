@@ -180,7 +180,7 @@ fun SeiSpinner(
             animation = tween(durationMillis = 900, easing = LinearEasing),
             repeatMode = RepeatMode.Restart,
         ),
-        label = "xy-spinner-angle",
+        label = "sei-spinner-angle",
     )
     Canvas(modifier.size(size)) {
         val stroke = strokeWidth.toPx()

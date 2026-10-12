@@ -84,7 +84,7 @@ internal fun TransferFileSection(deviceId: String, notice: SeiNoticeState) {
                         seiNow(
                             "{0} file(s) are in the shared folder. On the PC open {1}.",
                             sent,
-                            root?.remoteHint ?: "\\\\tsclient\\XyDesk",
+                            root?.remoteHint ?: "\\\\tsclient\\SeiDesk",
                         )
                     } else {
                         seiNow(
@@ -122,7 +122,7 @@ internal fun TransferFileSection(deviceId: String, notice: SeiNoticeState) {
     Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
         PanelHint(
             sei(
-                "Move files between phone and PC through the shared folder. On Windows it appears as the XyDesk drive (\\\\tsclient\\XyDesk) — plain copy/paste in File Explorer works too.",
+                "Move files between phone and PC through the shared folder. On Windows it appears as the SeiDesk drive (\\\\tsclient\\SeiDesk) — plain copy/paste in File Explorer works too.",
             ),
         )
 
@@ -214,7 +214,7 @@ internal fun TransferFileSection(deviceId: String, notice: SeiNoticeState) {
         if (incoming.isEmpty()) {
             Text(
                 sei(
-                    "Nothing from the PC yet. On Windows, copy a file into the XyDesk drive, then tap Refresh.",
+                    "Nothing from the PC yet. On Windows, copy a file into the SeiDesk drive, then tap Refresh.",
                 ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 11.sp,
