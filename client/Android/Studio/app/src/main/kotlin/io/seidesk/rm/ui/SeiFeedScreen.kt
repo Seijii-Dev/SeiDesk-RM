@@ -7,38 +7,44 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import io.seidesk.rm.ui.components.SeiGlassCard
 import io.seidesk.rm.ui.components.SeiGlassSectionLabel
 import io.seidesk.rm.ui.components.SeiIconPill
 import io.seidesk.rm.ui.components.SeiIcons
 import io.seidesk.rm.ui.components.SeiTopBar
 
-/**
- * Layar Feed — layar sendiri, bukan kartu yang menumpang di Beranda.
- *
- * Sebelumnya feed jokes komunitas (`FunHubCard`) hanya muncul sebagai satu
- * kartu di tengah daftar perangkat, jadi isinya sempit dan terpotong oleh
- * `INITIAL_JOKES_VISIBLE`. Sebagai tujuan nav sendiri, feed mendapat lebar
- * penuh dan bisa digulir tanpa berebut ruang dengan daftar perangkat.
- *
- * `FunHubCard` dipanggil dengan `onHide = null`: tombol "Sembunyikan" tidak
- * relevan di sini karena feed memang tujuan yang dipilih pengguna, bukan
- * kartu opsional. Tombol itu tetap ada di kartu Beranda.
- */
 @Composable
 internal fun SeiFeedScreen(
     onMenu: () -> Unit,
 ) {
+    var refreshTrigger by remember { mutableIntStateOf(0) }
+
     Column(
         Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
     ) {
         SeiTopBar(
-            title = sei( "Feed"),
-            actions = { SeiIconPill(SeiIcons.Menu, onMenu, flat = true, contentDescription = "Menu") },
+            title = sei("Feed"),
+            actions = {
+                SeiIconPill(
+                    icon = SeiIcons.Rotate,
+                    onClick = { refreshTrigger++ },
+                    flat = true,
+                    contentDescription = sei("Refresh"),
+                )
+                SeiIconPill(
+                    icon = SeiIcons.Menu,
+                    onClick = onMenu,
+                    flat = true,
+                    contentDescription = sei("Menu"),
+                )
+            },
         )
         Column(
             Modifier
@@ -47,10 +53,12 @@ internal fun SeiFeedScreen(
                 .padding(bottom = 18.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            SeiGlassSectionLabel(sei( "Community"))
-            SeiGlassCard(padding = 14.dp) {
-                FunHubCard(onHide = null)
-            }
+            SeiGlassSectionLabel(sei("Community"))
+            FunHubCard(
+                onHide = null,
+                refreshTrigger = refreshTrigger,
+            )
         }
     }
 }
+

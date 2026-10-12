@@ -1539,7 +1539,8 @@ fun SeiDeskSessionScreen(
 
         if (state is SessionState.Connecting || state is SessionState.Authenticating) {
             if (reconnecting && everConnected) {
-                ReconnectingOverlay(
+                Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.35f)))
+                ReconnectingBanner(
                     attempt = reconnectAttempt,
                     waitingForNativeRelease = waitingForNativeRelease,
                     onStop = { confirmCancelConnect = true },
@@ -1557,7 +1558,8 @@ fun SeiDeskSessionScreen(
         if (reconnecting && everConnected &&
             (state is SessionState.Disconnected || state is SessionState.Error)
         ) {
-            ReconnectingOverlay(
+            Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.35f)))
+            ReconnectingBanner(
                 attempt = reconnectAttempt,
                 waitingForNativeRelease = waitingForNativeRelease,
                 onStop = { confirmCancelConnect = true },
@@ -1751,60 +1753,66 @@ fun SeiDeskSessionScreen(
 // =============================================================
 
 private fun stepIndex(stage: SessionManager.Stage): Int = when (stage) {
-    SessionManager.Stage.IDLE -> 0
-    SessionManager.Stage.PROBE -> 1
-    SessionManager.Stage.HANDSHAKE -> 2
-    SessionManager.Stage.AUTH -> 3
-    SessionManager.Stage.READY -> 4
+    SessionManager.Stage.IDLE, SessionManager.Stage.PROBE -> 0
+    SessionManager.Stage.HANDSHAKE -> 1
+    SessionManager.Stage.AUTH -> 2
+    SessionManager.Stage.READY -> 3
 }
 
 private val connectSteps = listOf(
-    "Menyiapkan sesi" to "Preparing session",
-    "Memeriksa jaringan" to "Checking network",
-    "Security connect" to "Security connect",
-    "Autentikasi (NLA)" to "Authentication (NLA)",
-    "Menyiapkan desktop" to "Preparing desktop",
+    "Resolving",
+    "Secure handshake",
+    "Signing in",
+    "Streaming",
 )
 
 @Composable
-private fun ReconnectingOverlay(
+private fun ReconnectingBanner(
     attempt: Int,
     waitingForNativeRelease: Boolean,
     onStop: () -> Unit,
 ) {
-    Column(
+    Box(
         Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 28.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surface)
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
-            .padding(18.dp)
-            .zIndex(20f),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+            .padding(horizontal = 16.dp, vertical = 16.dp)
+            .zIndex(50f),
+        contentAlignment = Alignment.TopCenter,
     ) {
-        SeiSpinner(size = 24.dp, color = MaterialTheme.colorScheme.primary)
-        Text(
-            sei( "Temporary network interruption"),
-            color = MaterialTheme.colorScheme.onSurface,
-            style = MaterialTheme.typography.titleSmall,
-            textAlign = TextAlign.Center,
-        )
-        Text(
-            sei(
-                if (waitingForNativeRelease) {
-                    "Waiting for the native session to close safely; attempt {0} will continue afterward."
-                } else {
-                    "Session is kept open. Waiting for the network and retrying (attempt {0})."
-                },
-                attempt,
-            ),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            style = MaterialTheme.typography.bodySmall,
-            textAlign = TextAlign.Center,
-        )
-        SeiPillButton(sei( "Stop retrying"), onStop, primary = false, compact = true)
+        Row(
+            Modifier
+                .clip(RoundedCornerShape(12.dp))
+                .background(Color(0xFF0F141C).copy(alpha = 0.94f))
+                .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
+                .padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            SeiSpinner(size = 16.dp, strokeWidth = 2.dp, color = MaterialTheme.colorScheme.primary)
+            Column(Modifier.weight(1f, fill = false)) {
+                Text(
+                    text = sei("Reconnecting... (attempt {0})", attempt),
+                    color = Color.White.copy(alpha = 0.95f),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                    text = if (waitingForNativeRelease) {
+                        sei("Waiting for native session release")
+                    } else {
+                        sei("Network interrupted · retrying")
+                    },
+                    color = Color.White.copy(alpha = 0.70f),
+                    fontSize = 11.sp,
+                )
+            }
+            SeiPillButton(
+                text = sei("Cancel"),
+                onClick = onStop,
+                primary = false,
+                compact = true,
+            )
+        }
     }
 }
 
@@ -1843,13 +1851,13 @@ private fun ConnectingScreen(
             )
             Spacer(Modifier.height(6.dp))
             Text(
-                "${elapsed}s",
+                String.format(java.util.Locale.US, "%02d:%02d", elapsed / 60, elapsed % 60),
                 color = Color.White.copy(alpha = 0.76f),
                 fontSize = 12.sp,
             )
             Spacer(Modifier.height(26.dp))
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                connectSteps.forEachIndexed { index, (title, titleEn) ->
+                connectSteps.forEachIndexed { index, title ->
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -1877,7 +1885,7 @@ private fun ConnectingScreen(
                             }
                         }
                         Text(
-                            sei( titleEn),
+                            sei(title),
                             color = Color.White.copy(alpha = if (index <= active) 0.96f else 0.72f),
                             fontSize = 14.sp,
                             fontWeight = if (index == active) FontWeight.SemiBold else FontWeight.Normal,
@@ -1886,7 +1894,7 @@ private fun ConnectingScreen(
                 }
             }
             Spacer(Modifier.height(30.dp))
-            SeiPillButton(sei( "Cancel"), onCancel, primary = false, compact = true)
+            SeiPillButton(sei("Cancel"), onCancel, primary = false, compact = true)
         }
     }
 }

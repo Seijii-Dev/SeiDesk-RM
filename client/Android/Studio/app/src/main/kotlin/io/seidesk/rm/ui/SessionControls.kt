@@ -17,6 +17,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.systemGestureExclusion
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -1251,60 +1252,105 @@ private fun LiveTelemetryPill(
     telemetry: io.seidesk.rm.core.TelemetrySample,
     modifier: Modifier = Modifier,
 ) {
+    var expanded by remember { mutableStateOf(false) }
     val rtt = telemetry.rttMs
     val rttColor = when {
-        rtt <= 0 -> Color(0xFFF2F2F4)
-        rtt < 45 -> Color(0xFFE4E4E8)
-        rtt < 120 -> Color(0xFFA9A9B0)
-        else -> Color(0xFF7C7C84)
+        rtt <= 0 -> Color(0xFF10B981)
+        rtt < 45 -> Color(0xFF10B981)
+        rtt < 100 -> Color(0xFFF59E0B)
+        else -> Color(0xFFEF4444)
     }
-    val textShadow = Shadow(
-        color = Color(0xF2000000),
-        offset = Offset(1.2f, 1.2f),
-        blurRadius = 3f,
-    )
-    val labelStyle = TextStyle(
-        fontFamily = io.seidesk.rm.ui.theme.SeiFont,
-        color = Color(0xB8D9D9DE),
-        fontSize = 10.sp,
-        fontWeight = FontWeight.SemiBold,
-        letterSpacing = 0.2.sp,
-        lineHeight = 12.sp,
-        shadow = textShadow,
-    )
-    val valueStyle = TextStyle(
-        fontFamily = io.seidesk.rm.ui.theme.SeiFont,
-        color = Color(0xFFF2F2F4),
-        fontSize = 11.sp,
-        fontWeight = FontWeight.Bold,
-        lineHeight = 14.sp,
-        shadow = textShadow,
-    )
     val rttLabel = if (rtt > 0) "${rtt} ms" else "-- ms"
-    val resLabel = if (telemetry.width > 0) "${telemetry.width}x${telemetry.height}" else "--"
-    val items = listOf(
-        Triple("FPS", "${telemetry.fps}", Color(0xFFF2F2F4)),
-        Triple("LATENCY", rttLabel, rttColor),
-        Triple("RESOLUTION", resLabel, Color(0xFFF2F2F4)),
-        Triple("ENCODE", telemetry.codecLabel, Color(0xFFF2F2F4)),
-        Triple("RELAY", telemetry.relayLabel, Color(0xFFF2F2F4)),
-        Triple("NETWORK", telemetry.networkLabel, Color(0xFFF2F2F4)),
-    )
+    val resLabel = if (telemetry.width > 0) "${telemetry.width}×${telemetry.height}" else "--"
 
-    Column(
-        modifier = modifier.padding(horizontal = 2.dp, vertical = 2.dp),
-        verticalArrangement = Arrangement.spacedBy(3.dp),
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(Color.Black.copy(alpha = 0.72f))
+            .border(1.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(8.dp))
+            .clickable { expanded = !expanded }
+            .padding(horizontal = 8.dp, vertical = 4.dp),
     ) {
-        items.forEach { (label, value, color) ->
-            Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
-                Text(text = label, style = labelStyle)
-                Text(text = value, style = valueStyle.copy(color = color))
+        if (!expanded) {
+            // Collapsed 1-line telemetry chip (min 11 sp)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Box(
+                    Modifier
+                        .size(6.dp)
+                        .clip(CircleShape)
+                        .background(rttColor),
+                )
+                Text(
+                    text = "${telemetry.fps} fps · $rttLabel · ${telemetry.codecLabel}",
+                    style = TextStyle(
+                        fontFamily = io.seidesk.rm.ui.theme.SeiFont,
+                        color = Color.White.copy(alpha = 0.94f),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium,
+                    ),
+                )
+            }
+        } else {
+            // Expanded telemetry details (min 10 sp)
+            val items = listOf(
+                Triple("FPS", "${telemetry.fps}", Color(0xFFF2F2F4)),
+                Triple("LATENCY", rttLabel, rttColor),
+                Triple("RESOLUTION", resLabel, Color(0xFFF2F2F4)),
+                Triple("ENCODE", telemetry.codecLabel, Color(0xFFF2F2F4)),
+                Triple("RELAY", telemetry.relayLabel, Color(0xFFF2F2F4)),
+                Triple("NETWORK", telemetry.networkLabel, Color(0xFFF2F2F4)),
+            )
+            Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Box(Modifier.size(6.dp).clip(CircleShape).background(rttColor))
+                    Text(
+                        sei("TELEMETRY"),
+                        style = TextStyle(
+                            fontFamily = io.seidesk.rm.ui.theme.SeiFont,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.SemiBold,
+                        ),
+                    )
+                }
+                Spacer(Modifier.height(2.dp))
+                items.forEach { (label, value, color) ->
+                    Row(
+                        modifier = Modifier.widthIn(min = 140.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Text(
+                            text = label,
+                            style = TextStyle(
+                                fontFamily = io.seidesk.rm.ui.theme.SeiFont,
+                                color = Color.White.copy(alpha = 0.65f),
+                                fontSize = 10.sp,
+                            ),
+                        )
+                        Spacer(Modifier.size(8.dp))
+                        Text(
+                            text = value,
+                            style = TextStyle(
+                                fontFamily = io.seidesk.rm.ui.theme.SeiFont,
+                                color = color,
+                                fontSize = 10.5.sp,
+                                fontWeight = FontWeight.SemiBold,
+                            ),
+                        )
+                    }
+                }
             }
         }
     }
 }
 
-/** Tombol rail sesi: latar mengikuti rasa tombol HUD, ikon selalu terbaca. */
+/** Tombol rail sesi: accent ring + tinted obsidian/primary fill. */
 @Composable
 private fun RailButton(
     icon: ImageVector,
@@ -1314,14 +1360,18 @@ private fun RailButton(
     onClick: () -> Unit,
 ) {
     val pal = hudPalette(plate)
+    val ringColor = if (active) MaterialTheme.colorScheme.primary else pal.border
+    val fillColor = if (active) MaterialTheme.colorScheme.primary.copy(alpha = 0.22f) else pal.plate
+    val iconTint = if (active) MaterialTheme.colorScheme.primary else pal.ink
+
     Box(
         Modifier
             .size(44.dp)
             .clip(CircleShape)
-            .background(if (active) Color(0xE9F2F2F4) else pal.plate)
+            .background(fillColor)
             .border(
                 if (active) 2.dp else 1.2.dp,
-                if (active) Color(0xFFFFFFFF) else pal.border,
+                ringColor,
                 CircleShape,
             )
             .clickable(onClick = onClick),
@@ -1330,7 +1380,7 @@ private fun RailButton(
         Icon(
             icon,
             contentDescription = description,
-            tint = if (active) Color(0xFF0B0B0E) else pal.ink,
+            tint = iconTint,
             modifier = Modifier.size(20.dp),
         )
     }
@@ -1376,34 +1426,37 @@ private fun PanelHandle(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var idleAlpha by remember { mutableFloatStateOf(1f) }
+    LaunchedEffect(Unit) {
+        delay(3000)
+        idleAlpha = 0.35f
+    }
+
     Box(
         modifier
-            .clickable(onClick = onClick)
-            .padding(vertical = 24.dp, horizontal = 5.dp)
+            .size(44.dp)
+            .systemGestureExclusion()
+            .clickable(onClick = {
+                idleAlpha = 1f
+                onClick()
+            })
             .zIndex(20f),
+        contentAlignment = Alignment.Center,
     ) {
         Box(
             Modifier
-                .clip(SeiPill)
-                .background(MaterialTheme.colorScheme.surface)
-                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, SeiPill)
-                .padding(horizontal = 10.dp, vertical = 16.dp),
+                .size(38.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = idleAlpha))
+                .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.45f * idleAlpha), CircleShape),
+            contentAlignment = Alignment.Center,
         ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(
-                    SeiIcons.Sliders,
-                    contentDescription = sei( "Open session panel"),
-                    tint = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.size(17.dp),
-                )
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    sei( "Menu"),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = 9.sp,
-                    letterSpacing = 0.8.sp,
-                )
-            }
+            Icon(
+                SeiIcons.Sliders,
+                contentDescription = sei("Open session panel"),
+                tint = MaterialTheme.colorScheme.primary.copy(alpha = idleAlpha),
+                modifier = Modifier.size(20.dp),
+            )
         }
     }
 }

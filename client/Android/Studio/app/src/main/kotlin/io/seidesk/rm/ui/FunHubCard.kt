@@ -39,6 +39,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.graphics.Color
 import io.seidesk.rm.ui.components.SeiOverlay
 import io.seidesk.rm.ui.components.SeiPillButton
 import kotlinx.coroutines.launch
@@ -48,7 +53,10 @@ private const val INITIAL_JOKES_VISIBLE = 3
 
 /** Flat home feed for anonymous, shared community jokes. */
 @Composable
-internal fun FunHubCard(onHide: (() -> Unit)? = null) {
+internal fun FunHubCard(
+    onHide: (() -> Unit)? = null,
+    refreshTrigger: Int = 0,
+) {
     val context = LocalContext.current
     val api = remember(context) { CommunityJokesApi(context) }
     val scope = rememberCoroutineScope()
@@ -125,7 +133,7 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
         }
     }
 
-    LaunchedEffect(api, refreshKey) {
+    LaunchedEffect(api, refreshKey, refreshTrigger) {
         refreshing = jokes.isEmpty()
         feedError = null
         try {
@@ -200,11 +208,9 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
         }
 
         when {
-            refreshing && jokes.isEmpty() -> Text(
-                sei( "Loading community feed…"),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            refreshing && jokes.isEmpty() -> Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                repeat(3) { FeedSkeletonItem() }
+            }
             feedError != null && jokes.isEmpty() -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(feedError.orEmpty(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
                 SeiPillButton(
@@ -837,3 +843,61 @@ private fun FeedBinaryImage(path: String, modifier: Modifier = Modifier, round: 
         )
     }
 }
+
+@Composable
+internal fun FeedSkeletonItem() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(Color(0xFF141822))
+            .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(12.dp))
+            .padding(14.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Box(
+                Modifier
+                    .size(26.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.12f)),
+            )
+            Box(
+                Modifier
+                    .width(90.dp)
+                    .height(12.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(Color.White.copy(alpha = 0.12f)),
+            )
+        }
+        Box(
+            Modifier
+                .fillMaxWidth(0.92f)
+                .height(13.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .background(Color.White.copy(alpha = 0.09f)),
+        )
+        Box(
+            Modifier
+                .fillMaxWidth(0.65f)
+                .height(13.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .background(Color.White.copy(alpha = 0.07f)),
+        )
+        Spacer(Modifier.height(2.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            repeat(3) {
+                Box(
+                    Modifier
+                        .size(width = 44.dp, height = 24.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(Color.White.copy(alpha = 0.08f)),
+                )
+            }
+        }
+    }
+}
+
