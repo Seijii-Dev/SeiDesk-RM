@@ -904,7 +904,7 @@ private fun LiveSessionsCard() {
                     )
                     Text(
                         item.address,
-                        style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -1462,8 +1462,7 @@ private fun DeviceCard(
                 Text(
                     if (rdpOptions.pcConnectMode) profile.host else "${profile.host}:${profile.port}",
                     style = MaterialTheme.typography.bodySmall.copy(
-                        fontFamily = FontFamily.Monospace,
-                    ),
+                                            ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,

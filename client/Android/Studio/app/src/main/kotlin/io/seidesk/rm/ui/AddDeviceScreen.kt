@@ -583,7 +583,6 @@ fun AddDeviceScreen(
                             }
                         },
                         style = MaterialTheme.typography.bodySmall,
-                        fontFamily = FontFamily.Monospace,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
@@ -718,7 +717,6 @@ fun AddDeviceScreen(
                                 ) {
                                     Text(
                                         text = engine.badge,
-                                        fontFamily = FontFamily.Monospace,
                                         style = MaterialTheme.typography.labelSmall,
                                         color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
@@ -1764,7 +1762,6 @@ fun AddDeviceScreen(
                         Text(
                             sshCmd,
                             style = MaterialTheme.typography.bodySmall,
-                            fontFamily = FontFamily.Monospace,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                         Spacer(Modifier.height(8.dp))
@@ -1943,7 +1940,6 @@ fun AddDeviceScreen(
                                 Text(
                                     text = if (isPcQuickMode) "ID PC: ${item.pcId}" else "${item.ip}:${item.port}",
                                     style = MaterialTheme.typography.titleSmall,
-                                    fontFamily = FontFamily.Monospace,
                                 )
                                 Text(
                                     text = if (isPcQuickMode) {
@@ -1957,7 +1953,6 @@ fun AddDeviceScreen(
                             }
                             Text(
                                 text = "${item.rttMs} ms",
-                                fontFamily = FontFamily.Monospace,
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.primary,
                             )
@@ -2029,7 +2024,6 @@ private fun StorageAccessRow() {
         Text(
             "Path HP: $path",
             style = MaterialTheme.typography.bodySmall,
-            fontFamily = FontFamily.Monospace,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.height(4.dp))
@@ -2082,7 +2076,6 @@ private fun XySliderRow(
             Text(
                 "${value.toInt()}$suffix",
                 style = MaterialTheme.typography.bodySmall,
-                fontFamily = FontFamily.Monospace,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }

@@ -272,6 +272,16 @@ public class ExtendedKeyboardView extends LinearLayout
 		k.setTextColor(ContextCompat.getColor(getContext(), R.color.kbd_text));
 		k.setTextSize(TypedValue.COMPLEX_UNIT_PX,
 		              getResources().getDimension(R.dimen.kbd_key_text));
+		try
+		{
+			android.graphics.Typeface tf = androidx.core.content.res.ResourcesCompat.getFont(
+			    getContext(), R.font.jetbrains_mono_medium);
+			if (tf != null)
+				k.setTypeface(tf);
+		}
+		catch (Exception ignored)
+		{
+		}
 		styleKey(k, keycode, repeatable, weight);
 		return k;
 	}

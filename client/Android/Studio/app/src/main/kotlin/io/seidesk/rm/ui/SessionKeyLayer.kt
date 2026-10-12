@@ -380,7 +380,8 @@ private fun HudKeyButton(
                             g,
                             modifier = Modifier.align(align),
                             color = pal.ink.copy(alpha = 0.55f),
-                            fontSize = 8.sp,
+                            fontSize = 10.sp,
+                            fontFamily = io.seidesk.rm.ui.theme.SeiFont,
                             fontWeight = FontWeight.SemiBold,
                         )
                     }
@@ -481,6 +482,7 @@ internal fun HudKeyGlyph(key: HudKey, tint: Color, boxDp: Float = key.size) {
     Text(
         text = key.label,
         color = tint,
+        fontFamily = io.seidesk.rm.ui.theme.SeiFont,
         fontSize = (boxDp * 0.22f).coerceIn(10f, 16f).sp,
         fontWeight = FontWeight.SemiBold,
         maxLines = 1,

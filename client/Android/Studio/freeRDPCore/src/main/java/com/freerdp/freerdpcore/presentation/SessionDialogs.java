@@ -255,7 +255,21 @@ public class SessionDialogs
 
 	private void showOnUiThread(final AlertDialog dialog)
 	{
-		mainHandler.post(dialog::show);
+		mainHandler.post(() -> {
+			dialog.show();
+			try
+			{
+				android.graphics.Typeface tf = androidx.core.content.res.ResourcesCompat.getFont(
+				    activity, R.font.jetbrains_mono_regular);
+				if (tf != null && dialog.findViewById(android.R.id.message) instanceof android.widget.TextView)
+				{
+					((android.widget.TextView)dialog.findViewById(android.R.id.message)).setTypeface(tf);
+				}
+			}
+			catch (Exception ignored)
+			{
+			}
+		});
 	}
 
 	private void notifyCancel()

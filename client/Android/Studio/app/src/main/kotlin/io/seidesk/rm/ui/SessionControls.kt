@@ -1264,20 +1264,20 @@ private fun LiveTelemetryPill(
         blurRadius = 3f,
     )
     val labelStyle = TextStyle(
+        fontFamily = io.seidesk.rm.ui.theme.SeiFont,
         color = Color(0xB8D9D9DE),
-        fontSize = 7.sp,
+        fontSize = 10.sp,
         fontWeight = FontWeight.SemiBold,
-        fontFamily = FontFamily.Monospace,
-        letterSpacing = 0.4.sp,
-        lineHeight = 8.sp,
+        letterSpacing = 0.2.sp,
+        lineHeight = 12.sp,
         shadow = textShadow,
     )
     val valueStyle = TextStyle(
+        fontFamily = io.seidesk.rm.ui.theme.SeiFont,
         color = Color(0xFFF2F2F4),
-        fontSize = 8.5.sp,
+        fontSize = 11.sp,
         fontWeight = FontWeight.Bold,
-        fontFamily = FontFamily.Monospace,
-        lineHeight = 10.sp,
+        lineHeight = 14.sp,
         shadow = textShadow,
     )
     val rttLabel = if (rtt > 0) "${rtt} ms" else "-- ms"
@@ -3032,7 +3032,6 @@ private fun MonitorAndUserGridModal(
                                         )
                                         Text(
                                             text = if (isActive) sei( "ACTIVE") else engine.badge,
-                                            fontFamily = FontFamily.Monospace,
                                             fontSize = 8.5.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -3120,7 +3119,6 @@ private fun MonitorAndUserGridModal(
                                         )
                                         Text(
                                             text = if (item.active) sei( "ACTIVE") else item.badge,
-                                            fontFamily = FontFamily.Monospace,
                                             fontSize = 8.5.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = if (item.active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -3189,7 +3187,6 @@ private fun MonitorAndUserGridModal(
                                 )
                                 Text(
                                     text = if (isConsole) sei( "ACTIVE") else "/ADMIN",
-                                    fontFamily = FontFamily.Monospace,
                                     fontSize = 8.5.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = if (isConsole) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -3242,7 +3239,6 @@ private fun MonitorAndUserGridModal(
                                 )
                                 Text(
                                     text = if (isVirtualUser) sei( "ACTIVE") else "MULTI",
-                                    fontFamily = FontFamily.Monospace,
                                     fontSize = 8.5.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = if (isVirtualUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,

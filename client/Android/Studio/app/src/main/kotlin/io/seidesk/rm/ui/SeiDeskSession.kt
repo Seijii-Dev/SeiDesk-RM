@@ -1692,7 +1692,6 @@ fun SeiDeskSessionScreen(
                     Text(
                         line,
                         style = MaterialTheme.typography.bodySmall,
-                        fontFamily = FontFamily.Monospace,
                     )
                 }
             }
@@ -2193,10 +2192,10 @@ private fun CertificateDialog(
             Text("Subject: ${info.subject}", style = MaterialTheme.typography.bodySmall)
             Text("Issuer: ${info.issuer}", style = MaterialTheme.typography.bodySmall)
             Text(sei( "Fingerprint SHA-256:"), style = MaterialTheme.typography.bodySmall)
-            Text(info.fingerprint, style = MaterialTheme.typography.bodySmall, fontFamily = FontFamily.Monospace)
+            Text(info.fingerprint, style = MaterialTheme.typography.bodySmall)
             if (oldFingerprint != null && oldFingerprint != info.fingerprint) {
                 Text(sei( "Stored fingerprint: {0}", oldFingerprint),
-                    style = MaterialTheme.typography.bodySmall, fontFamily = FontFamily.Monospace)
+                    style = MaterialTheme.typography.bodySmall)
             }
         }
         SeiPillButton(

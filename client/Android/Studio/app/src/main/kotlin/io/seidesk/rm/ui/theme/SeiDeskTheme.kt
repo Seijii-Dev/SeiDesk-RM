@@ -5,6 +5,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
+import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -103,17 +104,92 @@ val LightScheme = lightColorScheme(
     scrim = Color(0x38000000),
 )
 
-// Space Grotesk = display, Inter = body (variable fonts, OFL).
-val SeiDisplay = FontFamily(
-    Font(R.font.space_grotesk, FontWeight.Medium),
-    Font(R.font.space_grotesk, FontWeight.SemiBold),
-    Font(R.font.space_grotesk, FontWeight.Bold),
+// JetBrains Mono static fonts (SIL OFL 1.1).
+val SeiFont = FontFamily(
+    Font(R.font.jetbrains_mono_regular, FontWeight.Normal),
+    Font(R.font.jetbrains_mono_medium, FontWeight.Medium),
+    Font(R.font.jetbrains_mono_semibold, FontWeight.SemiBold),
+    Font(R.font.jetbrains_mono_bold, FontWeight.Bold),
 )
-val SeiBody = FontFamily(
-    Font(R.font.inter, FontWeight.Normal),
-    Font(R.font.inter, FontWeight.Medium),
-    Font(R.font.inter, FontWeight.SemiBold),
-    Font(R.font.inter, FontWeight.Bold),
+val SeiDisplay = SeiFont
+val SeiBody = SeiFont
+
+val SeiTypography = Typography(
+    displayLarge = TextStyle(
+        fontFamily = SeiFont, fontSize = 32.sp, lineHeight = 40.sp,
+        fontWeight = FontWeight.SemiBold, letterSpacing = (-0.3).sp,
+        fontFeatureSettings = "calt 0",
+    ),
+    displayMedium = TextStyle(
+        fontFamily = SeiFont, fontSize = 28.sp, lineHeight = 36.sp,
+        fontWeight = FontWeight.SemiBold, letterSpacing = (-0.3).sp,
+        fontFeatureSettings = "calt 0",
+    ),
+    displaySmall = TextStyle(
+        fontFamily = SeiFont, fontSize = 26.sp, lineHeight = 34.sp,
+        fontWeight = FontWeight.SemiBold, letterSpacing = (-0.3).sp,
+        fontFeatureSettings = "calt 0",
+    ),
+    headlineLarge = TextStyle(
+        fontFamily = SeiFont, fontSize = 24.sp, lineHeight = 32.sp,
+        fontWeight = FontWeight.SemiBold, letterSpacing = (-0.2).sp,
+        fontFeatureSettings = "calt 0",
+    ),
+    headlineMedium = TextStyle(
+        fontFamily = SeiFont, fontSize = 22.sp, lineHeight = 30.sp,
+        fontWeight = FontWeight.SemiBold, letterSpacing = (-0.2).sp,
+        fontFeatureSettings = "calt 0",
+    ),
+    headlineSmall = TextStyle(
+        fontFamily = SeiFont, fontSize = 19.sp, lineHeight = 26.sp,
+        fontWeight = FontWeight.SemiBold, letterSpacing = (-0.1).sp,
+        fontFeatureSettings = "calt 0",
+    ),
+    titleLarge = TextStyle(
+        fontFamily = SeiFont, fontSize = 18.sp, lineHeight = 26.sp,
+        fontWeight = FontWeight.SemiBold, letterSpacing = 0.sp,
+        fontFeatureSettings = "calt 0",
+    ),
+    titleMedium = TextStyle(
+        fontFamily = SeiFont, fontSize = 16.sp, lineHeight = 22.sp,
+        fontWeight = FontWeight.SemiBold, letterSpacing = 0.sp,
+        fontFeatureSettings = "calt 0",
+    ),
+    titleSmall = TextStyle(
+        fontFamily = SeiFont, fontSize = 14.sp, lineHeight = 20.sp,
+        fontWeight = FontWeight.SemiBold, letterSpacing = 0.sp,
+        fontFeatureSettings = "calt 0",
+    ),
+    bodyLarge = TextStyle(
+        fontFamily = SeiFont, fontSize = 15.sp, lineHeight = 23.sp,
+        fontWeight = FontWeight.Normal, letterSpacing = 0.sp,
+        fontFeatureSettings = "calt 0",
+    ),
+    bodyMedium = TextStyle(
+        fontFamily = SeiFont, fontSize = 14.sp, lineHeight = 21.sp,
+        fontWeight = FontWeight.Normal, letterSpacing = 0.sp,
+        fontFeatureSettings = "calt 0",
+    ),
+    bodySmall = TextStyle(
+        fontFamily = SeiFont, fontSize = 12.5.sp, lineHeight = 18.sp,
+        fontWeight = FontWeight.Normal, letterSpacing = 0.sp,
+        fontFeatureSettings = "calt 0",
+    ),
+    labelLarge = TextStyle(
+        fontFamily = SeiFont, fontSize = 13.5.sp, lineHeight = 18.sp,
+        fontWeight = FontWeight.SemiBold, letterSpacing = 0.1.sp,
+        fontFeatureSettings = "calt 0",
+    ),
+    labelMedium = TextStyle(
+        fontFamily = SeiFont, fontSize = 12.sp, lineHeight = 16.sp,
+        fontWeight = FontWeight.Medium, letterSpacing = 0.2.sp,
+        fontFeatureSettings = "calt 0",
+    ),
+    labelSmall = TextStyle(
+        fontFamily = SeiFont, fontSize = 11.sp, lineHeight = 14.sp,
+        fontWeight = FontWeight.Medium, letterSpacing = 0.3.sp,
+        fontFeatureSettings = "calt 0",
+    ),
 )
 
 /** Radius lebih ramah sentuh; kontrol pill tetap terbaca sebagai kontrol. */
@@ -128,14 +204,6 @@ val SeiShapes = Shapes(
 
 /**
  * Mode tema sebagai state Compose yang di-share lintas activity.
- *
- * Dulu mengganti tema memanggil Activity.recreate() — seluruh layar
- * kedip-kedip dan state UI (posisi scroll, drawer) ikut reset. Sekarang
- * mode disimpan di sini: mengubahnya membuat semua layar yang memakai
- * [seiDark] recompose sendiri, tanpa recreate.
- *
- * [mode] bernilai Int.MIN_VALUE sampai [init] dipanggil di activity
- * pertama (membaca preferensi tersimpan).
  */
 object SeiThemeState {
     const val FOLLOW_SYSTEM = 0
@@ -145,22 +213,16 @@ object SeiThemeState {
     var mode by mutableIntStateOf(Int.MIN_VALUE)
         private set
 
-    /** Baca preferensi sekali per proses; panggil di setContent activity. */
     fun init(prefs: AppPrefs) {
         if (mode == Int.MIN_VALUE) mode = prefs.themeMode
     }
 
-    /** Set dari UI pengaturan: tulis prefs + state sekaligus. */
     fun set(prefs: AppPrefs, value: Int) {
         mode = value
         prefs.themeMode = value
     }
 }
 
-/**
- * Gelap atau tidaknya app SAAT INI, sebagai state: ikut pilihan user,
- * fallback ke tema sistem.
- */
 @Composable
 fun seiDark(): Boolean = when (SeiThemeState.mode) {
     SeiThemeState.DARK -> true
@@ -187,43 +249,7 @@ fun SeiDeskTheme(
     MaterialTheme(
         colorScheme = scheme,
         shapes = SeiShapes,
-        typography = MaterialTheme.typography.copy(
-            displaySmall = TextStyle(
-                fontFamily = SeiDisplay, fontSize = 26.sp,
-                fontWeight = FontWeight.SemiBold, letterSpacing = (-0.6).sp,
-            ),
-            headlineMedium = TextStyle(
-                fontFamily = SeiDisplay, fontSize = 22.sp,
-                fontWeight = FontWeight.SemiBold, letterSpacing = (-0.4).sp,
-            ),
-            headlineSmall = TextStyle(
-                fontFamily = SeiDisplay, fontSize = 19.sp, fontWeight = FontWeight.SemiBold,
-            ),
-            titleLarge = TextStyle(
-                fontFamily = SeiDisplay, fontSize = 18.sp, fontWeight = FontWeight.SemiBold,
-            ),
-            titleMedium = TextStyle(
-                fontFamily = SeiDisplay, fontSize = 16.sp, fontWeight = FontWeight.SemiBold,
-            ),
-            titleSmall = TextStyle(
-                fontFamily = SeiBody, fontSize = 14.sp, fontWeight = FontWeight.SemiBold,
-            ),
-            bodyLarge = TextStyle(fontFamily = SeiBody, fontSize = 15.5.sp, lineHeight = 22.sp),
-            bodyMedium = TextStyle(fontFamily = SeiBody, fontSize = 14.sp, lineHeight = 20.sp),
-            bodySmall = TextStyle(fontFamily = SeiBody, fontSize = 12.5.sp, lineHeight = 17.sp),
-            labelLarge = TextStyle(
-                fontFamily = SeiDisplay, fontSize = 13.5.sp,
-                fontWeight = FontWeight.SemiBold, letterSpacing = 0.2.sp,
-            ),
-            labelMedium = TextStyle(
-                fontFamily = SeiBody, fontSize = 12.sp,
-                fontWeight = FontWeight.Medium, letterSpacing = 0.3.sp,
-            ),
-            labelSmall = TextStyle(
-                fontFamily = SeiBody, fontSize = 10.5.sp,
-                fontWeight = FontWeight.Medium, letterSpacing = 0.6.sp,
-            ),
-        ),
+        typography = SeiTypography,
         content = {
             CompositionLocalProvider(LocalContentColor provides scheme.onSurface) {
                 content()

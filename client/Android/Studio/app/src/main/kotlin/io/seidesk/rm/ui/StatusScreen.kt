@@ -159,7 +159,6 @@ fun StatusScreen(
                     Text(
                         text = portalSummary ?: "-",
                         style = MaterialTheme.typography.bodySmall,
-                        fontFamily = FontFamily.Monospace,
                     )
                 }
                 Spacer(Modifier.height(10.dp))
@@ -221,7 +220,6 @@ private fun KeyValue(label: String, value: String) {
         Text(
             value,
             style = MaterialTheme.typography.bodySmall,
-            fontFamily = FontFamily.Monospace,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }

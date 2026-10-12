@@ -133,7 +133,7 @@ internal fun SeiBottomNav(
                 Text(
                     text = title,
                     color = textColor,
-                    fontSize = 10.5.sp,
+                    fontSize = 11.sp,
                     fontWeight = if (active) FontWeight.SemiBold else FontWeight.Medium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,

@@ -21,6 +21,7 @@ class SeiDeskRmIdentityTest {
         assertEquals("Devices", SeiText.t("home.devices"))
         assertEquals("Thanks for using SeiDesk RM.", SeiText.t("about.thanks"))
         assertTrue(SeiText.t("about.license.body").contains("SeiDesk RM"))
+        assertTrue(SeiText.t("about.license.body").contains("JetBrains Mono"))
     }
 
     @Test

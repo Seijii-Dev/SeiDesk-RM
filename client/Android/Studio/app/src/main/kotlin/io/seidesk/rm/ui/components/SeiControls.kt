@@ -227,8 +227,8 @@ fun SeiTag(text: String, modifier: Modifier = Modifier) {
         modifier = modifier,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         style = MaterialTheme.typography.labelSmall.copy(
-            fontSize = 10.sp,
-            letterSpacing = 1.2.sp,
+            fontSize = 11.sp,
+            letterSpacing = 1.0.sp,
         ),
         maxLines = 1,
     )

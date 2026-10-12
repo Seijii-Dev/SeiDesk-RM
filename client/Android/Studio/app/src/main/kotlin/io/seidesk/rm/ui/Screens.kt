@@ -911,7 +911,6 @@ private fun SecuritySection(appPrefs: AppPrefs) {
                             Text(
                                 fingerprint,
                                 style = MaterialTheme.typography.bodySmall,
-                                fontFamily = FontFamily.Monospace,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                             )

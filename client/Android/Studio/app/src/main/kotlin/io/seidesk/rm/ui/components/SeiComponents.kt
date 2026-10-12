@@ -729,7 +729,6 @@ fun SeiDialog(
                     Text(
                         line,
                         style = MaterialTheme.typography.bodySmall,
-                        fontFamily = FontFamily.Monospace,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                 }
