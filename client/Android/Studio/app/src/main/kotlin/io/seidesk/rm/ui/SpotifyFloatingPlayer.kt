@@ -176,8 +176,8 @@ internal fun SpotifyFloatingPlayer(
                 if (!playback.notificationAccessGranted) {
                     Text(
                         xy(
-                            "Izinkan akses notifikasi Android agar XyDesk bisa membaca info lagu dan mengirim kontrol penuh. Pemutar apa pun didukung; login dan audio tetap di aplikasi musik itu.",
-                            "Allow Android notification access so XyDesk can read track details and send full playback controls. Any music player works; sign-in and audio stay inside that app.",
+                            "Izinkan akses notifikasi Android agar SeiDesk RM bisa membaca info lagu dan mengirim kontrol penuh. Pemutar apa pun didukung; login dan audio tetap di aplikasi musik itu.",
+                            "Allow Android notification access so SeiDesk RM can read track details and send full playback controls. Any music player works; sign-in and audio stay inside that app.",
                         ),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -224,7 +224,7 @@ internal fun SpotifyFloatingPlayer(
                         onCycleRepeat = onCycleRepeat,
                     )
                     Text(
-                        xy("Audio tetap di HP · kontrol dari XyDesk", "Audio stays on your phone · controls from XyDesk"),
+                        xy("Audio tetap di HP · kontrol dari SeiDesk RM", "Audio stays on your phone · controls from SeiDesk RM"),
                         modifier = Modifier.align(Alignment.CenterHorizontally),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,

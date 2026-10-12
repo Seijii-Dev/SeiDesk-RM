@@ -18,7 +18,7 @@ internal class CommunityJokesApi(context: Context) {
         val body = request(
             method = "GET",
             path = "/api/jokes",
-            headers = mapOf("X-XyDesk-Client-ID" to clientId),
+            headers = mapOf("X-SeiDesk-Client-ID" to clientId, "X-XyDesk-Client-ID" to clientId),
         )
         val items = body.optJSONArray("items") ?: JSONArray()
         buildList(items.length()) {
@@ -57,7 +57,7 @@ internal class CommunityJokesApi(context: Context) {
     /** Nama tampilan server (dipulihkan setelah pasang ulang bila ID dipulihkan). */
     suspend fun fetchServerDisplayName(): String? = withContext(Dispatchers.IO) {
         runCatching {
-            val body = request(method = "GET", path = "/api/jokes/me", headers = mapOf("X-XyDesk-Client-ID" to clientId))
+            val body = request(method = "GET", path = "/api/jokes/me", headers = mapOf("X-SeiDesk-Client-ID" to clientId, "X-XyDesk-Client-ID" to clientId))
             body.optString("display_name").takeIf { it.isNotBlank() }
         }.getOrNull()
     }
@@ -225,8 +225,8 @@ internal class CommunityJokesApi(context: Context) {
     // ---- akun komunitas ringan (guest) -------------------------------------
     private val prefs by lazy { appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE) }
 
-    /** ID ramah pengguna, contoh: XY-7F3A9C. Turunan stabil dari client id. */
-    fun friendlyAccountId(): String = "XY-" + clientId.replace("-", "").take(6).uppercase()
+    /** ID ramah pengguna, contoh: SEI-7F3A9C. Turunan stabil dari client id. */
+    fun friendlyAccountId(): String = "SEI-" + clientId.replace("-", "").take(6).uppercase()
 
     fun displayName(): String? = prefs.getString(KEY_DISPLAY_NAME, null)?.takeIf { it.isNotBlank() }
 

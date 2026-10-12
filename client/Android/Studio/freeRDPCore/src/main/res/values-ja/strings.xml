@@ -7,7 +7,7 @@
     <string name="cont">続行</string>
     <string name="login">ログイン</string>
     <!-- Home menu items -->
-    <string name="menu_about">aFreeRDPについて</string>
+    <string name="menu_about">SeiDesk RMについて</string>
     <string name="menu_help">ヘルプ</string>
     <string name="menu_new_bookmark">新しい接続</string>
     <string name="menu_app_settings">設定</string>
@@ -118,7 +118,7 @@
     <string name="title_application_settings">設定</string>
     <string name="title_create_shortcut">RDP Connections</string>
     <string name="title_help">ヘルプ</string>
-    <string name="title_about">aFreeRDPについて</string>
+    <string name="title_about">SeiDesk RMについて</string>
     <!-- Error message strings -->
     <string name="error_bookmark_incomplete_title">保存せずに戻りますか?</string>
     <string name="error_bookmark_incomplete">保存せずに終了する場合は「キャンセル」を押してください。\n続行する場合は「続行」を押して、必要な項目を入力してください。</string>

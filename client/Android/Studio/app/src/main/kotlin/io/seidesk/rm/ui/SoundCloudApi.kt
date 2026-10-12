@@ -99,7 +99,7 @@ object SoundCloudParse {
 /** Bagian jaringan: HTTP polos lewat [HttpURLConnection], tanpa dependensi baru. */
 object SoundCloudClient {
     private const val USER_AGENT =
-        "Mozilla/5.0 (Linux; Android 13; XyDesk) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Mobile Safari/537.36"
+        "Mozilla/5.0 (Linux; Android 13; SeiDesk) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Mobile Safari/537.36"
 
     @Volatile
     private var cachedClientId: String? = null

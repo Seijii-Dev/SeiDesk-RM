@@ -372,7 +372,7 @@ fun SessionControls(
     fun exportHudLayoutToClipboard() {
         val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
         val json = HudKey.exportLayoutJson(keys)
-        cm?.setPrimaryClip(ClipData.newPlainText("XyDesk HUD Layout", json))
+        cm?.setPrimaryClip(ClipData.newPlainText("SeiDesk RM HUD Layout", json))
         notice.show(xyNow("Layout tombol JSON disalin ke clipboard", "Button layout JSON copied to clipboard"))
     }
 

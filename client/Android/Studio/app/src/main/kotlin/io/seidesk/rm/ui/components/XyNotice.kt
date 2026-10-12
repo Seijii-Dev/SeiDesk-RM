@@ -125,3 +125,14 @@ fun XyNoticeHost(
         }
     }
 }
+
+/** Rebranded aliases for SeiDesk RM notice system */
+typealias SeiNoticeState = XyNoticeState
+typealias SeiNoticeBus = XyNoticeBus
+
+@Composable
+fun rememberSeiNotice(): SeiNoticeState = rememberXyNotice()
+
+@Composable
+fun SeiNoticeHost(state: SeiNoticeState, modifier: Modifier = Modifier) = XyNoticeHost(state, modifier)
+

@@ -86,7 +86,7 @@ fun StatusScreen(
                     as HttpURLConnection).apply {
                     connectTimeout = 8000
                     readTimeout = 8000
-                    setRequestProperty("User-Agent", "XyDesk-Remote-Android")
+                    setRequestProperty("User-Agent", "SeiDesk-RM-Android")
                 }
                 try {
                     val body = conn.inputStream.bufferedReader().use { it.readText() }

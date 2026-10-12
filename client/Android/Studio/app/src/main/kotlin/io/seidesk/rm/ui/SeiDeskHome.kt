@@ -150,7 +150,7 @@ fun SeiDeskHome(
     var section by remember { mutableStateOf(XySection.PERANGKAT) }
     // Tab nav bawah (3 tujuan). `section` tetap ada karena seksi dibuka dari
     // drawer maupun dari layar Profil, dan keduanya menggambar SectionScreen.
-    var tab by remember { mutableStateOf(XyTab.HOME) }
+    var tab by remember { mutableStateOf(SeiTab.HOME) }
     var route by remember { mutableStateOf<XyRoute>(XyRoute.Devices) }
     var crashLog by remember { mutableStateOf(CrashLog.last(context.applicationContext)) }
     var showCrash by remember { mutableStateOf(false) }
@@ -209,7 +209,7 @@ fun SeiDeskHome(
         // Consume before launching so a failed auth or Activity recreation cannot
         // create an auto-launch loop. Credentials are loaded only from the vault.
         appPrefs.clearAutoResumeSession(profileId)
-        val existing = XySessionRegistry.list().firstOrNull { it.id == profileId }
+        val existing = SeiSessionRegistry.list().firstOrNull { it.id == profileId }
         if (existing != null) existing.open() else connect(profile)
     }
 
@@ -358,7 +358,7 @@ fun SeiDeskHome(
             route != XyRoute.Devices || section != XySection.PERANGKAT -> {
                 route = XyRoute.Devices
                 section = XySection.PERANGKAT
-                tab = XyTab.HOME
+                tab = SeiTab.HOME
             }
             else -> confirmExitApp = true
         }
@@ -440,9 +440,9 @@ fun SeiDeskHome(
                     )
                 }
 
-                XyRoute.Feed -> XyFeedScreen(onMenu = { drawerOpen = true })
+                XyRoute.Feed -> SeiFeedScreen(onMenu = { drawerOpen = true })
 
-                XyRoute.Profile -> XyProfileScreen(
+                XyRoute.Profile -> SeiProfileScreen(
                     onMenu = { drawerOpen = true },
                     onOpenSection = {
                         section = it
@@ -461,18 +461,18 @@ fun SeiDeskHome(
                 // Nav bawah disembunyikan saat form tambah/ubah perangkat terbuka
                 // supaya layar itu tetap penuh dan tombol simpan tidak tertutup.
                 if (route !is XyRoute.EditDevice) {
-                    XyBottomNavHairline()
-                    XyBottomNav(
+                    SeiBottomNavHairline()
+                    SeiBottomNav(
                         selected = tab,
                         onSelect = { next ->
                             tab = next
                             when (next) {
-                                XyTab.HOME -> {
+                                SeiTab.HOME -> {
                                     section = XySection.PERANGKAT
                                     route = XyRoute.Devices
                                 }
-                                XyTab.FEED -> route = XyRoute.Feed
-                                XyTab.PROFILE -> route = XyRoute.Profile
+                                SeiTab.FEED -> route = XyRoute.Feed
+                                SeiTab.PROFILE -> route = XyRoute.Profile
                             }
                         },
                     )
@@ -865,11 +865,11 @@ fun SeiDeskHome(
  */
 @Composable
 private fun LiveSessionsCard() {
-    var live by remember { mutableStateOf(XySessionRegistry.list()) }
-    var confirmKill by remember { mutableStateOf<XySessionRegistry.Live?>(null) }
+    var live by remember { mutableStateOf(SeiSessionRegistry.list()) }
+    var confirmKill by remember { mutableStateOf<SeiSessionRegistry.Live?>(null) }
     LaunchedEffect(Unit) {
         while (true) {
-            live = XySessionRegistry.list()
+            live = SeiSessionRegistry.list()
             kotlinx.coroutines.delay(1_500)
         }
     }

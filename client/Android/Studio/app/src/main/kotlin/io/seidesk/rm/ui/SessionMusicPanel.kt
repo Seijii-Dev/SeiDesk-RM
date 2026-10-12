@@ -74,8 +74,8 @@ internal fun MusicTab(
         section("sumber-musik", xy("Sumber & izin", "Source & access")) {
             PanelHint(
                 xy(
-                    "XyDesk mengendalikan sesi media Android, jadi pemutar apa pun bisa dipakai — Spotify, SoundCloud, YouTube Music, atau pemutar lokal. Audio dan login tetap di aplikasi itu.",
-                    "XyDesk drives Android's media session, so any player works — Spotify, SoundCloud, YouTube Music, or a local player. Audio and sign-in stay inside that app.",
+                    "SeiDesk RM mengendalikan sesi media Android, jadi pemutar apa pun bisa dipakai — Spotify, SoundCloud, YouTube Music, atau pemutar lokal. Audio dan login tetap di aplikasi itu.",
+                    "SeiDesk RM drives Android's media session, so any player works — Spotify, SoundCloud, YouTube Music, or a local player. Audio and sign-in stay inside that app.",
                 ),
             )
             if (!playback.notificationAccessGranted) {
@@ -544,8 +544,8 @@ internal fun OnlineMusicSection() {
 
     PanelHint(
         xy(
-            "Cari dan putar trek publik SoundCloud langsung di dalam XyDesk — tanpa login dan tanpa aplikasi tambahan. Pemutarnya milik XyDesk sendiri, jadi tetap jalan saat panel ditutup.",
-            "Search and play public SoundCloud tracks right inside XyDesk — no sign-in, no extra app. XyDesk's own player keeps going after the panel closes.",
+            "Cari dan putar trek publik SoundCloud langsung di dalam SeiDesk RM — tanpa login dan tanpa aplikasi tambahan. Pemutarnya milik SeiDesk RM sendiri, jadi tetap jalan saat panel ditutup.",
+            "Search and play public SoundCloud tracks right inside SeiDesk RM — no sign-in, no extra app. SeiDesk RM's own player keeps going after the panel closes.",
         ),
     )
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

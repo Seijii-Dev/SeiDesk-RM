@@ -522,7 +522,7 @@ public class LibFreeRDP
 		args.add("/disp");
 
 		if (advanced.getRedirectPrinter())
-			args.add("/printer:aFreeRDP Print,Microsoft Print to PDF,default");
+			args.add("/printer:SeiDesk RM Print,Microsoft Print to PDF,default");
 
 		// Gateway enabled?
 		if (bookmark.getType() == BookmarkBase.TYPE_MANUAL && bookmark.getEnableGatewaySettings())

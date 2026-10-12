@@ -777,3 +777,7 @@ object XyIcons {
         moveTo(14f, 3.5f); lineTo(14f, 8f); lineTo(18.5f, 8f)
     }
 }
+
+/** Rebranded alias for [XyIcons]. */
+typealias SeiIcons = XyIcons
+

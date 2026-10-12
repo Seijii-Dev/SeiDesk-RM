@@ -46,7 +46,7 @@ internal object XyRdpClient {
             conn.requestMethod = method
             conn.setRequestProperty("Authorization", "Bearer $token")
             conn.setRequestProperty("Accept", "application/vnd.github+json")
-            conn.setRequestProperty("User-Agent", "XyDesk-Remote-Android")
+            conn.setRequestProperty("User-Agent", "SeiDesk-RM-Android")
             conn.connectTimeout = 15_000
             conn.readTimeout = 20_000
             if (body != null) {
@@ -182,3 +182,8 @@ internal object XyRdpClient {
         )
     }.getOrNull()
 }
+
+internal typealias SeiRdpClient = XyRdpClient
+internal typealias SeiRdpAccess = XyRdpAccess
+internal typealias SeiRdpRun = XyRdpRun
+

@@ -162,7 +162,7 @@
     <string name="preference_key_experimental_camera" translatable="false">experimental.camera</string>
     <string name="preference_key_client_name" translatable="false">preference_key_client_name</string>
     <string name="preference_title_client_name">Klientnamn</string>
-    <string name="preference_default_client_name" translatable="false">aFreeRDP</string>
+    <string name="preference_default_client_name" translatable="false">SeiDesk RM</string>
     <string name="preference_key_accept_certificates" translatable="false">security.accept_certificates</string>
     <string name="preference_key_security_clear_certificate_cache" translatable="false">security.clear_certificate_cache</string>
     <string name="preference_key_power_disconnect_timeout" translatable="false">power.disconnect_timeout</string>
@@ -190,7 +190,7 @@
     <string name="print_notif_title">Utskriftsjobb mottaget</string>
     <string name="print_notif_open">Öppna</string>
     <string name="print_notif_print">Skriv ut</string>
-    <string name="accessibility_keyboard_label">aFreeRDP-fysiskt tangentbord</string>
+    <string name="accessibility_keyboard_label">SeiDesk RM-fysiskt tangentbord</string>
     <string name="accessibility_keyboard_description">Skickar kortkommandon från ett fysiskt tangentbord (t.ex. Windows-tangenten) till fjärrskrivbordet.</string>
     <string name="pref_title_keyboard_accessibility">Kortkommandon från fysiskt tangentbord</string>
     <string name="pref_summary_keyboard_accessibility">Skicka Windows-tangenten och systemkortkommandon till fjärrskrivbordet. Kräver tillgänglighetsbehörighet.</string>

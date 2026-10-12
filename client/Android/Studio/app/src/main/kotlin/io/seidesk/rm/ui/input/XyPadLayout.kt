@@ -135,3 +135,8 @@ object XyPadLayout {
 
     private fun fmt(value: Float): String = String.format(java.util.Locale.US, "%.4f", value)
 }
+
+typealias SeiPadPos = XyPadPos
+typealias SeiPadCluster = XyPadCluster
+typealias SeiPadLayout = XyPadLayout
+

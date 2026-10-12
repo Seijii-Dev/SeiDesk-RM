@@ -21,8 +21,11 @@ internal object XyRdpConfig {
      * Syarat kedua unlock: gabung saluran/grup komunitas. GANTI konstanta ini
      * bila link komunitas resmi berubah — satu-satunya tempat yang dipakai.
      */
-    const val CHANNEL_URL = "https://github.com/xykal/XyDesk-Remote"
+    const val CHANNEL_URL = "https://github.com/Seijii-Dev/SeiDesk-RM"
 
     /** PAT disimpan terenkripsi di CredentialVault dengan id ini. */
     const val VAULT_PAT_ID = "xyrdp-github-pat"
 }
+
+internal typealias SeiRdpConfig = XyRdpConfig
+

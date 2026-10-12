@@ -197,3 +197,10 @@ object XyGamepadActionMapper {
     private fun crossed(before: Int, after: Int): Boolean =
         before < TRIGGER_THRESHOLD * 255f && after >= TRIGGER_THRESHOLD * 255f
 }
+
+typealias SeiPadKey = XyPadKey
+typealias SeiStickMode = XyStickMode
+typealias SeiStickDirection = XyStickDirection
+typealias SeiGamepadOutput = XyGamepadOutput
+typealias SeiGamepadActionMapper = XyGamepadActionMapper
+

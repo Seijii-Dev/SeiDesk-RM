@@ -6,14 +6,14 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * Daftar sesi yang sedang hidup di proses ini.
  *
- * Satu sesi = satu XyDeskSessionActivity (masing-masing punya SessionManager
+ * Satu sesi = satu SeiDeskSessionActivity (masing-masing punya SessionManager
  * sendiri), dan default app memang membiarkan sesi jalan di latar. Registry
  * ini yang bikin sesi-sesi itu kelihatan dan bisa dipindah-pindah dari home —
  * tanpa ini, sesi kedua cuma bisa dijangkau lewat daftar app terakhir.
  */
-object XySessionRegistry {
+object SeiSessionRegistry {
 
-    class Live(
+    open class Live(
         val id: String,
         val label: String,
         val address: String,
@@ -50,3 +50,25 @@ object XySessionRegistry {
 
     fun count(): Int = items.size
 }
+
+/** Backward compatibility alias for [SeiSessionRegistry]. */
+object XySessionRegistry {
+    class Live(
+        id: String,
+        label: String,
+        address: String,
+        open: () -> Unit,
+        kill: () -> Unit,
+        bitmapProvider: (() -> android.graphics.Bitmap?)? = null,
+    ) : SeiSessionRegistry.Live(id, label, address, open, kill, bitmapProvider)
+
+    fun add(item: SeiSessionRegistry.Live) = SeiSessionRegistry.add(item)
+    fun remove(id: String) = SeiSessionRegistry.remove(id)
+    fun setActive(id: String, active: Boolean) = SeiSessionRegistry.setActive(id, active)
+    fun activeCount(): Int = SeiSessionRegistry.activeCount()
+    fun list(): List<SeiSessionRegistry.Live> = SeiSessionRegistry.list()
+    fun disconnectAll() = SeiSessionRegistry.disconnectAll()
+    fun count(): Int = SeiSessionRegistry.count()
+}
+
+

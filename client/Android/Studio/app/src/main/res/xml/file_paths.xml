@@ -5,10 +5,18 @@
         name="screenshots"
         path="screenshots/" />
 
-    <!-- Folder yang di-redirect jadi drive 'XyDesk' di PC. File yang diterima
+    <!-- Folder yang di-redirect jadi drive di PC. File yang diterima
          dari PC perlu URI content:// sebelum bisa dibuka/dibagikan aplikasi
          lain; FileProvider hanya mau melayani path yang dideklarasikan di sini. -->
     <external-files-path
         name="share"
         path="Share/" />
+
+    <!-- Cache path for exported RDP files and printed documents -->
+    <cache-path
+        name="cache"
+        path="." />
+    <files-path
+        name="internal_files"
+        path="." />
 </paths>

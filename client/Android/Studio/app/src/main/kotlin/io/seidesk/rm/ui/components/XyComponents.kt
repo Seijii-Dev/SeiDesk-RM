@@ -767,3 +767,193 @@ fun XyDialog(
         }
     }
 }
+
+// =========================================================================
+// SeiDesk RM Component Aliases
+// =========================================================================
+
+@Composable
+fun SeiCard(
+    modifier: Modifier = Modifier,
+    padding: Dp = 16.dp,
+    content: @Composable ColumnScope.() -> Unit,
+) = XyCard(modifier = modifier, padding = padding, content = content)
+
+@Composable
+fun SeiPillButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    primary: Boolean = true,
+    icon: ImageVector? = null,
+    compact: Boolean = false,
+    enabled: Boolean = true,
+) = XyPillButton(
+    text = text,
+    onClick = onClick,
+    modifier = modifier,
+    primary = primary,
+    icon = icon,
+    compact = compact,
+    enabled = enabled,
+)
+
+@Composable
+fun SeiIconPill(
+    icon: ImageVector,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    size: Dp = 46.dp,
+    active: Boolean = false,
+    flat: Boolean = false,
+    contentDescription: String? = null,
+) = XyIconPill(
+    icon = icon,
+    onClick = onClick,
+    modifier = modifier,
+    size = size,
+    active = active,
+    flat = flat,
+    contentDescription = contentDescription,
+)
+
+@Composable
+fun SeiSectionLabel(text: String, modifier: Modifier = Modifier) =
+    XySectionLabel(text = text, modifier = modifier)
+
+@Composable
+fun SeiRow(
+    title: String,
+    subtitle: String? = null,
+    modifier: Modifier = Modifier,
+    leading: ImageVector? = null,
+    leadingTint: Color? = null,
+    trailing: @Composable (() -> Unit)? = null,
+    onClick: (() -> Unit)? = null,
+) = XyRow(
+    title = title,
+    subtitle = subtitle,
+    modifier = modifier,
+    leading = leading,
+    leadingTint = leadingTint,
+    trailing = trailing,
+    onClick = onClick,
+)
+
+@Composable
+fun SeiSwitch(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    enabled: Boolean = true,
+) = XySwitch(checked = checked, onCheckedChange = onCheckedChange, enabled = enabled)
+
+@Composable
+fun SeiToggleRow(
+    title: String,
+    subtitle: String? = null,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+) = XyToggleRow(
+    title = title,
+    subtitle = subtitle,
+    checked = checked,
+    onCheckedChange = onCheckedChange,
+    modifier = modifier,
+)
+
+@Composable
+fun SeiSegmented(
+    options: List<String>,
+    selectedIndex: Int,
+    onSelect: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) = XySegmented(
+    options = options,
+    selectedIndex = selectedIndex,
+    onSelect = onSelect,
+    modifier = modifier,
+)
+
+@Composable
+fun SeiField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    modifier: Modifier = Modifier,
+    hint: String? = null,
+    isPassword: Boolean = false,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    imeAction: ImeAction = ImeAction.Next,
+    trailing: (@Composable () -> Unit)? = null,
+) = XyField(
+    value = value,
+    onValueChange = onValueChange,
+    label = label,
+    modifier = modifier,
+    hint = hint,
+    isPassword = isPassword,
+    keyboardType = keyboardType,
+    imeAction = imeAction,
+    trailing = trailing,
+)
+
+@Composable
+fun SeiTopBar(
+    title: String,
+    onBack: (() -> Unit)? = null,
+    modifier: Modifier = Modifier,
+    actions: @Composable () -> Unit = {},
+) = XyTopBar(title = title, onBack = onBack, modifier = modifier, actions = actions)
+
+@Composable
+fun SeiStatusDot(color: Color, label: String, modifier: Modifier = Modifier) =
+    XyStatusDot(color = color, label = label, modifier = modifier)
+
+@Composable
+fun SeiWordmark(
+    modifier: Modifier = Modifier,
+    fontSize: TextUnit = 22.sp,
+) = XyWordmark(modifier = modifier, fontSize = fontSize)
+
+@Composable
+fun SeiLogo(
+    modifier: Modifier = Modifier,
+    tint: Color = MaterialTheme.colorScheme.onSurface,
+) = XyLogo(modifier = modifier, tint = tint)
+
+@Composable
+fun SeiOverlay(
+    title: String,
+    modifier: Modifier = Modifier,
+    onDismiss: (() -> Unit)? = null,
+    maxWidth: Dp = 440.dp,
+    origin: Alignment = Alignment.Center,
+    content: @Composable ColumnScope.() -> Unit,
+) = XyOverlay(
+    title = title,
+    modifier = modifier,
+    onDismiss = onDismiss,
+    maxWidth = maxWidth,
+    origin = origin,
+    content = content,
+)
+
+@Composable
+fun SeiDialog(
+    title: String,
+    body: String,
+    confirmLabel: String,
+    onConfirm: () -> Unit,
+    dismissLabel: String? = null,
+    onDismiss: (() -> Unit)? = null,
+) = XyDialog(
+    title = title,
+    body = body,
+    confirmLabel = confirmLabel,
+    onConfirm = onConfirm,
+    dismissLabel = dismissLabel,
+    onDismiss = onDismiss,
+)
+
+

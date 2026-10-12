@@ -371,3 +371,78 @@ fun XyGlassSectionLabel(text: String, modifier: Modifier = Modifier) {
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
 }
+
+/** Rebranded SeiDesk RM aliases for glass design primitives */
+val SeiGlassShape: Shape get() = XyGlassShape
+val SeiGlassTileShape: Shape get() = XyGlassTileShape
+
+@Composable
+fun Modifier.seiGlass(
+    shape: Shape = SeiGlassShape,
+    opacity: Float = 1f,
+    strength: Float = 1f,
+    edge: Boolean = true,
+): Modifier = xyGlass(shape = shape, opacity = opacity, strength = strength, edge = edge)
+
+@Composable
+fun SeiGlassCard(
+    modifier: Modifier = Modifier,
+    padding: Dp = 16.dp,
+    shape: Shape = SeiGlassShape,
+    opacity: Float = 1f,
+    strength: Float = 1f,
+    content: @Composable ColumnScope.() -> Unit,
+) = XyGlassCard(
+    modifier = modifier,
+    padding = padding,
+    shape = shape,
+    opacity = opacity,
+    strength = strength,
+    content = content,
+)
+
+@Composable
+fun SeiGlassTile(
+    icon: ImageVector,
+    title: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    subtitle: String? = null,
+    selected: Boolean = false,
+    enabled: Boolean = true,
+    trailing: (@Composable () -> Unit)? = null,
+    titleMaxLines: Int = 1,
+) = XyGlassTile(
+    icon = icon,
+    title = title,
+    onClick = onClick,
+    modifier = modifier,
+    subtitle = subtitle,
+    selected = selected,
+    enabled = enabled,
+    trailing = trailing,
+    titleMaxLines = titleMaxLines,
+)
+
+@Composable
+fun SeiGlassRow(
+    icon: ImageVector?,
+    title: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    subtitle: String? = null,
+    trailing: (@Composable () -> Unit)? = null,
+) = XyGlassRow(
+    icon = icon,
+    title = title,
+    onClick = onClick,
+    modifier = modifier,
+    subtitle = subtitle,
+    trailing = trailing,
+)
+
+@Composable
+fun SeiGlassSectionLabel(text: String, modifier: Modifier = Modifier) =
+    XyGlassSectionLabel(text = text, modifier = modifier)
+
+

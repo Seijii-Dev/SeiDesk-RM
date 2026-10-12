@@ -422,8 +422,8 @@ class SeiDeskSessionActivity : ComponentActivity() {
         applyWindowSecurityFlags()
         // Daftarkan sesi ini supaya home bisa menampilkan & memindahkan sesi
         // yang sedang hidup (multi-sesi).
-        XySessionRegistry.add(
-            XySessionRegistry.Live(
+        SeiSessionRegistry.add(
+            SeiSessionRegistry.Live(
                 id = profile.id,
                 label = profile.label ?: "${profile.host}:${profile.port}",
                 address = "${profile.host}:${profile.port}",

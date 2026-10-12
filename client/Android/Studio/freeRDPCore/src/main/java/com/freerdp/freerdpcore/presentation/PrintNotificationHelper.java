@@ -50,7 +50,7 @@ public class PrintNotificationHelper
 	{
 		ensureChannel(ctx);
 
-		Uri uri = FileProvider.getUriForFile(ctx, AUTHORITY, pdfFile);
+		Uri uri = FileProvider.getUriForFile(ctx, ctx.getPackageName() + ".files", pdfFile);
 
 		PendingIntent openIntent = PendingIntent.getActivity(
 		    ctx, notifId.get(),

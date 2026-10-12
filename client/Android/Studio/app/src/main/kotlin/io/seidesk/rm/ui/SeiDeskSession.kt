@@ -277,7 +277,7 @@ fun SeiDeskSessionScreen(
     // sudah tampil di stream — dua kursor sekaligus terlihat seperti bug
     // "mouse double" yang dilaporkan penguji.
     val extMouseState = remember {
-        (context as? XyDeskSessionActivity)?.externalMouseConnectedState
+        (context as? SeiDeskSessionActivity)?.externalMouseConnectedState
             ?: mutableStateOf(false)
     }
     val extMouseConnected by extMouseState
@@ -471,7 +471,7 @@ fun SeiDeskSessionScreen(
                     if (!activity.isFinishing && !activity.isDestroyed && clipboardEnabled) {
                         val cm = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         val applied = try {
-                            (activity as? XyDeskSessionActivity)?.noteRemoteClipboardText(text)
+                            (activity as? SeiDeskSessionActivity)?.noteRemoteClipboardText(text)
                             cm.setPrimaryClip(ClipboardImageProvider.createTextClip(activity, "rdp", text))
                             true
                         } catch (e: RuntimeException) {
@@ -499,7 +499,7 @@ fun SeiDeskSessionScreen(
                     if (!activity.isFinishing && !activity.isDestroyed && clipboardEnabled && data.isNotEmpty()) {
                         val cm = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         runCatching {
-                            (activity as? XyDeskSessionActivity)?.noteRemoteClipboardImage(data)
+                            (activity as? SeiDeskSessionActivity)?.noteRemoteClipboardImage(data)
                             ClipboardImageProvider.setImageData(data)
                             cm.setPrimaryClip(
                                 android.content.ClipData.newUri(
@@ -522,7 +522,7 @@ fun SeiDeskSessionScreen(
             val visible = heightPx > 0
             keyboardShown = visible
             prefs.setKeyboardShown(profile.id, visible)
-            (context as? XyDeskSessionActivity)?.onSessionImeVisibilityChanged(visible)
+            (context as? SeiDeskSessionActivity)?.onSessionImeVisibilityChanged(visible)
         }
         controller.onRemoteCursor = { cursor -> remoteCursor = cursor }
         controller.onCursorMoved = { x, y ->
@@ -565,7 +565,7 @@ fun SeiDeskSessionScreen(
                 lastRemoteDpiRequest = DisplayPrefs.remoteDpi(context, profile.id)
                 controller.bind(instance)
                 controller.setImeVisible(keyboardShown)
-                (context as? XyDeskSessionActivity)?.syncPhoneClipboardToRemote()
+                (context as? SeiDeskSessionActivity)?.syncPhoneClipboardToRemote()
                 when {
                     // Zoom sendiri menang; kalau belum pernah diatur dan auto-fit
                     // menyala, seluruh desktop dimuat (taskbar ikut kelihatan).
@@ -727,7 +727,7 @@ fun SeiDeskSessionScreen(
     }
 
     LaunchedEffect(state, certPrompt != null, nlaPrompt != null, confirmDisconnect, confirmCancelConnect, showLog, controlsBackHandler) {
-        (context as? XyDeskSessionActivity)?.backHandler = {
+        (context as? SeiDeskSessionActivity)?.backHandler = {
             when {
                 certPrompt != null || nlaPrompt != null -> true
                 showLog -> {
@@ -757,7 +757,7 @@ fun SeiDeskSessionScreen(
     }
 
     fun reportInputDispatchFailure() {
-        (context as? XyDeskSessionActivity)?.reportInputDispatchFailure()
+        (context as? SeiDeskSessionActivity)?.reportInputDispatchFailure()
     }
     fun sendCursorEvent(x: Int, y: Int, flags: Int) {
         if (!manager.sendCursorEvent(x, y, flags) && state is SessionState.Connected) {
@@ -927,7 +927,7 @@ fun SeiDeskSessionScreen(
     }
 
     DisposableEffect(controller, clipboardSyncEnabled) {
-        val act = context as? XyDeskSessionActivity
+        val act = context as? SeiDeskSessionActivity
         controller.onInputKeyConsumed = {
             (context as? Activity)?.runOnUiThread {
                 consumeOneShotKeys()
@@ -1190,7 +1190,7 @@ fun SeiDeskSessionScreen(
                 zoom = zoom,
                 inputMode = InputMode.entries[inputMode],
                 externalInputDeviceConnected = !isPcConnectMode &&
-                    (context as? XyDeskSessionActivity)?.externalInputDeviceConnected == true,
+                    (context as? SeiDeskSessionActivity)?.externalInputDeviceConnected == true,
                 onInputModeChange = { mode ->
                     inputMode = mode.ordinal
                     prefs.inputMode = mode
@@ -1402,7 +1402,7 @@ fun SeiDeskSessionScreen(
                 onOpenHome = {
                     // Sesi tetap jalan di latar, tetapi tidak auto-resume begitu
                     // pengguna sengaja memilih kembali ke Home.
-                    (context as? XyDeskSessionActivity)?.markIntentionalHomeNavigation()
+                    (context as? SeiDeskSessionActivity)?.markIntentionalHomeNavigation()
                     controller.blurInput()
                     runCatching {
                         context.startActivity(
@@ -1494,7 +1494,7 @@ fun SeiDeskSessionScreen(
                     privacyCurtain = true
                 },
                 onGyroMouseChanged = { enabled ->
-                    (context as? XyDeskSessionActivity)?.setGyroMouseActive(enabled && connected)
+                    (context as? SeiDeskSessionActivity)?.setGyroMouseActive(enabled && connected)
                 },
                 onOverlayActiveChange = { controlsOverlayOpen = it },
                 onRegisterBackHandler = { controlsBackHandler = it },
@@ -1722,7 +1722,7 @@ fun SeiDeskSessionScreen(
                 confirmDisconnect = false
                 userDisconnect = true
                 reconnecting = false
-                (context as? XyDeskSessionActivity)?.markExplicitDisconnect(profile.id)
+                (context as? SeiDeskSessionActivity)?.markExplicitDisconnect(profile.id)
                 appPrefs.clearAutoResumeSession(profile.id)
                 releaseLatchedKeys()
                 if (context.let { runCatching { AppPrefs(it).autoLockRemoteOnLeave }.getOrDefault(false) }) {

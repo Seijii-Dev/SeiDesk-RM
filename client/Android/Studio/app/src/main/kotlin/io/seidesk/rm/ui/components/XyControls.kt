@@ -246,3 +246,48 @@ fun XyInset(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
         content()
     }
 }
+
+// =========================================================================
+// SeiDesk RM Control Aliases
+// =========================================================================
+
+@Composable
+fun SeiSlider(
+    value: Float,
+    onValueChange: (Float) -> Unit,
+    valueRange: ClosedFloatingPointRange<Float>,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    steps: Int = 0,
+) = XySlider(
+    value = value,
+    onValueChange = onValueChange,
+    valueRange = valueRange,
+    modifier = modifier,
+    enabled = enabled,
+    steps = steps,
+)
+
+@Composable
+fun SeiSpinner(
+    modifier: Modifier = Modifier,
+    size: Dp = 18.dp,
+    color: Color = MaterialTheme.colorScheme.primary,
+    strokeWidth: Dp = 2.dp,
+) = XySpinner(modifier = modifier, size = size, color = color, strokeWidth = strokeWidth)
+
+@Composable
+fun SeiDivider(modifier: Modifier = Modifier) = XyDivider(modifier = modifier)
+
+@Composable
+fun SeiDot(color: Color, sizeDp: Dp = 6.dp, modifier: Modifier = Modifier) =
+    XyDot(color = color, sizeDp = sizeDp, modifier = modifier)
+
+@Composable
+fun SeiTag(text: String, modifier: Modifier = Modifier) =
+    XyTag(text = text, modifier = modifier)
+
+@Composable
+fun SeiInset(modifier: Modifier = Modifier, content: @Composable () -> Unit) =
+    XyInset(modifier = modifier, content = content)
+

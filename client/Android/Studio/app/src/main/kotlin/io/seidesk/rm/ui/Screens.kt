@@ -1177,8 +1177,8 @@ internal fun SupportCard() {
             SupportLink(
                 icon = XyIcons.Star,
                 title = t("about.support.star"),
-                subtitle = "github.com/xykal/XyDesk-Remote",
-                url = "https://github.com/xykal/XyDesk-Remote/stargazers",
+                subtitle = "github.com/Seijii-Dev/SeiDesk-RM",
+                url = "https://github.com/Seijii-Dev/SeiDesk-RM/stargazers",
             )
         }
         Spacer(Modifier.height(10.dp))
