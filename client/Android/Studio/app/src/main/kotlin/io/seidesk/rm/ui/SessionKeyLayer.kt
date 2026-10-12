@@ -562,15 +562,14 @@ fun HudKeyPicker(
             ) {
                 Column(Modifier.weight(1f)) {
                     Text(
-                        xy("TAMBAH TOMBOL KONTROL", "ADD CONTROL BUTTON"),
+                        sei( "ADD CONTROL BUTTON"),
                         color = MaterialTheme.colorScheme.onSurface,
                         fontSize = 12.sp,
                         letterSpacing = 1.1.sp,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
-                        xy(
-                            "Pilih dari kategori Gamepad, Kombinasi, F1-F12, Single Key, Numpad, Huruf, Modifier, atau Mouse.",
+                        sei(
                             "Pick from Gamepad, Combos, F1-F12, Single Key, Numpad, Letters, Modifiers, or Mouse.",
                         ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -581,8 +580,8 @@ fun HudKeyPicker(
             SeiField(
                 value = search,
                 onValueChange = { search = it },
-                label = xy("Cari tombol", "Search button"),
-                hint = xy("mis. F4, Ctrl+C, Num 5, Esc, Panah", "e.g. F4, Ctrl+C, Num 5, Esc, Arrow"),
+                label = sei( "Search button"),
+                hint = sei( "e.g. F4, Ctrl+C, Num 5, Esc, Arrow"),
             )
             Row(
                 Modifier.horizontalScroll(rememberScrollState()),
@@ -610,7 +609,7 @@ fun HudKeyPicker(
                             .padding(horizontal = 11.dp, vertical = 6.dp),
                     ) {
                         Text(
-                            "${xy(name, nameEn)} (${list.size})",
+                            "${sei( nameEn)} (${list.size})",
                             color = if (active) MaterialTheme.colorScheme.onPrimaryContainer
                             else MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 11.sp,
@@ -639,7 +638,7 @@ fun HudKeyPicker(
             ) {
                 if (items.isEmpty()) {
                     Text(
-                        xy("Tidak ada tombol yang cocok dengan pencarian.", "No matching buttons found."),
+                        sei( "No matching buttons found."),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 11.sp,
                     )
@@ -686,7 +685,7 @@ fun HudKeyPicker(
                                             )
                                         }
                                         Text(
-                                            xy(item.label, item.labelEn),
+                                            sei( item.labelEn),
                                             color = MaterialTheme.colorScheme.onSurface,
                                             fontSize = 11.sp,
                                             fontWeight = FontWeight.Medium,
@@ -702,7 +701,7 @@ fun HudKeyPicker(
                 }
             }
             SeiPillButton(
-                xy("Tutup", "Close"),
+                sei( "Close"),
                 onDismiss,
                 primary = false,
                 compact = true,
@@ -755,14 +754,14 @@ fun HudKeyEditor(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(
-                xy("UBAH TOMBOL", "EDIT BUTTON"),
+                sei( "EDIT BUTTON"),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 10.sp,
                 letterSpacing = 1.3.sp,
                 fontWeight = FontWeight.SemiBold,
             )
             Text(
-                xy("Perubahan tersimpan otomatis. Selesai untuk kembali ke sesi.", "Changes save automatically. Finish to return to the session."),
+                sei( "Changes save automatically. Finish to return to the session."),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 11.sp,
             )
@@ -789,12 +788,12 @@ fun HudKeyEditor(
                     }
                 }
                 Text(
-                    xy("Jenis: {0}", "Type: {0}", xy(key.kind.title, key.kind.titleEn)),
+                    sei( "Type: {0}", key.kind.titleEn),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 11.sp,
                 )
                 SeiPillButton(
-                    xy("Ganti jenis aksi", "Change action type"),
+                    sei( "Change action type"),
                     { rePick = true },
                     primary = false,
                     compact = true,
@@ -803,24 +802,24 @@ fun HudKeyEditor(
                 SeiField(
                     value = key.label,
                     onValueChange = { onChange(key.copy(label = it.take(10))) },
-                    label = xy("Label tombol (maks 10 huruf)", "Button label (max 10 chars)"),
+                    label = sei( "Button label (max 10 chars)"),
                 )
                 if (key.kind == HudKind.MACRO) {
                     SeiField(
                         value = key.macroText,
                         onValueChange = { onChange(key.copy(macroText = it.take(160))) },
-                        label = xy("Perintah / teks makro otomatis", "Auto-typed macro command / text"),
+                        label = sei( "Auto-typed macro command / text"),
                         hint = "powershell",
                     )
                     io.seidesk.rm.ui.components.SeiToggleRow(
-                        title = xy("Tekan Enter otomatis di akhir", "Press Enter automatically at the end"),
+                        title = sei( "Press Enter automatically at the end"),
                         checked = key.macroSendEnter,
                         onCheckedChange = { onChange(key.copy(macroSendEnter = it)) },
                     )
                 }
                 if (key.kind == HudKind.COMBO || key.kind == HudKind.KEY) {
                     Text(
-                        xy("Kombinasi bebas", "Custom combination"),
+                        sei( "Custom combination"),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.SemiBold,
@@ -845,8 +844,7 @@ fun HudKeyEditor(
                         }
 
                         Text(
-                            xy(
-                                "Terpilih {0}/5 — ketuk chip di bawah untuk hapus/tambah",
+                            sei(
                                 "Picked {0}/5 — tap chips below to remove/add",
                                 key.combo.size,
                             ),
@@ -892,8 +890,7 @@ fun HudKeyEditor(
                     } else {
                         val mainCode = key.keyCode
                         Text(
-                            xy(
-                                "Tombol utama: {0}",
+                            sei(
                                 "Main key: {0}",
                                 HudKeyCatalog.keyName(mainCode),
                             ),
@@ -923,22 +920,22 @@ fun HudKeyEditor(
                         }
                     }
                 }
-                Text(xy("Cara pakai", "How it works"), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp)
+                Text(sei( "How it works"), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp)
                 val supportedActions = HudKey.allowedActions(key.kind)
                 val selectedAction = supportedActions.indexOf(key.action).coerceAtLeast(0)
                 SeiSegmented(
-                    options = supportedActions.map { xy(it.title, it.titleEn) },
+                    options = supportedActions.map { sei( it.titleEn) },
                     selectedIndex = selectedAction,
                     onSelect = { onChange(key.copy(action = supportedActions[it])) },
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Text(
-                    xy(supportedActions[selectedAction].detail, supportedActions[selectedAction].detailEn),
+                    sei( supportedActions[selectedAction].detailEn),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 10.5.sp,
                 )
                 Text(
-                    xy("Ukuran tombol: {0} dp", "Button size: {0} dp", key.size.toInt()),
+                    sei( "Button size: {0} dp", key.size.toInt()),
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 11.sp,
                 )
@@ -948,8 +945,7 @@ fun HudKeyEditor(
                     valueRange = HudKey.MIN_SIZE..HudKey.MAX_SIZE,
                 )
                 Text(
-                    xy(
-                        "Posisi: {0}% , {1}% — geser tombolnya langsung di layar untuk memindah.",
+                    sei(
                         "Position: {0}% , {1}% — drag the button on screen to move it.",
                         (key.x * 100).toInt(),
                         (key.y * 100).toInt(),
@@ -960,14 +956,14 @@ fun HudKeyEditor(
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 SeiPillButton(
-                    xy("Hapus", "Delete"),
+                    sei( "Delete"),
                     onDelete,
                     primary = false,
                     compact = true,
                     modifier = Modifier.weight(1f),
                 )
                 SeiPillButton(
-                    xy("Simpan & selesai", "Save & finish"),
+                    sei( "Save & finish"),
                     onDismiss,
                     primary = true,
                     compact = true,
@@ -1025,8 +1021,7 @@ fun HudMappingBanner(
     ) {
         Column(Modifier.weight(1f)) {
             Text(
-                xy(
-                    "Atur posisi ({0})",
+                sei(
                     "Edit layout ({0})",
                     keyCount,
                 ),
@@ -1036,8 +1031,7 @@ fun HudMappingBanner(
                 maxLines = 1,
             )
             Text(
-                xy(
-                    "Geser tombol · Ketuk untuk ubah",
+                sei(
                     "Drag to move · Tap to edit",
                 ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1054,7 +1048,7 @@ fun HudMappingBanner(
                 .padding(horizontal = 12.dp, vertical = 7.dp),
         ) {
             Text(
-                xy("+ Tambah", "+ Add"),
+                sei( "+ Add"),
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -1069,7 +1063,7 @@ fun HudMappingBanner(
                     .padding(horizontal = 10.dp, vertical = 7.dp),
             ) {
                 Text(
-                    xy("Reset", "Reset"),
+                    sei( "Reset"),
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 11.sp,
                 )
@@ -1084,7 +1078,7 @@ fun HudMappingBanner(
                 .padding(horizontal = 12.dp, vertical = 7.dp),
         ) {
             Text(
-                xy("Selesai", "Done"),
+                sei( "Done"),
                 color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.SemiBold,

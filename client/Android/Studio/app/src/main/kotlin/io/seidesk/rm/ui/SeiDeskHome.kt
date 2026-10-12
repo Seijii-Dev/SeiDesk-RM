@@ -102,7 +102,7 @@ internal enum class SeiSection(val title: String, val titleEn: String) {
 
 /** Judul seksi yang ikut bahasa aktif. */
 @Composable
-internal fun sectionTitle(section: SeiSection): String = xy(section.title, section.titleEn)
+internal fun sectionTitle(section: SeiSection): String = sei( section.titleEn)
 
 /** Layar yang sedang tampil. */
 private sealed interface SeiRoute {
@@ -220,7 +220,7 @@ fun SeiDeskHome(
         val opts = RdpOptions.of(context, profile.id)
         val mac = opts.macAddress?.trim().orEmpty()
         if (WakeOnLan.parseMacBytes(mac) == null) {
-            notice.show(xyNow("MAC Address Wake-on-LAN belum diatur atau tidak valid", "Wake-on-LAN MAC address is missing or invalid"))
+            notice.show(seiNow( "Wake-on-LAN MAC address is missing or invalid"))
             return
         }
         wolWaitingProfile = profile
@@ -236,16 +236,14 @@ fun SeiDeskHome(
             if (sendRes.isFailure) {
                 wolWaitingProfile = null
                 notice.show(
-                    xyNow(
-                        "Gagal mengirim paket Wake-on-LAN: ${sendRes.exceptionOrNull()?.message ?: "error"}",
+                    seiNow(
                         "Failed to send Wake-on-LAN packet: ${sendRes.exceptionOrNull()?.message ?: "error"}",
                     ),
                 )
                 return@launch
             }
             notice.show(
-                xyNow(
-                    "Magic Packet terkirim ke ${profile.label ?: profile.host}. Menunggu port RDP aktif...",
+                seiNow(
                     "Magic Packet sent to ${profile.label ?: profile.host}. Waiting for RDP port...",
                 ),
             )
@@ -260,12 +258,11 @@ fun SeiDeskHome(
             if (wolWaitingProfile?.id == profile.id) {
                 wolWaitingProfile = null
                 if (ready) {
-                    notice.show(xyNow("PC menyala! Membuka sesi RDP...", "PC is awake! Launching RDP session..."))
+                    notice.show(seiNow( "PC is awake! Launching RDP session..."))
                     connect(profile)
                 } else {
                     notice.show(
-                        xyNow(
-                            "Paket WoL sudah dikirim, tetapi port ${profile.port} belum merespons dalam 35 detik.",
+                        seiNow(
                             "WoL packet sent, but port ${profile.port} did not respond within 35 seconds.",
                         ),
                     )
@@ -279,13 +276,12 @@ fun SeiDeskHome(
             val saved = runCatching { repo.save(profile, rememberPassword) }
             if (saved.isFailure) {
                 notice.show(
-                    xyNow("Profil tidak tersimpan: ", "Profile not saved: ") +
-                        (saved.exceptionOrNull()?.message ?: xyNow("kesalahan penyimpanan", "storage error")),
+                    seiNow( "Profile not saved: ") +
+                        (saved.exceptionOrNull()?.message ?: seiNow( "storage error")),
                 )
             } else if (saved.getOrDefault(true) == false) {
                 notice.show(
-                    xyNow(
-                        "Profil tersimpan, tapi password gagal disimpan aman. Isi ulang nanti; password tidak diingat.",
+                    seiNow(
                         "Profile saved, but the password could not be stored securely. Re-enter it later; it was not remembered.",
                     ),
                 )
@@ -310,7 +306,7 @@ fun SeiDeskHome(
             FeedbackDestination.COPY -> {
                 val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
                 if (clipboard == null) {
-                    notice.show(xyNow("Clipboard tidak tersedia", "Clipboard is unavailable"))
+                    notice.show(seiNow( "Clipboard is unavailable"))
                     return
                 }
                 runCatching {
@@ -319,13 +315,12 @@ fun SeiDeskHome(
                     )
                 }.onSuccess {
                     notice.show(
-                        xyNow(
-                            "Draf disalin. Tempel ke aplikasi mana pun.",
+                        seiNow(
                             "Draft copied. Paste it into any app.",
                         ),
                     )
                 }.onFailure {
-                    notice.show(xyNow("Gagal menyalin draf", "Could not copy the draft"))
+                    notice.show(seiNow( "Could not copy the draft"))
                 }
             }
 
@@ -339,11 +334,11 @@ fun SeiDeskHome(
                     context.startActivity(
                         Intent.createChooser(
                             sendIntent,
-                            xyNow("Pilih aplikasi untuk berbagi", "Choose an app to share"),
+                            seiNow( "Choose an app to share"),
                         ),
                     )
                 }.onFailure {
-                    notice.show(xyNow("Menu berbagi tidak tersedia", "Share menu is unavailable"))
+                    notice.show(seiNow( "Share menu is unavailable"))
                 }
             }
         }
@@ -432,8 +427,7 @@ fun SeiDeskHome(
                             scope.launch {
                                 repo.clear()
                                 notice.show(
-                                    xyNow(
-                                        "Kredensial & perangkat dihapus",
+                                    seiNow(
                                         "Credentials and devices cleared",
                                     ),
                                 )
@@ -530,7 +524,7 @@ fun SeiDeskHome(
                 SeiRow(
                     // Dulu title mentah (Indonesia saja) — drawer satu-satunya
                     // tempat yang tidak ikut bahasa. Sekarang dua bahasa.
-                    title = xy(item.title, item.titleEn),
+                    title = sei( item.titleEn),
                     modifier = Modifier.padding(horizontal = 8.dp),
                     leading = when (item) {
                         SeiSection.PERANGKAT -> SeiIcons.Monitor
@@ -555,8 +549,8 @@ fun SeiDeskHome(
                 )
             }
             SeiRow(
-                title = xy("Alat & bantuan", "Tools & help"),
-                subtitle = xy("Cadangan, pembaruan, dan masukan", "Backup, updates, and feedback"),
+                title = sei( "Tools & help"),
+                subtitle = sei( "Backup, updates, and feedback"),
                 modifier = Modifier.padding(horizontal = 8.dp),
                 leading = SeiIcons.Folder,
                 trailing = {
@@ -570,7 +564,7 @@ fun SeiDeskHome(
             )
             if (helpToolsOpen) {
                 SeiPillButton(
-                    text = xy("Cadangkan / Pulihkan Profil", "Backup / Restore Profiles"),
+                    text = sei( "Backup / Restore Profiles"),
                     onClick = {
                         drawerOpen = false
                         backupJsonInput = exportProfilesJson(context, favorites)
@@ -583,11 +577,11 @@ fun SeiDeskHome(
                 )
                 Spacer(Modifier.height(6.dp))
                 SeiPillButton(
-                    text = xy("Cek Pembaruan & RilisIn Store", "Check Update & RilisIn Store"),
+                    text = sei( "Check Update & RilisIn Store"),
                     onClick = {
                         drawerOpen = false
                         updateModalOpen = true
-                        updateStatusText = xyNow("Memeriksa status rilis terbaru dari www.xydeskremote.biz.id...", "Checking latest release status from www.xydeskremote.biz.id...")
+                        updateStatusText = seiNow( "Checking latest release status from www.xydeskremote.biz.id...")
                         scope.launch {
                             val status = withContext(Dispatchers.IO) { fetchRemoteReleaseStatus(context) }
                             updateStatusText = status
@@ -600,7 +594,7 @@ fun SeiDeskHome(
                 )
                 Spacer(Modifier.height(6.dp))
                 SeiPillButton(
-                    text = xy("Masukan & saran", "Feedback & suggestions"),
+                    text = sei( "Feedback & suggestions"),
                     onClick = {
                         drawerOpen = false
                         feedbackOpen = true
@@ -623,7 +617,7 @@ fun SeiDeskHome(
 
     if (showCrash) {
         InfoDialog(
-            title = xy("Log error terakhir", "Last error log"),
+            title = sei( "Last error log"),
             body = crashLog.orEmpty(),
             onDismiss = {
                 showCrash = false
@@ -647,7 +641,7 @@ fun SeiDeskHome(
             append(bootTail.joinToString("\n"))
         }
         InfoDialog(
-            title = xy("Log sesi terakhir", "Last session log"),
+            title = sei( "Last session log"),
             body = body,
             onDismiss = { showBoot = false },
         )
@@ -660,71 +654,67 @@ fun SeiDeskHome(
     }
     confirmDeleteDevice?.let { target ->
         SeiDialog(
-            title = xy("Hapus perangkat?", "Delete device?"),
-            body = xy(
-                "Hapus \"{0}\" beserta password dan pengaturannya?",
+            title = sei( "Delete device?"),
+            body = sei(
                 "Delete \"{0}\" along with its saved password and settings?",
                 target.label ?: "${target.host}:${target.port}",
             ),
-            confirmLabel = xy("Hapus", "Delete"),
+            confirmLabel = sei( "Delete"),
             onConfirm = {
                 confirmDeleteDevice = null
                 scope.launch {
                     repo.remove(target.id)
                     io.seidesk.rm.core.RdpOptions.clear(context, target.id)
                     DisplayPrefs.clear(context, target.id)
-                    notice.show(xyNow("Perangkat dihapus", "Device deleted"))
+                    notice.show(seiNow( "Device deleted"))
                 }
             },
-            dismissLabel = xy("Batal", "Cancel"),
+            dismissLabel = sei( "Cancel"),
             onDismiss = { confirmDeleteDevice = null },
         )
     }
     wolWaitingProfile?.let { target ->
         SeiDialog(
-            title = xy("Membangunkan PC (Wake-on-LAN)", "Waking PC (Wake-on-LAN)"),
-            body = xy(
-                "Magic Packet sudah dikirim ke \"{0}\" ({1}:{2}). XyDesk sedang memantau kesiapan port RDP otomatis hingga 35 detik...",
+            title = sei( "Waking PC (Wake-on-LAN)"),
+            body = sei(
                 "Magic Packet sent to \"{0}\" ({1}:{2}). XyDesk is automatically polling the RDP port for up to 35 seconds...",
                 target.label ?: target.host,
                 target.host,
                 target.port,
             ),
-            confirmLabel = xy("Konek Sekarang", "Connect Now"),
+            confirmLabel = sei( "Connect Now"),
             onConfirm = {
                 wolWaitingProfile = null
                 connect(target)
             },
-            dismissLabel = xy("Batal Tunggu", "Cancel Wait"),
+            dismissLabel = sei( "Cancel Wait"),
             onDismiss = { wolWaitingProfile = null },
         )
     }
 
     if (confirmExitApp) {
         SeiDialog(
-            title = xy("Keluar dari SeiDesk RM?", "Exit SeiDesk RM?"),
-            body = xy(
-                "Tutup aplikasi sekarang? Sesi yang sedang aktif di latar akan tetap berjalan jika keep-alive menyala.",
+            title = sei( "Exit SeiDesk RM?"),
+            body = sei(
                 "Close the application now? Active background sessions will stay running while keep-alive is enabled.",
             ),
-            confirmLabel = xy("Keluar", "Exit"),
+            confirmLabel = sei( "Exit"),
             onConfirm = {
                 confirmExitApp = false
                 onExit()
             },
-            dismissLabel = xy("Batal", "Cancel"),
+            dismissLabel = sei( "Cancel"),
             onDismiss = { confirmExitApp = false },
         )
     }
 
     if (backupModalOpen) {
         SeiOverlay(
-            title = xy("Cadangkan & Pulihkan Profil (JSON)", "Backup & Restore Profiles (JSON)"),
+            title = sei( "Backup & Restore Profiles (JSON)"),
             onDismiss = { backupModalOpen = false },
         ) {
             Text(
-                xy(
-                    "Salin JSON di bawah untuk mencadangkan seluruh daftar Koneksi PC & Koneksi RDP Anda, atau tempel JSON cadangan lalu ketuk Pulihkan.",
+                sei(
                     "Copy the JSON below to back up all your PC Connect & RDP profiles, or paste a backup JSON and tap Restore.",
                 ),
                 style = MaterialTheme.typography.bodySmall,
@@ -733,29 +723,29 @@ fun SeiDeskHome(
             SeiField(
                 value = backupJsonInput,
                 onValueChange = { backupJsonInput = it },
-                label = xy("Data JSON Profil Perangkat", "Device Profiles JSON Data"),
+                label = sei( "Device Profiles JSON Data"),
                 hint = "{\"version\":1,\"profiles\":[...]}",
             )
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 SeiPillButton(
-                    text = xy("Salin Cadangan", "Copy Backup"),
+                    text = sei( "Copy Backup"),
                     onClick = {
                         val json = exportProfilesJson(context, favorites)
                         backupJsonInput = json
                         val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
                         cm?.setPrimaryClip(ClipData.newPlainText("seidesk-profiles-backup", json))
-                        notice.show(xyNow("Cadangan JSON disalin ke clipboard ({0} perangkat)", "Backup JSON copied to clipboard ({0} devices)", favorites.size))
+                        notice.show(seiNow( "Backup JSON copied to clipboard ({0} devices)", favorites.size))
                     },
                     primary = false,
                     compact = true,
                     modifier = Modifier.weight(1f),
                 )
                 SeiPillButton(
-                    text = xy("Pulihkan JSON", "Restore JSON"),
+                    text = sei( "Restore JSON"),
                     onClick = {
                         val parsed = importProfilesJson(backupJsonInput)
                         if (parsed.isEmpty()) {
-                            notice.show(xyNow("Format JSON tidak valid atau kosong", "Invalid or empty JSON format"))
+                            notice.show(seiNow( "Invalid or empty JSON format"))
                         } else {
                             confirmRestoreProfiles = parsed
                         }
@@ -765,7 +755,7 @@ fun SeiDeskHome(
                 )
             }
             SeiPillButton(
-                text = xy("Tutup", "Close"),
+                text = sei( "Close"),
                 onClick = { backupModalOpen = false },
                 primary = false,
                 compact = true,
@@ -776,13 +766,12 @@ fun SeiDeskHome(
 
     confirmRestoreProfiles?.let { listToRestore ->
         SeiDialog(
-            title = xy("Pulihkan {0} profil perangkat?", "Restore {0} device profiles?", listToRestore.size),
-            body = xy(
-                "Tambahkan / perbarui {0} profil perangkat dari data cadangan JSON sekarang?",
+            title = sei( "Restore {0} device profiles?", listToRestore.size),
+            body = sei(
                 "Add / update {0} device profiles from the JSON backup now?",
                 listToRestore.size,
             ),
-            confirmLabel = xy("Pulihkan", "Restore"),
+            confirmLabel = sei( "Restore"),
             onConfirm = {
                 val items = listToRestore
                 confirmRestoreProfiles = null
@@ -799,17 +788,17 @@ fun SeiDeskHome(
                             }
                         }
                     }
-                    notice.show(xyNow("{0} profil perangkat berhasil dipulihkan", "{0} device profiles restored", items.size))
+                    notice.show(seiNow( "{0} device profiles restored", items.size))
                 }
             },
-            dismissLabel = xy("Batal", "Cancel"),
+            dismissLabel = sei( "Cancel"),
             onDismiss = { confirmRestoreProfiles = null },
         )
     }
 
     if (updateModalOpen) {
         SeiOverlay(
-            title = xy("Pembaruan & RilisIn Store", "Updates & RilisIn Store"),
+            title = sei( "Updates & RilisIn Store"),
             onDismiss = { updateModalOpen = false },
         ) {
             Text(
@@ -817,13 +806,13 @@ fun SeiDeskHome(
                 style = MaterialTheme.typography.titleSmall,
             )
             Text(
-                text = updateStatusText ?: xy("Memeriksa pembaruan...", "Checking for updates..."),
+                text = updateStatusText ?: sei( "Checking for updates..."),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 SeiPillButton(
-                    text = xy("Portal www.xydeskremote.biz.id", "www.xydeskremote.biz.id Portal"),
+                    text = sei( "www.xydeskremote.biz.id Portal"),
                     onClick = {
                         runCatching {
                             context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.xydeskremote.biz.id")))
@@ -833,7 +822,7 @@ fun SeiDeskHome(
                     modifier = Modifier.weight(1f),
                 )
                 SeiPillButton(
-                    text = xy("Buka RilisIn Store", "Open RilisIn Store"),
+                    text = sei( "Open RilisIn Store"),
                     onClick = {
                         runCatching {
                             context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://rilisin.xyverse.my.id")))
@@ -845,7 +834,7 @@ fun SeiDeskHome(
                 )
             }
             SeiPillButton(
-                text = xy("Tutup", "Close"),
+                text = sei( "Close"),
                 onClick = { updateModalOpen = false },
                 primary = false,
                 compact = true,
@@ -891,7 +880,7 @@ private fun LiveSessionsCard() {
             ) {
                 Box(Modifier.size(6.dp).clip(CircleShape).background(Color(0xFF10B981)))
             }
-            XySectionLabel(xy("Sesi aktif ({0})", "Active sessions ({0})", live.size))
+            XySectionLabel(sei( "Active sessions ({0})", live.size))
         }
         Spacer(Modifier.height(10.dp))
         live.forEach { item ->
@@ -922,13 +911,13 @@ private fun LiveSessionsCard() {
                     )
                 }
                 SeiPillButton(
-                    text = xy("Buka", "Open"),
+                    text = sei( "Open"),
                     onClick = { item.open() },
                     icon = SeiIcons.Play,
                     compact = true,
                 )
                 SeiPillButton(
-                    text = xy("Putus", "Disconnect"),
+                    text = sei( "Disconnect"),
                     onClick = { confirmKill = item },
                     primary = false,
                     compact = true,
@@ -939,19 +928,18 @@ private fun LiveSessionsCard() {
     }
     confirmKill?.let { target ->
         SeiDialog(
-            title = xy("Putuskan sesi aktif?", "Disconnect active session?"),
-            body = xy(
-                "Putuskan koneksi ke \"{0}\" ({1}) sekarang?",
+            title = sei( "Disconnect active session?"),
+            body = sei(
                 "Disconnect from \"{0}\" ({1}) now?",
                 target.label,
                 target.address,
             ),
-            confirmLabel = xy("Putuskan", "Disconnect"),
+            confirmLabel = sei( "Disconnect"),
             onConfirm = {
                 confirmKill = null
                 target.kill()
             },
-            dismissLabel = xy("Batal", "Cancel"),
+            dismissLabel = sei( "Cancel"),
             onDismiss = { confirmKill = null },
         )
     }
@@ -993,8 +981,7 @@ private fun DevicesScreen(
             }
             if (showPcConnectionNotice) {
                 Banner(
-                    text = xy(
-                        "Koneksi PC langsung masih dalam tahap pengembangan dan terpisah dari RDP. Fitur RDP tetap tersedia.",
+                    text = sei(
                         "Direct PC connection is still in development and separate from RDP. RDP remains available.",
                     ),
                     onClick = { showPcConnectionNotice = false },
@@ -1004,8 +991,7 @@ private fun DevicesScreen(
             }
             if (crashLog != null) {
                 Banner(
-                    text = xy(
-                        "Terjadi error sebelumnya — ketuk untuk lihat log",
+                    text = sei(
                         "An error happened before — tap to see the log",
                     ),
                     onClick = onShowCrash,
@@ -1021,8 +1007,7 @@ private fun DevicesScreen(
             }
             if (bootSuspect) {
                 Banner(
-                    text = xy(
-                        "Sesi terakhir terhenti di tengah jalan — ketuk untuk lihat log",
+                    text = sei(
                         "The last session stopped midway — tap to see the log",
                     ),
                     onClick = onShowBoot,
@@ -1032,15 +1017,15 @@ private fun DevicesScreen(
             }
 
             SeiTopBar(
-                title = xy("Perangkat", "Devices"),
+                title = sei( "Devices"),
                 onBack = null,
                 actions = {
-                    SeiIconPill(SeiIcons.Menu, onMenu, flat = true, contentDescription = xy("Menu", "Menu"))
+                    SeiIconPill(SeiIcons.Menu, onMenu, flat = true, contentDescription = sei( "Menu"))
                     SeiIconPill(
                         SeiIcons.Plus,
                         { showAddBubble = !showAddBubble },
                         active = true,
-                        contentDescription = xy("Tambah perangkat", "Add device"),
+                        contentDescription = sei( "Add device"),
                     )
                 },
             )
@@ -1052,12 +1037,10 @@ private fun DevicesScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         SeiCard(modifier = Modifier.fillMaxWidth()) {
-                            Text(xy("Belum ada perangkat", "No devices yet"), style = MaterialTheme.typography.titleMedium)
+                            Text(sei( "No devices yet"), style = MaterialTheme.typography.titleMedium)
                             Spacer(Modifier.height(6.dp))
                             Text(
-                                xy(
-                                    "Pilih Koneksi PC (ID & Password via XyDeskHost.exe dengan dukungan GPU Gaming) " +
-                                        "atau Koneksi RDP standar lewat IP lokal, domain, maupun Tailscale.",
+                                sei(
                                     "Choose PC Connection (ID & Password via XyDeskHost.exe with Gaming GPU support) " +
                                         "or standard RDP Connection over a local IP, domain, or Tailscale.",
                                 ),
@@ -1067,13 +1050,13 @@ private fun DevicesScreen(
                             Spacer(Modifier.height(16.dp))
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 SeiPillButton(
-                                    xy("Koneksi PC (ID)", "PC (ID & Pass)"),
+                                    sei( "PC (ID & Pass)"),
                                     onAddPcQuick,
                                     icon = SeiIcons.Plus,
                                     modifier = Modifier.weight(1f),
                                 )
                                 SeiPillButton(
-                                    xy("Koneksi RDP", "Standard RDP"),
+                                    sei( "Standard RDP"),
                                     onAddRdp,
                                     primary = false,
                                     modifier = Modifier.weight(1f),
@@ -1132,12 +1115,11 @@ private fun DevicesScreen(
                                 }
                                 Column(Modifier.weight(1f)) {
                                     Text(
-                                        xy("RdpFree", "RdpFree"),
+                                        sei( "RdpFree"),
                                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
                                     )
                                     Text(
-                                        xy(
-                                            "PC Windows dari akun GitHub-mu sendiri — tanpa Tailscale",
+                                        sei(
                                             "Windows PC from your own GitHub account — no Tailscale needed",
                                         ),
                                         style = MaterialTheme.typography.labelSmall,
@@ -1145,7 +1127,7 @@ private fun DevicesScreen(
                                     )
                                 }
                                 SeiPillButton(
-                                    text = xy("Buat", "Create"),
+                                    text = sei( "Create"),
                                     onClick = onCreateRdp,
                                     modifier = Modifier.height(36.dp),
                                     compact = true,
@@ -1156,9 +1138,9 @@ private fun DevicesScreen(
                     item {
                         SeiSegmented(
                             options = listOf(
-                                xy("Semua ({0})", "All ({0})", favorites.size),
-                                xy("Koneksi PC", "PC Connect"),
-                                xy("Koneksi RDP", "RDP Session"),
+                                sei( "All ({0})", favorites.size),
+                                sei( "PC Connect"),
+                                sei( "RDP Session"),
                             ),
                             selectedIndex = modeFilterIndex,
                             onSelect = { modeFilterIndex = it },
@@ -1170,8 +1152,8 @@ private fun DevicesScreen(
                             SeiField(
                                 value = searchQuery,
                                 onValueChange = { searchQuery = it },
-                                label = xy("Cari perangkat", "Search devices"),
-                                hint = xy("Nama PC, alamat IP, atau username...", "PC name, IP address, or username..."),
+                                label = sei( "Search devices"),
+                                hint = sei( "PC name, IP address, or username..."),
                                 modifier = Modifier.fillMaxWidth(),
                             )
                         }
@@ -1212,21 +1194,20 @@ private fun DevicesScreen(
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 Text(
-                    xy("Pilih Jenis Koneksi", "Choose Connection Type"),
+                    sei( "Choose Connection Type"),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                 )
                 SeiRow(
-                    title = xy("Koneksi PC (ID & Password)", "PC Connection (ID & Password)"),
-                    subtitle = xy(
-                        "Jalur E2EE + Ultra-Low Latency FPS Gaming (NVIDIA / AMD / Intel GPU)",
+                    title = sei( "PC Connection (ID & Password)"),
+                    subtitle = sei(
                         "E2EE + Ultra-Low Latency FPS Gaming path (NVIDIA / AMD / Intel GPU)",
                     ),
                     modifier = Modifier.padding(horizontal = 2.dp),
                     trailing = {
                         Text(
-                            xy("Eksperimental", "Experimental"),
+                            sei( "Experimental"),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary,
                             maxLines = 1,
@@ -1238,9 +1219,8 @@ private fun DevicesScreen(
                     },
                 )
                 SeiRow(
-                    title = xy("Koneksi RDP (Host / IP)", "RDP Connection (Host / IP)"),
-                    subtitle = xy(
-                        "Koneksi langsung lewat IP lokal, domain publik, atau Tailscale",
+                    title = sei( "RDP Connection (Host / IP)"),
+                    subtitle = sei(
                         "Direct connection via local IP, public domain, or Tailscale",
                     ),
                     modifier = Modifier.padding(horizontal = 2.dp),
@@ -1250,15 +1230,14 @@ private fun DevicesScreen(
                     },
                 )
                 SeiRow(
-                    title = xy("RDP Gratis 6 Jam (GitHub Actions)", "Free 6-Hour RDP (GitHub Actions)"),
-                    subtitle = xy(
-                        "Buat PC Windows dari template XyRDP di akun GitHub-mu sendiri — iklan 1x + gabung saluran untuk buka",
+                    title = sei( "Free 6-Hour RDP (GitHub Actions)"),
+                    subtitle = sei(
                         "Spin up a Windows PC from the XyRDP template on your own GitHub account — watch 1 ad + join to unlock",
                     ),
                     modifier = Modifier.padding(horizontal = 2.dp),
                     trailing = {
                         Text(
-                            xy("Baru", "New"),
+                            sei( "New"),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary,
                             maxLines = 1,
@@ -1286,10 +1265,10 @@ private fun DeviceCard(
     val rdpOptions = remember(profile.id) { RdpOptions.of(context, profile.id) }
     val hasWol = !rdpOptions.macAddress.isNullOrBlank()
     val streamBadge = when (rdpOptions.streamProfile) {
-        SeiStreamProfile.ULTRA_LOW_LATENCY -> xy("Latensi Rendah", "Low Latency")
+        SeiStreamProfile.ULTRA_LOW_LATENCY -> sei( "Low Latency")
         SeiStreamProfile.HIGH_VISUAL -> "AVC444"
-        SeiStreamProfile.DATA_SAVER -> xy("Hemat Kuota", "Data Saver")
-        SeiStreamProfile.CUSTOM -> xy("Kustom", "Custom")
+        SeiStreamProfile.DATA_SAVER -> sei( "Data Saver")
+        SeiStreamProfile.CUSTOM -> sei( "Custom")
         SeiStreamProfile.BALANCED, SeiStreamProfile.AUTO -> if (rdpOptions.udpTransport) "UDP+H264" else "H264"
     }
     // Art preview milik app (bukan wallpaper RDP/OS): geometris, diturunkan
@@ -1527,7 +1506,7 @@ private fun DeviceCard(
                     SpecChip(label = "WoL", highlight = false)
                 }
                 if (rdpOptions.audioMode != SeiAudioMode.OFF) {
-                    SpecChip(label = xy("Audio", "Audio"), highlight = false)
+                    SpecChip(label = sei( "Audio"), highlight = false)
                 }
             }
 
@@ -1542,7 +1521,7 @@ private fun DeviceCard(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 SeiPillButton(
-                    text = xy("Hubungkan", "Connect"),
+                    text = sei( "Connect"),
                     onClick = onConnect,
                     icon = SeiIcons.Play,
                     compact = false,
@@ -1550,7 +1529,7 @@ private fun DeviceCard(
                 )
                 if (hasWol) {
                     SeiPillButton(
-                        text = xy("WoL", "WoL"),
+                        text = sei( "WoL"),
                         onClick = onWakeConnect,
                         primary = false,
                         compact = true,
@@ -1561,14 +1540,14 @@ private fun DeviceCard(
                     onClick = onEdit,
                     size = 42.dp,
                     flat = false,
-                    contentDescription = xy("Pengaturan RDP", "RDP settings"),
+                    contentDescription = sei( "RDP settings"),
                 )
                 SeiIconPill(
                     icon = SeiIcons.Trash,
                     onClick = onDelete,
                     size = 42.dp,
                     flat = false,
-                    contentDescription = xy("Hapus", "Delete"),
+                    contentDescription = sei( "Delete"),
                 )
             }
         }
@@ -1793,16 +1772,14 @@ private fun fetchRemoteReleaseStatus(context: Context): String {
         val json = org.json.JSONObject(body)
         val latest = json.optString("version", "1.0.0")
         val launchDate = json.optString("launchWib", "Sabtu, 3 Oktober 2026 · 10:00 WIB")
-        xyNow(
-            "Versi terpasang: v{0} · Target Rilis Publik: v{1} ({2}). Toko aplikasi resmi ekosistem XyVerse akan tersedia di rilisin.xyverse.my.id.",
+        seiNow(
             "Installed version: v{0} · Public Release Target: v{1} ({2}). Official XyVerse app store will be available at rilisin.xyverse.my.id.",
             current,
             latest,
             launchDate,
         )
     }.getOrElse {
-        xyNow(
-            "Versi terpasang: v{0} · Kunjungi www.xydeskremote.biz.id atau rilisin.xyverse.my.id untuk informasi rilis terbaru.",
+        seiNow(
             "Installed version: v{0} · Visit www.xydeskremote.biz.id or rilisin.xyverse.my.id for the latest release info.",
             current,
         )

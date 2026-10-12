@@ -148,9 +148,8 @@ class SeiDeskHomeActivity : ComponentActivity() {
             return
         }
         val confirmIntent = km.createConfirmDeviceCredentialIntent(
-            xyNow("Verifikasi Keamanan SeiDesk RM", "SeiDesk RM Security Verification"),
-            xyNow(
-                "Buka kunci perangkat Anda untuk memulai sesi remote desktop.",
+            seiNow( "SeiDesk RM Security Verification"),
+            seiNow(
                 "Unlock your device to launch the remote desktop session.",
             ),
         )
@@ -195,8 +194,7 @@ class SeiDeskHomeActivity : ComponentActivity() {
                         }
                     }
                     runOnUiThread {
-                        sharedFileBanner.value = xyNow(
-                            "File '${targetFile.name}' siap di Drive XyDesk PC remote. Pilih perangkat untuk terhubung.",
+                        sharedFileBanner.value = seiNow(
                             "File '${targetFile.name}' is ready in the remote PC 'XyDesk' drive. Select a device to connect.",
                         )
                     }
@@ -206,8 +204,7 @@ class SeiDeskHomeActivity : ComponentActivity() {
                     runOnUiThread {
                         val cm = getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
                         cm?.setPrimaryClip(ClipData.newPlainText("SeiDesk RM Share", sharedText))
-                        sharedFileBanner.value = xyNow(
-                            "Teks disalin ke clipboard & disimpan sebagai '${noteFile.name}' di Drive XyDesk.",
+                        sharedFileBanner.value = seiNow(
                             "Text copied to clipboard & saved as '${noteFile.name}' in the XyDesk drive.",
                         )
                     }

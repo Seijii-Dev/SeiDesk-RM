@@ -91,7 +91,7 @@ internal fun SessionScrollPill(
             .padding(horizontal = 5.dp, vertical = 5.dp)
             .semantics {
                 contentDescription =
-                    xyNow("Kontrol scroll mouse atas dan bawah", "Mouse scroll up and down control")
+                    seiNow( "Mouse scroll up and down control")
             },
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -105,7 +105,7 @@ internal fun SessionScrollPill(
         ) {
             Icon(
                 SeiIcons.ChevronUp,
-                contentDescription = xyNow("Scroll mouse ke atas", "Scroll mouse up"),
+                contentDescription = seiNow( "Scroll mouse up"),
                 tint = palette.ink,
                 modifier = Modifier.size(16.dp),
             )
@@ -175,7 +175,7 @@ internal fun SessionScrollPill(
         ) {
             Icon(
                 SeiIcons.ChevronDown,
-                contentDescription = xyNow("Scroll mouse ke bawah", "Scroll mouse down"),
+                contentDescription = seiNow( "Scroll mouse down"),
                 tint = palette.ink,
                 modifier = Modifier.size(16.dp),
             )

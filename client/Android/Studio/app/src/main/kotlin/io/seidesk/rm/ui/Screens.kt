@@ -95,9 +95,8 @@ private fun DisplaySection(
     val context = LocalContext.current
     if (favorites.isEmpty()) {
         EmptyHint(
-            title = xy("Belum ada perangkat", "No devices yet"),
-            body = xy(
-                "Tambahkan perangkat dulu, lalu atur tampilannya di sini.",
+            title = sei( "No devices yet"),
+            body = sei(
                 "Add a device first, then set its display options here.",
             ),
         )
@@ -122,7 +121,7 @@ private fun DisplaySection(
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        XySectionLabel(xy("Perangkat", "Devices"))
+        XySectionLabel(sei( "Devices"))
         SeiSegmented(
             options = favorites.map { it.label ?: it.host },
             selectedIndex = index.coerceIn(0, favorites.lastIndex),
@@ -138,12 +137,12 @@ private fun DisplaySection(
                         SeiIcons.Gear,
                         { onEditDevice(profile) },
                         size = 38.dp,
-                        contentDescription = xy("Ubah perangkat", "Edit device"),
+                        contentDescription = sei( "Edit device"),
                     )
                 },
             )
             Spacer(Modifier.height(8.dp))
-            XySectionLabel(xy("Resolusi desktop remote", "Remote desktop resolution"))
+            XySectionLabel(sei( "Remote desktop resolution"))
             Spacer(Modifier.height(8.dp))
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 DisplayPrefs.resolutionOptions.chunked(2).forEachIndexed { rowIndex, row ->
@@ -151,7 +150,7 @@ private fun DisplaySection(
                         row.forEachIndexed { colIndex, option ->
                             val value = option.value
                             SeiPillButton(
-                                text = xy(option.id, option.en),
+                                text = sei( option.en),
                                 onClick = {
                                     resolution = value
                                     DisplayPrefs.setResolution(context, profile.id, value)
@@ -166,7 +165,7 @@ private fun DisplaySection(
                 }
             }
             Spacer(Modifier.height(16.dp))
-            XySectionLabel(xy("Orientasi", "Orientation"))
+            XySectionLabel(sei( "Orientation"))
             Spacer(Modifier.height(8.dp))
             SeiSegmented(
                 options = DisplayPrefs.rotations,
@@ -178,7 +177,7 @@ private fun DisplaySection(
                 modifier = Modifier.fillMaxWidth(),
             )
             Spacer(Modifier.height(16.dp))
-            XySectionLabel(xy("Zoom lokal awal", "Initial local zoom"))
+            XySectionLabel(sei( "Initial local zoom"))
             Text(
                 "$scale%",
                 style = MaterialTheme.typography.titleMedium,
@@ -193,9 +192,7 @@ private fun DisplaySection(
                 steps = 11,
             )
             Text(
-                xy(
-                    "Zoom lokal bisa diubah dari panel sesi tanpa memutus koneksi. DPI desktop " +
-                        "Windows dan resolusi remote punya kontrol masing-masing.",
+                sei(
                     "Local zoom can be changed from the session panel without disconnecting. Windows " +
                         "desktop DPI and remote resolution each have their own controls.",
                 ),
@@ -234,12 +231,10 @@ private fun CredentialsSection(
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        XySectionLabel(xy("Password tersimpan", "Saved passwords"))
+        XySectionLabel(sei( "Saved passwords"))
         SeiCard {
             Text(
-                xy(
-                    "Password dienkripsi AES-256-GCM; kuncinya tidak bisa keluar dari " +
-                        "Android Keystore perangkat ini.",
+                sei(
                     "Passwords are encrypted with AES-256-GCM; the key cannot leave this " +
                         "device's Android Keystore.",
                 ),
@@ -248,7 +243,7 @@ private fun CredentialsSection(
             )
             Spacer(Modifier.height(6.dp))
             if (favorites.isEmpty()) {
-                Text(xy("Belum ada perangkat tersimpan.", "No saved devices yet."), style = MaterialTheme.typography.bodyMedium)
+                Text(sei( "No saved devices yet."), style = MaterialTheme.typography.bodyMedium)
             } else {
                 favorites.forEachIndexed { idx, profile ->
                     val remembered = rememberedFlags[idx]
@@ -266,10 +261,10 @@ private fun CredentialsSection(
                             )
                             Text(
                                 buildString {
-                                    append(profile.username ?: xy("tanpa username", "no username"))
+                                    append(profile.username ?: sei( "no username"))
                                     append(
-                                        if (remembered) xy("  ·  password tersimpan", "  ·  password saved")
-                                        else xy("  ·  password tidak disimpan", "  ·  password not saved"),
+                                        if (remembered) sei( "  ·  password saved")
+                                        else sei( "  ·  password not saved"),
                                     )
                                 },
                                 style = MaterialTheme.typography.bodySmall,
@@ -278,7 +273,7 @@ private fun CredentialsSection(
                         }
                         if (remembered) {
                             SeiPillButton(
-                                text = xy("Lupakan", "Forget"),
+                                text = sei( "Forget"),
                                 onClick = { confirmForgetProfile = profile },
                                 primary = false,
                                 compact = true,
@@ -291,8 +286,8 @@ private fun CredentialsSection(
         }
         SeiCard {
             SeiRow(
-                title = xy("Hapus semua kredensial & perangkat", "Delete all credentials and devices"),
-                subtitle = xy("Vault dikosongkan dan daftar perangkat dibersihkan", "Vault cleared and device list wiped"),
+                title = sei( "Delete all credentials and devices"),
+                subtitle = sei( "Vault cleared and device list wiped"),
                 leading = SeiIcons.Trash,
                 onClick = { confirmClear = true },
             )
@@ -302,33 +297,32 @@ private fun CredentialsSection(
 
     confirmForgetProfile?.let { target ->
         SeiDialog(
-            title = xy("Lupakan password?", "Forget password?"),
-            body = xy(
-                "Hapus password tersimpan untuk \"{0}\"? Kamu akan diminta memasukkan password lagi saat menyambung.",
+            title = sei( "Forget password?"),
+            body = sei(
                 "Remove the saved password for \"{0}\"? You will be asked to enter it again on the next connection.",
                 target.label ?: "${target.host}:${target.port}",
             ),
-            confirmLabel = xy("Lupakan", "Forget"),
+            confirmLabel = sei( "Forget"),
             onConfirm = {
                 confirmForgetProfile = null
                 vault.remove(target.id)
                 tick++
             },
-            dismissLabel = xy("Batal", "Cancel"),
+            dismissLabel = sei( "Cancel"),
             onDismiss = { confirmForgetProfile = null },
         )
     }
 
     if (confirmClear) {
         SeiDialog(
-            title = xy("Hapus semua?", "Delete everything?"),
-            body = xy("Semua perangkat tersimpan dan password-nya akan dihapus.", "All saved devices and their passwords will be removed."),
-            confirmLabel = xy("Hapus", "Delete"),
+            title = sei( "Delete everything?"),
+            body = sei( "All saved devices and their passwords will be removed."),
+            confirmLabel = sei( "Delete"),
             onConfirm = {
                 confirmClear = false
                 onClearAll()
             },
-            dismissLabel = xy("Batal", "Cancel"),
+            dismissLabel = sei( "Cancel"),
             onDismiss = { confirmClear = false },
         )
     }
@@ -372,7 +366,6 @@ private fun GeneralSection(
     var pointerSize by remember { mutableStateOf(prefs.pointerSize) }
     var scrollSpeed by remember { mutableStateOf(prefs.scrollSpeed) }
     var haptics by remember { mutableStateOf(prefs.haptics) }
-    var lang by remember { mutableStateOf(LangPrefs.current()) }
     var showLeft by remember { mutableStateOf(prefs.showLeft) }
     var showRight by remember { mutableStateOf(prefs.showRight) }
     var showMiddle by remember { mutableStateOf(prefs.showMiddle) }
@@ -386,10 +379,10 @@ private fun GeneralSection(
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        XySectionLabel(xy("Tampilan app", "App appearance"))
+        XySectionLabel(sei( "App appearance"))
         SeiCard {
             SeiSegmented(
-                options = listOf(xy("Ikut sistem", "Follow system"), xy("Gelap", "Dark"), xy("Terang", "Light")),
+                options = listOf(sei( "Follow system"), sei( "Dark"), sei( "Light")),
                 selectedIndex = themeMode,
                 onSelect = {
                     themeMode = it
@@ -402,9 +395,8 @@ private fun GeneralSection(
             )
             Spacer(Modifier.height(6.dp))
             SeiToggleRow(
-                title = xy("Putuskan sesi saat app ke background", "Disconnect when app goes background"),
-                subtitle = xy(
-                    "Cegah sesi menggantung saat HP dipakai untuk hal lain",
+                title = sei( "Disconnect when app goes background"),
+                subtitle = sei(
                     "Avoid a dangling session while the phone does something else",
                 ),
                 checked = autoDisconnect,
@@ -415,12 +407,11 @@ private fun GeneralSection(
             )
         }
 
-        XySectionLabel(xy("Sesi terakhir", "Last session"))
+        XySectionLabel(sei( "Last session"))
         SeiCard {
             SeiToggleRow(
-                title = xy("Lanjutkan sesi terakhir otomatis", "Automatically resume the last session"),
-                subtitle = xy(
-                    "Coba buka profil terakhir dalam 15 menit setelah sesi berakhir tidak sengaja. Password yang tidak tersimpan akan diminta. Putus manual tidak akan tersambung lagi.",
+                title = sei( "Automatically resume the last session"),
+                subtitle = sei(
                     "Reopen the last profile within 15 minutes after an unexpected session close. If its password isn't saved, you'll be prompted. Manual Disconnect will not reconnect.",
                 ),
                 checked = autoResumeLastSession,
@@ -431,9 +422,9 @@ private fun GeneralSection(
             )
         }
 
-        XySectionLabel(xy("Kontrol sesi", "Session controls"))
+        XySectionLabel(sei( "Session controls"))
         SeiCard {
-            Text(xy("Mode input default", "Default input mode"), style = MaterialTheme.typography.titleSmall)
+            Text(sei( "Default input mode"), style = MaterialTheme.typography.titleSmall)
             Spacer(Modifier.height(8.dp))
             SeiSegmented(
                 options = InputMode.entries.map { it.title },
@@ -450,10 +441,10 @@ private fun GeneralSection(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(16.dp))
-            Text(xy("Pointer", "Pointer"), style = MaterialTheme.typography.titleSmall)
+            Text(sei( "Pointer"), style = MaterialTheme.typography.titleSmall)
             Spacer(Modifier.height(8.dp))
             SeiSegmented(
-                options = PointerStyle.entries.map { xy(it.title, it.titleEn) },
+                options = PointerStyle.entries.map { sei( it.titleEn) },
                 selectedIndex = pointerStyle,
                 onSelect = {
                     pointerStyle = it
@@ -463,7 +454,7 @@ private fun GeneralSection(
             )
             Spacer(Modifier.height(10.dp))
             Text(
-                xy("Ukuran pointer: {0} dp", "Pointer size: {0} dp", pointerSize.toInt()),
+                sei( "Pointer size: {0} dp", pointerSize.toInt()),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -477,8 +468,7 @@ private fun GeneralSection(
             )
             Spacer(Modifier.height(10.dp))
             Text(
-                xy(
-                    "Kecepatan scroll: {0}x",
+                sei(
                     "Scroll speed: {0}x",
                     "%.1f".format(scrollSpeed),
                 ),
@@ -494,8 +484,8 @@ private fun GeneralSection(
                 valueRange = 0.4f..2.5f,
             )
             SeiToggleRow(
-                title = xy("Getaran saat tombol ditekan", "Haptic feedback on button press"),
-                subtitle = xy("Haptic halus di cluster mouse dan keyboard", "Subtle haptics on the mouse cluster and keyboard"),
+                title = sei( "Haptic feedback on button press"),
+                subtitle = sei( "Subtle haptics on the mouse cluster and keyboard"),
                 checked = haptics,
                 onCheckedChange = {
                     haptics = it
@@ -504,16 +494,10 @@ private fun GeneralSection(
             )
         }
 
-        XySectionLabel(xy("Tombol HUD", "HUD buttons"))
+        XySectionLabel(sei( "HUD buttons"))
         SeiCard {
             Text(
-                xy(
-                    "Setiap tombol di layar sesi berdiri sendiri: bulat, ukurannya " +
-                        "bisa diatur, dan aksinya dipilih per tombol " +
-                        "(sekali klik / tahan / toggle). Geser tombol hanya saat " +
-                        "mode \"Atur posisi\" menyala, supaya tidak kepencet waktu dipakai. " +
-                        "Tombol bawaan di bawah ini menentukan set awal untuk perangkat " +
-                        "yang belum pernah diubah.",
+                sei(
                     "Every on-screen button stands alone: round, resizable, and " +
                         "with its own action (single tap / " +
                         "hold / toggle). Dragging only works while \"Edit layout\" is on, " +
@@ -524,29 +508,28 @@ private fun GeneralSection(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             SeiToggleRow(
-                title = xy("Tombol kiri", "Left button"),
+                title = sei( "Left button"),
                 checked = showLeft,
                 onCheckedChange = { showLeft = it; prefs.showLeft = it },
             )
             SeiToggleRow(
-                title = xy("Tombol kanan", "Right button"),
+                title = sei( "Right button"),
                 checked = showRight,
                 onCheckedChange = { showRight = it; prefs.showRight = it },
             )
             SeiToggleRow(
-                title = xy("Tombol tengah", "Middle button"),
+                title = sei( "Middle button"),
                 checked = showMiddle,
                 onCheckedChange = { showMiddle = it; prefs.showMiddle = it },
             )
             SeiToggleRow(
-                title = xy("Scroll atas/bawah", "Scroll up/down"),
+                title = sei( "Scroll up/down"),
                 checked = showScroll,
                 onCheckedChange = { showScroll = it; prefs.showScroll = it },
             )
             SeiToggleRow(
-                title = xy("Tombol ganti mode input", "Input-mode switch button"),
-                subtitle = xy(
-                    "Pindah trackpad <-> sentuh langsung dari layar sesi",
+                title = sei( "Input-mode switch button"),
+                subtitle = sei(
                     "Switch trackpad <-> direct touch from the session screen",
                 ),
                 checked = showSwitch,
@@ -554,8 +537,7 @@ private fun GeneralSection(
             )
             Spacer(Modifier.height(6.dp))
             Text(
-                xy(
-                    "Posisi cluster diatur dengan menyeretnya langsung di layar sesi.",
+                sei(
                     "Cluster position is set by dragging it on the session screen.",
                 ),
                 style = MaterialTheme.typography.bodySmall,
@@ -563,13 +545,10 @@ private fun GeneralSection(
             )
         }
 
-        XySectionLabel(xy("Keyboard", "Keyboard"))
+        XySectionLabel(sei( "Keyboard"))
         SeiCard {
             Text(
-                xy(
-                    "Mengetik memakai keyboard HP (IME). Tidak ada keyboard virtual " +
-                        "bawaan app dan tidak ada toolbar di atas keyboard: semua " +
-                        "kontrol dibuat dari tombol overlay satu-satu di layar sesi.",
+                sei(
                     "Typing uses the phone keyboard (IME). There is no built-in " +
                         "virtual keyboard and no toolbar above it: every control is a " +
                         "separate overlay button on the session screen.",
@@ -579,16 +558,15 @@ private fun GeneralSection(
             )
             Spacer(Modifier.height(8.dp))
             SeiToggleRow(
-                title = xy("Muat seluruh desktop (fit)", "Fit whole desktop"),
-                subtitle = xy("Taskbar dan tepi desktop selalu ikut kelihatan", "Taskbar and desktop edges always stay visible"),
+                title = sei( "Fit whole desktop"),
+                subtitle = sei( "Taskbar and desktop edges always stay visible"),
                 checked = autoFit,
                 onCheckedChange = { autoFit = it; prefs.autoFit = it },
             )
             Spacer(Modifier.height(8.dp))
             SeiToggleRow(
-                title = xy("Paksa bar sistem tetap tersembunyi saat mengetik", "Keep system bars hidden while typing"),
-                subtitle = xy(
-                    "Coba sembunyikan kembali status bar/ikon notch saat keyboard HP muncul di sesi. Berguna untuk Android 8+; sistem masih dapat menampilkannya sementara.",
+                title = sei( "Keep system bars hidden while typing"),
+                subtitle = sei(
                     "Re-hide the status bar and notch icons when the phone keyboard opens in a session. Helps on Android 8+; the system may still show them briefly.",
                 ),
                 checked = keepSystemBarsHiddenOnIme,
@@ -599,17 +577,15 @@ private fun GeneralSection(
             )
         }
 
-        XySectionLabel(xy("Keyboard & HUD", "Keyboard & HUD"))
+        XySectionLabel(sei( "Keyboard & HUD"))
         SeiCard {
             Text(
-                xy("Ukuran default tombol HUD: {0} dp", "Default HUD button size: {0} dp", hudSize.toInt()),
+                sei( "Default HUD button size: {0} dp", hudSize.toInt()),
                 style = MaterialTheme.typography.bodyMedium,
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                xy(
-                    "Ukuran ini dipakai untuk tombol baru dan tata letak bawaan. " +
-                        "Tombol yang sudah diatur tetap memakai ukuran masing-masing.",
+                sei(
                     "New buttons and restored default layouts use this size. " +
                         "Existing custom buttons keep their individual sizes.",
                 ),
@@ -623,28 +599,11 @@ private fun GeneralSection(
             )
         }
 
-        XySectionLabel(xy("Bahasa / Language", "Language"))
-        SeiCard {
-            SeiSegmented(
-                options = listOf("English"),
-                selectedIndex = 0,
-                onSelect = { },
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Spacer(Modifier.height(6.dp))
-            Text(
-                t("home.language.sub"),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
 
-        XySectionLabel(xy("Streaming & Latensi (default perangkat baru)", "Streaming & Latency (new device defaults)"))
+        XySectionLabel(sei( "Streaming & Latency (new device defaults)"))
         SeiCard {
             Text(
-                xy(
-                    "Nilai ini dipakai saat menambah perangkat baru. Perangkat yang " +
-                        "sudah ada tetap diatur sendiri di layar Ubah perangkat.",
+                sei(
                     "These values are used when adding a new device. Existing devices " +
                         "keep their own settings on the Edit device screen.",
                 ),
@@ -652,7 +611,7 @@ private fun GeneralSection(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(6.dp))
-            Text(xy("Profil streaming default", "Default streaming profile"), style = MaterialTheme.typography.titleSmall)
+            Text(sei( "Default streaming profile"), style = MaterialTheme.typography.titleSmall)
             Spacer(Modifier.height(6.dp))
             val streamOptions = listOf(
                 SeiStreamProfile.AUTO,
@@ -665,7 +624,7 @@ private fun GeneralSection(
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     row.forEach { preset ->
                         SeiPillButton(
-                            text = xy(preset.title, preset.titleEn),
+                            text = sei( preset.titleEn),
                             onClick = {
                                 defaultStreamProfile = preset
                                 appPrefs.defaultStreamProfile = preset.ordinal
@@ -680,60 +639,58 @@ private fun GeneralSection(
                 Spacer(Modifier.height(6.dp))
             }
             SeiToggleRow(
-                title = xy("Transport UDP (RDP-UDP + FEC)", "UDP transport (RDP-UDP + FEC)"),
-                subtitle = xy("Jalur UDP multitransport untuk gerakan mulus", "Multitransport UDP channel for smoother motion"),
+                title = sei( "UDP transport (RDP-UDP + FEC)"),
+                subtitle = sei( "Multitransport UDP channel for smoother motion"),
                 checked = defaultUdp,
                 onCheckedChange = { defaultUdp = it; appPrefs.defaultUdp = it },
             )
             SeiToggleRow(
-                title = xy("Deteksi bandwidth otomatis", "Automatic bandwidth detection"),
-                subtitle = xy("Kualitas mengikuti kondisi jaringan secara dinamis", "Quality adapts dynamically to network conditions"),
+                title = sei( "Automatic bandwidth detection"),
+                subtitle = sei( "Quality adapts dynamically to network conditions"),
                 checked = defaultNetAuto,
                 onCheckedChange = { defaultNetAuto = it; appPrefs.defaultNetAuto = it },
             )
             SeiToggleRow(
-                title = xy("H.264 / RemoteFX (GFX)", "H.264 / RemoteFX (GFX)"),
-                subtitle = xy("Akselerasi hardware H.264 untuk video & animasi 60 FPS", "H.264 hardware acceleration for 60 FPS video & motion"),
+                title = sei( "H.264 / RemoteFX (GFX)"),
+                subtitle = sei( "H.264 hardware acceleration for 60 FPS video & motion"),
                 checked = defaultH264,
                 onCheckedChange = { defaultH264 = it; appPrefs.defaultH264 = it },
             )
             SeiToggleRow(
-                title = xy("Async Frame Update (+async-update)", "Async Frame Update (+async-update)"),
-                subtitle = xy("Render layar mandiri tanpa menunggu antrean input", "Decouple frame rendering from input queue"),
+                title = sei( "Async Frame Update (+async-update)"),
+                subtitle = sei( "Decouple frame rendering from input queue"),
                 checked = defaultAsyncUpdate,
                 onCheckedChange = { defaultAsyncUpdate = it; appPrefs.defaultAsyncUpdate = it },
             )
             SeiToggleRow(
-                title = xy("Async Input & Channels (+async-channels)", "Async Input & Channels (+async-channels)"),
-                subtitle = xy("Proses input & kanal di thread terpisah agar responsif", "Process input & channels on dedicated threads"),
+                title = sei( "Async Input & Channels (+async-channels)"),
+                subtitle = sei( "Process input & channels on dedicated threads"),
                 checked = defaultAsyncChannels,
                 onCheckedChange = { defaultAsyncChannels = it; appPrefs.defaultAsyncChannels = it },
             )
             SeiToggleRow(
-                title = xy("Resolusi dinamis", "Dynamic resolution"),
-                subtitle = xy("Desktop remote bisa diubah saat sesi hidup (kanal DISP)", "Change remote desktop size live (DISP channel)"),
+                title = sei( "Dynamic resolution"),
+                subtitle = sei( "Change remote desktop size live (DISP channel)"),
                 checked = defaultDynRes,
                 onCheckedChange = { defaultDynRes = it; appPrefs.defaultDynamicResolution = it },
             )
             SeiToggleRow(
-                title = xy("Clipboard dua arah (Teks & Gambar)", "Two-way clipboard (Text & Image)"),
+                title = sei( "Two-way clipboard (Text & Image)"),
                 checked = defaultClipboard,
                 onCheckedChange = { defaultClipboard = it; appPrefs.defaultClipboard = it },
             )
             SeiToggleRow(
-                title = xy("Penyimpanan lokal (drive)", "Local storage (drive)"),
-                subtitle = xy("Folder Download HP muncul sebagai drive di remote", "Phone storage shows up as a remote drive"),
+                title = sei( "Local storage (drive)"),
+                subtitle = sei( "Phone storage shows up as a remote drive"),
                 checked = defaultDrive,
                 onCheckedChange = { defaultDrive = it; appPrefs.defaultLocalDrive = it },
             )
         }
 
-        XySectionLabel(xy("Masalah koneksi", "Connection issues"))
+        XySectionLabel(sei( "Connection issues"))
         SeiCard {
             Text(
-                xy(
-                    "Audio, mikrofon, clipboard, drive, kamera, dan gateway diatur " +
-                        "per perangkat di layar Tambah/Ubah perangkat.",
+                sei(
                     "Audio, microphone, clipboard, drive, camera and gateway are set " +
                         "per device on the Add/Edit device screen.",
                 ),
@@ -742,12 +699,12 @@ private fun GeneralSection(
             )
             Spacer(Modifier.height(10.dp))
             Text(
-                xy("Inti: {0}", "Core: {0}", coreBuildInfo()),
+                sei( "Core: {0}", coreBuildInfo()),
                 style = MaterialTheme.typography.bodySmall,
             )
             Spacer(Modifier.height(10.dp))
             SeiPillButton(
-                xy("Lihat log sesi terakhir", "View last session log"),
+                sei( "View last session log"),
                 onShowLog,
                 primary = false,
                 compact = true,
@@ -791,12 +748,11 @@ private fun SecuritySection(appPrefs: AppPrefs) {
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        XySectionLabel(xy("Perlindungan Layar & Sesi", "Screen & Session Protection"))
+        XySectionLabel(sei( "Screen & Session Protection"))
         SeiCard {
             SeiToggleRow(
-                title = xy("Proteksi tangkapan layar (FLAG_SECURE)", "Screen capture protection (FLAG_SECURE)"),
-                subtitle = xy(
-                    "Sembunyikan pratinjau layar PC di recent apps Android & cegah perekaman layar pihak ketiga",
+                title = sei( "Screen capture protection (FLAG_SECURE)"),
+                subtitle = sei(
                     "Hide the PC preview in Android recents & block third-party screen recording",
                 ),
                 checked = screenCaptureProtection,
@@ -806,9 +762,8 @@ private fun SecuritySection(appPrefs: AppPrefs) {
                 },
             )
             SeiToggleRow(
-                title = xy("Wajib autentikasi perangkat (Biometrik / PIN)", "Require device lock (Biometric / PIN)"),
-                subtitle = xy(
-                    "Minta sidik jari, wajah, atau PIN HP sebelum membuka koneksi remote",
+                title = sei( "Require device lock (Biometric / PIN)"),
+                subtitle = sei(
                     "Prompt for phone fingerprint, face, or PIN before launching a remote session",
                 ),
                 checked = requireDeviceLock,
@@ -818,9 +773,8 @@ private fun SecuritySection(appPrefs: AppPrefs) {
                 },
             )
             SeiToggleRow(
-                title = xy("Kunci PC otomatis saat sesi selesai (Win+L)", "Auto-lock PC on session exit (Win+L)"),
-                subtitle = xy(
-                    "Kirim perintah kunci layar Windows otomatis sesaat sebelum memutus koneksi",
+                title = sei( "Auto-lock PC on session exit (Win+L)"),
+                subtitle = sei(
                     "Automatically send Windows lock screen command right before disconnecting",
                 ),
                 checked = autoLockRemoteOnLeave,
@@ -830,9 +784,8 @@ private fun SecuritySection(appPrefs: AppPrefs) {
                 },
             )
             SeiToggleRow(
-                title = xy("Bersihkan clipboard HP saat putus", "Clear phone clipboard on disconnect"),
-                subtitle = xy(
-                    "Hapus sisa teks/gambar dari sesi remote di clipboard HP setelah sesi ditutup",
+                title = sei( "Clear phone clipboard on disconnect"),
+                subtitle = sei(
                     "Wipe synced text/images from the phone clipboard after the session closes",
                 ),
                 checked = clearClipboardOnDisconnect,
@@ -843,12 +796,11 @@ private fun SecuritySection(appPrefs: AppPrefs) {
             )
         }
 
-        XySectionLabel(xy("Status sesi aktif", "Active session status"))
+        XySectionLabel(sei( "Active session status"))
         SeiCard {
             SeiToggleRow(
-                title = xy("Hitung sesi aktif secara anonim", "Count active sessions anonymously"),
-                subtitle = xy(
-                    "Aktif otomatis. Matikan sakelar ini kapan saja untuk berhenti mengirim heartbeat sesi.",
+                title = sei( "Count active sessions anonymously"),
+                subtitle = sei(
                     "On automatically. Turn this switch off any time to stop sending session heartbeats.",
                 ),
                 checked = shareActiveSessionStats,
@@ -858,8 +810,7 @@ private fun SecuritySection(appPrefs: AppPrefs) {
                 },
             )
             Text(
-                xy(
-                    "Yang dikirim hanya ID sesi acak sementara (berbeda untuk tiap koneksi)—bukan alamat PC, profil, username, password, clipboard, atau gambar desktop. Cloudflare tetap memproses metadata jaringan seperti IP. Angka publik adalah perkiraan sesi klien yang mengirim heartbeat, bukan jumlah orang; lease kedaluwarsa setelah 90 detik. Sakelar ini dapat dimatikan kapan saja.",
+                sei(
                     "Only a temporary random session ID (new for each connection) is sent—not the PC address, profile, username, password, clipboard, or desktop image. Cloudflare still processes network metadata such as IP. The public figure estimates client sessions sending heartbeats, not people; leases expire after 90 seconds. Turn this switch off any time.",
                 ),
                 style = MaterialTheme.typography.bodySmall,
@@ -868,10 +819,10 @@ private fun SecuritySection(appPrefs: AppPrefs) {
             )
         }
 
-        XySectionLabel(xy("Protokol & Enkripsi Default", "Default Protocol & Encryption"))
+        XySectionLabel(sei( "Default Protocol & Encryption"))
         SeiCard {
             Text(
-                xy("Protokol keamanan default (perangkat baru)", "Default security protocol (new devices)"),
+                sei( "Default security protocol (new devices)"),
                 style = MaterialTheme.typography.titleSmall,
             )
             Spacer(Modifier.height(6.dp))
@@ -880,7 +831,7 @@ private fun SecuritySection(appPrefs: AppPrefs) {
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     row.forEach { proto ->
                         SeiPillButton(
-                            text = xy(proto.title, proto.titleEn),
+                            text = sei( proto.titleEn),
                             onClick = {
                                 defaultSecurityProtocol = proto
                                 appPrefs.defaultSecurityProtocol = proto.ordinal
@@ -895,15 +846,15 @@ private fun SecuritySection(appPrefs: AppPrefs) {
             }
             Spacer(Modifier.height(6.dp))
             Text(
-                xy("Level kebijakan OpenSSL TLS default", "Default OpenSSL TLS security level"),
+                sei( "Default OpenSSL TLS security level"),
                 style = MaterialTheme.typography.titleSmall,
             )
             Spacer(Modifier.height(6.dp))
             SeiSegmented(
                 options = listOf(
-                    xy("Kompatibel (0)", "Legacy (0)"),
-                    xy("Standar (1)", "Standard (1)"),
-                    xy("Ketat (2)", "Strict (2)"),
+                    sei( "Legacy (0)"),
+                    sei( "Standard (1)"),
+                    sei( "Strict (2)"),
                 ),
                 selectedIndex = defaultTlsSecLevel.coerceIn(0, 2),
                 onSelect = {
@@ -914,8 +865,7 @@ private fun SecuritySection(appPrefs: AppPrefs) {
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                xy(
-                    "Level 1 adalah standar modern. Gunakan Level 0 untuk Windows Server lama, atau Level 2 untuk enkripsi ketat.",
+                sei(
                     "Level 1 is the modern default. Use Level 0 for older Windows Servers, or Level 2 for strict ciphers.",
                 ),
                 style = MaterialTheme.typography.bodySmall,
@@ -923,29 +873,27 @@ private fun SecuritySection(appPrefs: AppPrefs) {
             )
         }
 
-        XySectionLabel(xy("Penyimpanan kredensial", "Credential storage"))
+        XySectionLabel(sei( "Credential storage"))
         SeiCard {
-            Bullet(xy("Password: AES-256-GCM, kunci non-exportable di Android Keystore",
+            Bullet(sei(
                 "Passwords: AES-256-GCM, non-exportable key in the Android Keystore"))
-            Bullet(xy("Password tidak pernah masuk log aplikasi atau URI yang ditulis ke log",
+            Bullet(sei(
                 "Passwords never end up in app logs or in logged URIs"))
-            Bullet(xy("Backup & transfer data app dimatikan (allowBackup=false)",
+            Bullet(sei(
                 "App backup & transfer are disabled (allowBackup=false)"))
-            Bullet(xy("Tidak ada kredensial yang dikirim ke layanan pihak ketiga",
+            Bullet(sei(
                 "No credentials are sent to any third-party service"))
         }
-        XySectionLabel(xy("Sertifikat server yang dipercaya", "Trusted server certificates"))
+        XySectionLabel(sei( "Trusted server certificates"))
         SeiCard {
             Row(Modifier.fillMaxWidth().clickable { showTrustedCertificates = !showTrustedCertificates },
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("${if (showTrustedCertificates) "▾" else "▸"} ${xy("Daftar tepercaya ({0})", "Trusted list ({0})", entries.size)}",
+                Text("${if (showTrustedCertificates) "▾" else "▸"} ${sei( "Trusted list ({0})", entries.size)}",
                     style = MaterialTheme.typography.titleSmall)
             }
             if (showTrustedCertificates && entries.isEmpty()) {
                 Text(
-                    xy(
-                        "Belum ada sertifikat yang ditandai percaya. Sertifikat hanya " +
-                            "diingat kalau kamu menekan \"Percaya & ingat\" saat connect.",
+                    sei(
                         "No certificate has been trusted yet. A certificate is only " +
                             "remembered when you press \"Trust & remember\" while connecting.",
                     ),
@@ -978,7 +926,7 @@ private fun SecuritySection(appPrefs: AppPrefs) {
                                 .padding(horizontal = 10.dp, vertical = 5.dp),
                         ) {
                             Text(
-                                xy("Hapus", "Delete"),
+                                sei( "Delete"),
                                 style = MaterialTheme.typography.labelMedium,
                             )
                         }
@@ -986,7 +934,7 @@ private fun SecuritySection(appPrefs: AppPrefs) {
                 }
                 Spacer(Modifier.height(10.dp))
                 SeiPillButton(
-                    text = xy("Hapus semua kepercayaan sertifikat", "Clear all trusted certificates"),
+                    text = sei( "Clear all trusted certificates"),
                     onClick = { confirmClearAllCerts = true },
                     primary = false,
                 )
@@ -997,37 +945,35 @@ private fun SecuritySection(appPrefs: AppPrefs) {
 
     confirmRemoveCertHost?.let { targetHost ->
         SeiDialog(
-            title = xy("Hapus sertifikat tepercaya?", "Remove trusted certificate?"),
-            body = xy(
-                "Hapus kepercayaan sertifikat untuk \"{0}\"? Server ini akan meminta verifikasi ulang saat menyambung.",
+            title = sei( "Remove trusted certificate?"),
+            body = sei(
                 "Remove certificate trust for \"{0}\"? This server will prompt for verification again on the next connection.",
                 targetHost,
             ),
-            confirmLabel = xy("Hapus", "Remove"),
+            confirmLabel = sei( "Remove"),
             onConfirm = {
                 confirmRemoveCertHost = null
                 store.removeKey(targetHost)
                 tick++
             },
-            dismissLabel = xy("Batal", "Cancel"),
+            dismissLabel = sei( "Cancel"),
             onDismiss = { confirmRemoveCertHost = null },
         )
     }
 
     if (confirmClearAllCerts) {
         SeiDialog(
-            title = xy("Hapus semua sertifikat?", "Clear all certificates?"),
-            body = xy(
-                "Hapus seluruh daftar sertifikat server yang dipercaya? Semua server akan meminta verifikasi ulang saat menyambung.",
+            title = sei( "Clear all certificates?"),
+            body = sei(
                 "Clear the entire trusted server certificate list? Every server will prompt for verification again on connect.",
             ),
-            confirmLabel = xy("Hapus semua", "Clear all"),
+            confirmLabel = sei( "Clear all"),
             onConfirm = {
                 confirmClearAllCerts = false
                 store.clear()
                 tick++
             },
-            dismissLabel = xy("Batal", "Cancel"),
+            dismissLabel = sei( "Cancel"),
             onDismiss = { confirmClearAllCerts = false },
         )
     }
@@ -1060,7 +1006,6 @@ private fun Bullet(text: String) {
 private fun AboutSection() {
     val context = LocalContext.current
     var showLicense by remember { mutableStateOf(false) }
-    var lang by remember { mutableStateOf(LangPrefs.current()) }
     val native = remember {
         runCatching { com.freerdp.freerdpcore.services.LibFreeRDP.getVersion() }.getOrNull()
     }
@@ -1075,7 +1020,7 @@ private fun AboutSection() {
         SeiCard {
             SeiLogo(modifier = Modifier.height(38.dp).fillMaxWidth(0.16f))
             Spacer(Modifier.height(12.dp))
-            Text(xy("SeiDesk RM", "SeiDesk RM"), style = MaterialTheme.typography.headlineSmall)
+            Text(sei( "SeiDesk RM"), style = MaterialTheme.typography.headlineSmall)
             Text(
                 t("app.tagline"),
                 style = MaterialTheme.typography.bodyMedium,
@@ -1085,31 +1030,13 @@ private fun AboutSection() {
             SeiRow(title = t("about.version"), subtitle = appVersionName(context))
             SeiRow(
                 title = t("about.engine"),
-                subtitle = native ?: xy("FreeRDP (dimuat saat connect)", "FreeRDP (loaded on connect)"),
+                subtitle = native ?: sei( "FreeRDP (loaded on connect)"),
             )
             SeiRow(
                 title = t("about.developer"),
-                subtitle = xy(
-                    "Didukung oleh ${AppBrand.PUBLISHER}",
+                subtitle = sei(
                     "Powered by ${AppBrand.PUBLISHER}",
                 ),
-            )
-        }
-
-        // ---- Language: English-first release ----
-        SeiCard {
-            XySectionLabel(t("home.language").uppercase())
-            Text(
-                t("home.language.sub"),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(Modifier.height(10.dp))
-            SeiSegmented(
-                options = listOf("English"),
-                selectedIndex = 0,
-                onSelect = { },
-                modifier = Modifier.fillMaxWidth(),
             )
         }
 
@@ -1117,13 +1044,10 @@ private fun AboutSection() {
 
         SeiCard {
             Text(
-                xy(
-                    "SeiDesk RM dibangun di atas FreeRDP (Apache License 2.0). " +
-                        "Kode aplikasi milik XyVerse. Daftar perubahan terhadap tree " +
-                        "FreeRDP ada di XYDESK-REMOTE-NOTICE.md.",
+                sei(
                     "SeiDesk RM is built on FreeRDP (Apache License 2.0). The app " +
-                        "code belongs to XyVerse. The list of changes to the FreeRDP " +
-                        "tree is in XYDESK-REMOTE-NOTICE.md.",
+                        "code belongs to ${AppBrand.PUBLISHER}. The list of changes to the FreeRDP " +
+                        "tree is in SEIDESK-NOTICE.md.",
                 ),
                 style = MaterialTheme.typography.bodyMedium,
             )
@@ -1145,7 +1069,7 @@ private fun AboutSection() {
 }
 
 /**
- * xy("Dukung saya", "Support me") — Saweria, GitHub Sponsors, dan bintang repo.
+ * sei( "Support me") — Saweria, GitHub Sponsors, dan bintang repo.
  *
  * Semua tautan dibuka lewat browser (Intent VIEW), tanpa SDK pihak ketiga
  * dan tanpa jaringan dari dalam app sendiri.
@@ -1240,7 +1164,7 @@ fun InfoDialog(title: String, body: String, onDismiss: () -> Unit) {
     SeiDialog(
         title = title,
         body = body,
-        confirmLabel = xy("Tutup", "Close"),
+        confirmLabel = sei( "Close"),
         onConfirm = onDismiss,
         dismissLabel = null,
         onDismiss = onDismiss,

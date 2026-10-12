@@ -77,7 +77,7 @@ import io.seidesk.rm.ui.components.SeiTopBar
 import io.seidesk.rm.ui.theme.SeiPill
 
 /**
- * Layar xy("Tambah perangkat", "Add device") — bukan dialog. Semua yang dibutuhkan satu
+ * Layar sei( "Add device") — bukan dialog. Semua yang dibutuhkan satu
  * koneksi RDP ada di sini: alamat, kredensial, tampilan, kanal yang
  * di-redirect, dan gateway.
  *
@@ -327,17 +327,16 @@ fun AddDeviceScreen(
         val endpoint = parsePcIdOrEndpoint(host)
         if (host.isBlank()) {
             val msg = if (isPcQuickMode) {
-                xyNow("ID PC atau alamat host wajib diisi.", "PC ID or host address is required.")
+                seiNow( "PC ID or host address is required.")
             } else {
-                xyNow("Alamat host wajib diisi.", "Host address is required.")
+                seiNow( "Host address is required.")
             }
             error = msg
             validationPopup = msg
             return
         }
         if (endpoint == null) {
-            val msg = xyNow(
-                "ID PC atau Alamat/port tidak valid. Masukkan 10 digit ID PC (mis. 323-223-5826) atau host:port.",
+            val msg = seiNow(
                 "Invalid PC ID or address/port. Enter a 10-digit PC ID (e.g. 323-223-5826) or host:port.",
             )
             error = msg
@@ -345,8 +344,7 @@ fun AddDeviceScreen(
             return
         }
         if (gatewayOn && gwHost.isBlank()) {
-            val msg = xyNow(
-                "Gateway diaktifkan tetapi alamat Gateway host masih kosong.",
+            val msg = seiNow(
                 "RDP Gateway is enabled, but the Gateway host address is empty.",
             )
             error = msg
@@ -354,8 +352,7 @@ fun AddDeviceScreen(
             return
         }
         if (!options.macAddress.isNullOrBlank() && WakeOnLan.parseMacBytes(options.macAddress) == null) {
-            val msg = xyNow(
-                "Format MAC Address Wake-on-LAN tidak valid. Gunakan 6 pasang heksadesimal seperti AA:BB:CC:DD:EE:FF.",
+            val msg = seiNow(
                 "Invalid Wake-on-LAN MAC address format. Use 6 hex pairs like AA:BB:CC:DD:EE:FF.",
             )
             error = msg
@@ -450,10 +447,10 @@ fun AddDeviceScreen(
     ) {
         SeiTopBar(
             title = when {
-                existing != null && isPcQuickMode -> xy("Ubah Koneksi PC", "Edit PC Connection")
-                existing != null -> xy("Ubah Perangkat RDP", "Edit RDP Device")
-                isPcQuickMode -> xy("Koneksi PC [Tahap Pengembangan]", "PC Connect [Experimental]")
-                else -> xy("Koneksi RDP Baru", "New RDP Connection")
+                existing != null && isPcQuickMode -> sei( "Edit PC Connection")
+                existing != null -> sei( "Edit RDP Device")
+                isPcQuickMode -> sei( "PC Connect [Experimental]")
+                else -> sei( "New RDP Connection")
             },
             onBack = { requestCancel() },
             actions = {
@@ -462,7 +459,7 @@ fun AddDeviceScreen(
                     { showAdvanced = true },
                     active = showAdvanced,
                     flat = true,
-                    contentDescription = xy("Pengaturan lanjutan", "Advanced settings"),
+                    contentDescription = sei( "Advanced settings"),
                 )
             },
         )
@@ -475,8 +472,8 @@ fun AddDeviceScreen(
         ) {
             SeiSegmented(
                 options = listOf(
-                    xy("Setelan cepat", "Quick setup"),
-                    xy("Lanjutan", "Advanced"),
+                    sei( "Quick setup"),
+                    sei( "Advanced"),
                 ),
                 selectedIndex = if (showAdvanced) 1 else 0,
                 onSelect = { showAdvanced = it == 1 },
@@ -484,9 +481,7 @@ fun AddDeviceScreen(
             )
             if (!showAdvanced) {
                 Text(
-                    xy(
-                        "Mode cepat hanya menampilkan yang perlu untuk konek: akun, tipe koneksi, audio, " +
-                            "clipboard, drive, dan kamera.",
+                    sei(
                         "Quick mode shows only what a connection needs: account, connection type, audio, " +
                             "clipboard, drive, and camera.",
                     ),
@@ -497,8 +492,8 @@ fun AddDeviceScreen(
             if (existing == null) {
                 SeiSegmented(
                     options = listOf(
-                        xy("Koneksi RDP (Desktop / Server)", "RDP Session (Desktop / Server)"),
-                        xy("Koneksi PC (Direct Stream)", "PC Connect (Direct Stream)"),
+                        sei( "RDP Session (Desktop / Server)"),
+                        sei( "PC Connect (Direct Stream)"),
                     ),
                     selectedIndex = if (isPcQuickMode) 1 else 0,
                     onSelect = { idx ->
@@ -520,31 +515,31 @@ fun AddDeviceScreen(
             }
 
             XySectionLabel(
-                if (isPcQuickMode) xy("Identitas PC · Direct Stream 1:1 (Tanpa Akun RDP)", "PC Identity · 1:1 Direct Stream (No RDP Account)")
-                else xy("Alamat Host / Server RDP", "RDP Host / Server Address")
+                if (isPcQuickMode) sei( "PC Identity · 1:1 Direct Stream (No RDP Account)")
+                else sei( "RDP Host / Server Address")
             )
             SeiCard {
                 SeiField(
                     value = label,
                     onValueChange = { label = it },
-                    label = if (isPcQuickMode) xy("Label PC (opsional)", "PC Label (optional)")
-                    else xy("Nama perangkat", "Device name"),
-                    hint = if (isPcQuickMode) xy("mis. PC Gaming / Rig Utama", "e.g. Gaming PC / Main Rig")
-                    else xy("mis. PC kantor", "e.g. Office PC"),
+                    label = if (isPcQuickMode) sei( "PC Label (optional)")
+                    else sei( "Device name"),
+                    hint = if (isPcQuickMode) sei( "e.g. Gaming PC / Main Rig")
+                    else sei( "e.g. Office PC"),
                 )
                 Spacer(Modifier.height(14.dp))
                 SeiField(
                     value = host,
                     onValueChange = { host = it },
                     label = if (isPcQuickMode) {
-                        xy("ID PC (10 Digit / XY-ID)", "PC ID (10-Digit / XY-ID)")
+                        sei( "PC ID (10-Digit / XY-ID)")
                     } else {
-                        xy("Host / IP (port opsional)", "Host / IP (optional port)")
+                        sei( "Host / IP (optional port)")
                     },
                     hint = if (isPcQuickMode) {
-                        xy("323-223-5826 atau XY-C0A8-0132", "323-223-5826 or XY-C0A8-0132")
+                        sei( "323-223-5826 or XY-C0A8-0132")
                     } else {
-                        xy("pc.tailnet.ts.net atau [2001:db8::1]:3390", "pc.example.com or [2001:db8::1]:3390")
+                        sei( "pc.example.com or [2001:db8::1]:3390")
                     },
                     keyboardType = KeyboardType.Uri,
                     imeAction = androidx.compose.ui.text.input.ImeAction.Done,
@@ -552,9 +547,9 @@ fun AddDeviceScreen(
                 Spacer(Modifier.height(10.dp))
                 SeiPillButton(
                     text = if (isPcQuickMode) {
-                        xy("Pindai PC Otomatis di Wi-Fi (LAN)", "Auto-Scan PCs on Wi-Fi (LAN)")
+                        sei( "Auto-Scan PCs on Wi-Fi (LAN)")
                     } else {
-                        xy("Pindai Host RDP di Jaringan Lokal (LAN)", "Scan RDP Hosts on Local Network (LAN)")
+                        sei( "Scan RDP Hosts on Local Network (LAN)")
                     },
                     onClick = { triggerLanScan() },
                     icon = SeiIcons.Wifi,
@@ -567,8 +562,8 @@ fun AddDeviceScreen(
                     SeiField(
                         value = pass,
                         onValueChange = { pass = it },
-                        label = xy("PIN / Kunci Sesi XyDeskHost (opsional)", "XyDeskHost Session PIN / Key (optional)"),
-                        hint = xy("PIN 6 digit dari XyDeskHost.exe (bukan akun Windows)", "6-digit PIN from XyDeskHost.exe (not Windows account)"),
+                        label = sei( "XyDeskHost Session PIN / Key (optional)"),
+                        hint = sei( "6-digit PIN from XyDeskHost.exe (not Windows account)"),
                         isPassword = true,
                         keyboardType = KeyboardType.Password,
                     )
@@ -581,7 +576,7 @@ fun AddDeviceScreen(
                     Spacer(Modifier.height(6.dp))
                     Text(
                         buildString {
-                            append(xy("Target: ", "Target: "))
+                            append(sei( "Target: "))
                             append(resolvedPreview.host).append(':').append(resolvedPreview.port)
                             if (encodedPcId != null) {
                                 append("  ·  ID PC: ").append(encodedPcId)
@@ -596,8 +591,7 @@ fun AddDeviceScreen(
 
             if (isPcQuickMode) {
                 XySectionLabel(
-                    xy(
-                        "Agen PC Native (XyDeskHost.exe · Tahap Pengembangan)",
+                    sei(
                         "Native PC Agent (XyDeskHost.exe · In Development)",
                     ),
                 )
@@ -608,7 +602,7 @@ fun AddDeviceScreen(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
-                            xy("XyDeskHost.exe + .dll + QUIC + E2EE", "XyDeskHost.exe + .dll + QUIC + E2EE"),
+                            sei( "XyDeskHost.exe + .dll + QUIC + E2EE"),
                             style = MaterialTheme.typography.titleSmall,
                         )
                         Box(
@@ -618,7 +612,7 @@ fun AddDeviceScreen(
                                 .padding(horizontal = 8.dp, vertical = 3.dp),
                         ) {
                             Text(
-                                xy("TAHAP PENGEMBANGAN", "EXPERIMENTAL"),
+                                sei( "EXPERIMENTAL"),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.primary,
                             )
@@ -626,8 +620,7 @@ fun AddDeviceScreen(
                     }
                     Spacer(Modifier.height(6.dp))
                     Text(
-                        xy(
-                            "Berbeda dari RDP standar: Koneksi PC tidak memakai kredensial akun/domain Windows dan mengunci resolusi + DPI 1:1 mengikuti monitor fisik PC (DXGI Desktop Duplication). Seluruh paket dienkripsi End-to-End (TLS 1.3 + Pinning Keystore) dengan jalur Ultra-Low Latency untuk game FPS.",
+                        sei(
                             "Unlike standard RDP: PC Connection does not use Windows account/domain credentials and locks resolution + DPI 1:1 to the physical PC monitor (DXGI Desktop Duplication). All traffic is End-to-End Encrypted (TLS 1.3 + Keystore Pinning) with an Ultra-Low Latency path for FPS games.",
                         ),
                         style = MaterialTheme.typography.bodySmall,
@@ -636,14 +629,13 @@ fun AddDeviceScreen(
                     Spacer(Modifier.height(10.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         SeiPillButton(
-                            text = xy("Salin Perintah Setup PC", "Copy PC Setup Command"),
+                            text = sei( "Copy PC Setup Command"),
                             onClick = {
                                 val cmd = "irm https://www.xydeskremote.biz.id/host | iex"
                                 val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
                                 cm?.setPrimaryClip(ClipData.newPlainText("seidesk-host-cmd", cmd))
                                 SeiNoticeBus.post(
-                                    xyNow(
-                                        "Perintah PowerShell disalin! Jalankan di PowerShell Admin pada PC Anda.",
+                                    seiNow(
                                         "PowerShell command copied! Run it in Admin PowerShell on your PC.",
                                     ),
                                 )
@@ -652,7 +644,7 @@ fun AddDeviceScreen(
                             modifier = Modifier.weight(1f),
                         )
                         SeiPillButton(
-                            text = xy("Info XyDeskHost", "XyDeskHost Info"),
+                            text = sei( "XyDeskHost Info"),
                             onClick = {
                                 runCatching {
                                     context.startActivity(
@@ -668,19 +660,17 @@ fun AddDeviceScreen(
                 }
 
                 XySectionLabel(
-                    xy(
-                        "Mesin Direct PC Stream (Eksklusif Koneksi PC)",
+                    sei(
                         "Direct PC Stream Engine (PC Connect Exclusive)",
                     ),
                 )
                 SeiCard {
                     Text(
-                        xy("Arsitektur Pipeline Direct Stream", "Direct Stream Pipeline Architecture"),
+                        sei( "Direct Stream Pipeline Architecture"),
                         style = MaterialTheme.typography.titleSmall,
                     )
                     Text(
-                        xy(
-                            "Sistem streaming khusus Koneksi PC (tidak tersedia di mode RDP Desktop). Mengunci monitor fisik 1:1 dengan antrean frame nol.",
+                        sei(
                             "Dedicated streaming pipeline for PC Connect (unavailable in RDP Desktop mode). Locks 1:1 to the physical monitor with zero frame queue.",
                         ),
                         style = MaterialTheme.typography.bodySmall,
@@ -712,9 +702,9 @@ fun AddDeviceScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                             ) {
                                 Column(Modifier.weight(1f)) {
-                                    Text(xy(engine.title, engine.titleEn), style = MaterialTheme.typography.titleSmall)
+                                    Text(sei( engine.titleEn), style = MaterialTheme.typography.titleSmall)
                                     Text(
-                                        xy(engine.detail, engine.detailEn),
+                                        sei( engine.detailEn),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
@@ -739,12 +729,11 @@ fun AddDeviceScreen(
 
                     Spacer(Modifier.height(14.dp))
                     Text(
-                        xy("Preferensi refresh layar HP", "Handset display refresh preference"),
+                        sei( "Handset display refresh preference"),
                         style = MaterialTheme.typography.titleSmall,
                     )
                     Text(
-                        xy(
-                            "Meminta Android memilih refresh panel yang tersedia. FPS stream remote tetap dibatasi host, jaringan, dan kemampuan layar.",
+                        sei(
                             "Asks Android to select a supported panel refresh mode. Remote stream FPS still depends on the host, network, and display.",
                         ),
                         style = MaterialTheme.typography.bodySmall,
@@ -763,7 +752,7 @@ fun AddDeviceScreen(
 
                     Spacer(Modifier.height(14.dp))
                     Text(
-                        xy("Target Bitrate Video: {0} Mbps", "Target Video Bitrate: {0} Mbps", options.pcBitrateMbps),
+                        sei( "Target Video Bitrate: {0} Mbps", options.pcBitrateMbps),
                         style = MaterialTheme.typography.titleSmall,
                     )
                     Spacer(Modifier.height(4.dp))
@@ -776,12 +765,11 @@ fun AddDeviceScreen(
 
                     Spacer(Modifier.height(12.dp))
                     Text(
-                        xy("Binding Hardware GPU Encoder Host (NVENC / AMF / QuickSync)", "Host Hardware GPU Encoder Binding (NVENC / AMF / QuickSync)"),
+                        sei( "Host Hardware GPU Encoder Binding (NVENC / AMF / QuickSync)"),
                         style = MaterialTheme.typography.titleSmall,
                     )
                     Text(
-                        xy(
-                            "Eksklusif Koneksi PC: ikat langsung pipeline encode ke arsitektur kartu grafis PC Anda.",
+                        sei(
                             "PC Connect Exclusive: bind the encode pipeline directly to your PC graphics card architecture.",
                         ),
                         style = MaterialTheme.typography.bodySmall,
@@ -810,9 +798,9 @@ fun AddDeviceScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Column(Modifier.weight(1f)) {
-                                    Text(xy(gpu.title, gpu.titleEn), style = MaterialTheme.typography.titleSmall)
+                                    Text(sei( gpu.titleEn), style = MaterialTheme.typography.titleSmall)
                                     Text(
-                                        xy(gpu.detail, gpu.detailEn),
+                                        sei( gpu.detailEn),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
@@ -822,8 +810,7 @@ fun AddDeviceScreen(
                     }
                     Spacer(Modifier.height(10.dp))
                     Text(
-                        xy(
-                            "Info Layar: Resolusi dan DPI dikunci 1:1 mengikuti monitor konsol fisik PC (DXGI Desktop Duplication). Fitur multi-user virtual RDP, Dynamic Resolution DISP, dan RD Gateway dinonaktifkan pada mode ini.",
+                        sei(
                             "Display Info: Resolution and DPI are locked 1:1 to the physical PC console monitor (DXGI Desktop Duplication). Virtual multi-user RDP, DISP Dynamic Resolution, and RD Gateway are disabled in this mode.",
                         ),
                         style = MaterialTheme.typography.bodySmall,
@@ -831,12 +818,11 @@ fun AddDeviceScreen(
                     )
                 }
 
-                XySectionLabel(xy("Input Game FPS, Transport & Wake-on-LAN PC", "FPS Game Input, Transport & PC Wake-on-LAN"))
+                XySectionLabel(sei( "FPS Game Input, Transport & PC Wake-on-LAN"))
                 SeiCard {
                     SeiToggleRow(
-                        title = xy("Mouse Relatif RawInput (Rotasi 360° Game FPS)", "RawInput Relative Mouse (360° FPS Camera)"),
-                        subtitle = xy(
-                            "Kirim delta pergerakan mouse murni tanpa batas tepi layar untuk game shooter/3D",
+                        title = sei( "RawInput Relative Mouse (360° FPS Camera)"),
+                        subtitle = sei(
                             "Send pure relative mouse deltas without screen-edge clamping for shooter/3D games",
                         ),
                         checked = options.rawInputMouse,
@@ -844,9 +830,8 @@ fun AddDeviceScreen(
                         leading = SeiIcons.Sliders,
                     )
                     SeiToggleRow(
-                        title = xy("Transport QUIC / UDP Datagram (Zero HoL Blocking)", "QUIC / UDP Datagram Transport (Zero HoL Blocking)"),
-                        subtitle = xy(
-                            "Prioritaskan frame terbaru tanpa antrean TCP yang menahan paket saat jitter",
+                        title = sei( "QUIC / UDP Datagram Transport (Zero HoL Blocking)"),
+                        subtitle = sei(
                             "Prioritize newest frames without TCP head-of-line blocking during jitter",
                         ),
                         checked = options.udpTransport,
@@ -854,9 +839,8 @@ fun AddDeviceScreen(
                         leading = SeiIcons.Wifi,
                     )
                     SeiToggleRow(
-                        title = xy("Audio Real-Time Latensi Rendah", "Low-Latency Real-Time Audio"),
-                        subtitle = xy(
-                            "Streaming suara game & desktop langsung ke HP",
+                        title = sei( "Low-Latency Real-Time Audio"),
+                        subtitle = sei(
                             "Stream game and desktop audio directly to your phone",
                         ),
                         checked = audioIndex == 0,
@@ -864,9 +848,8 @@ fun AddDeviceScreen(
                         leading = SeiIcons.Mic,
                     )
                     SeiToggleRow(
-                        title = xy("Clipboard Otomatis (Anti-Putus Teks Panjang)", "Auto Clipboard (Long-Text Anti-Disconnect)"),
-                        subtitle = xy(
-                            "Sinkronisasi teks & gambar otomatis dengan proteksi ukuran buffer aman",
+                        title = sei( "Auto Clipboard (Long-Text Anti-Disconnect)"),
+                        subtitle = sei(
                             "Two-way text & image sync with safe buffer ceiling protection",
                         ),
                         checked = options.clipboard,
@@ -874,9 +857,8 @@ fun AddDeviceScreen(
                         leading = SeiIcons.Clip,
                     )
                     SeiToggleRow(
-                        title = xy("Mode Hemat Baterai & Suhu Dingin (VSYNC Pacing)", "Battery Saver & Cool Thermal Mode (VSYNC Pacing)"),
-                        subtitle = xy(
-                            "Gabungkan burst update per siklus layar agar HP tetap dingin dan irit baterai",
+                        title = sei( "Battery Saver & Cool Thermal Mode (VSYNC Pacing)"),
+                        subtitle = sei(
                             "Coalesce pixel bursts per VSYNC cycle to keep the phone cool and save battery",
                         ),
                         checked = options.batterySaver,
@@ -887,28 +869,28 @@ fun AddDeviceScreen(
                     SeiField(
                         value = options.macAddress.orEmpty(),
                         onValueChange = { options = options.copy(macAddress = it.trim().ifEmpty { null }) },
-                        label = xy("MAC Address PC untuk Wake-on-LAN (opsional)", "PC MAC Address for Wake-on-LAN (optional)"),
+                        label = sei( "PC MAC Address for Wake-on-LAN (optional)"),
                         hint = "AA:BB:CC:DD:EE:FF",
                     )
                 }
             } else {
 
-            XySectionLabel(xy("Kredensial", "Credentials"))
+            XySectionLabel(sei( "Credentials"))
             SeiCard {
                 if (!showCredentialForm) {
                     val activeAccountLabel = if (user.isNotBlank()) {
                         if (domain.isNotBlank()) "$domain\\$user" else user
                     } else {
-                        xy("Tanpa Akun (Tanya saat Connect)", "No Account (Ask on Connect)")
+                        sei( "No Account (Ask on Connect)")
                     }
                     val activeAccountSub = if (user.isNotBlank()) {
                         if (pass.isNotEmpty() && rememberPass) {
-                            xy("Password tersimpan (AES-256-GCM) · Ketuk untuk ganti akun", "Password saved (AES-256-GCM) · Tap to switch account")
+                            sei( "Password saved (AES-256-GCM) · Tap to switch account")
                         } else {
-                            xy("Password ditanya saat connect · Ketuk untuk ganti akun", "Password asked on connect · Tap to switch account")
+                            sei( "Password asked on connect · Tap to switch account")
                         }
                     } else {
-                        xy("Ketuk untuk memilih akun tersimpan atau tambah akun baru", "Tap to select a saved account or add a new account")
+                        sei( "Tap to select a saved account or add a new account")
                     }
 
                     Box(
@@ -929,7 +911,7 @@ fun AddDeviceScreen(
                         ) {
                             Column(Modifier.weight(1f)) {
                                 Text(
-                                    xy("Akun Kredensial Aktif", "Active Credential Account"),
+                                    sei( "Active Credential Account"),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
@@ -961,12 +943,12 @@ fun AddDeviceScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                             ) {
                                 Text(
-                                    xy("Akun tersimpan", "Saved accounts"),
+                                    sei( "Saved accounts"),
                                     style = MaterialTheme.typography.labelLarge,
                                     color = MaterialTheme.colorScheme.onSurface,
                                 )
                                 Text(
-                                    xy("Tutup", "Close"),
+                                    sei( "Close"),
                                     modifier = Modifier.clickable {
                                         accountDropdownOpen = false
                                         accountSearch = ""
@@ -979,8 +961,8 @@ fun AddDeviceScreen(
                                 SeiField(
                                     value = accountSearch,
                                     onValueChange = { accountSearch = it },
-                                    label = xy("Cari akun", "Search accounts"),
-                                    hint = xy("Username atau domain", "Username or domain"),
+                                    label = sei( "Search accounts"),
+                                    hint = sei( "Username or domain"),
                                 )
                             }
                             Column(
@@ -1023,9 +1005,9 @@ fun AddDeviceScreen(
                                             )
                                             Text(
                                                 if (acc.password.isNotEmpty()) {
-                                                    xy("Password tersimpan · siap dipakai", "Password saved · ready to use")
+                                                    sei( "Password saved · ready to use")
                                                 } else {
-                                                    xy("Akun tersimpan", "Saved account")
+                                                    sei( "Saved account")
                                                 },
                                                 style = MaterialTheme.typography.bodySmall,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1033,7 +1015,7 @@ fun AddDeviceScreen(
                                         }
                                         if (isSelected) {
                                             Text(
-                                                xy("✓ Dipilih", "✓ Selected"),
+                                                sei( "✓ Selected"),
                                                 style = MaterialTheme.typography.labelSmall,
                                                 color = MaterialTheme.colorScheme.primary,
                                                 modifier = Modifier.padding(start = 8.dp),
@@ -1043,7 +1025,7 @@ fun AddDeviceScreen(
                                 }
                                 if (allAccounts.isNotEmpty() && filteredAccounts.isEmpty()) {
                                     Text(
-                                        xy("Tidak ada akun yang cocok.", "No matching accounts."),
+                                        sei( "No matching accounts."),
                                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 14.dp),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1064,7 +1046,7 @@ fun AddDeviceScreen(
                                         verticalAlignment = Alignment.CenterVertically,
                                     ) {
                                         Text(
-                                            xy("✎ Ubah detail / password akun ini", "✎ Edit this account"),
+                                            sei( "✎ Edit this account"),
                                             style = MaterialTheme.typography.titleSmall,
                                         )
                                     }
@@ -1086,7 +1068,7 @@ fun AddDeviceScreen(
                                     verticalAlignment = Alignment.CenterVertically,
                                 ) {
                                     Text(
-                                        xy("+ Tambah akun baru", "+ Add new account"),
+                                        sei( "+ Add new account"),
                                         style = MaterialTheme.typography.titleSmall,
                                         color = MaterialTheme.colorScheme.primary,
                                     )
@@ -1108,7 +1090,7 @@ fun AddDeviceScreen(
                                     verticalAlignment = Alignment.CenterVertically,
                                 ) {
                                     Text(
-                                        xy("Tanpa akun (tanya saat Connect)", "No account (ask on connect)"),
+                                        sei( "No account (ask on connect)"),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
@@ -1122,8 +1104,8 @@ fun AddDeviceScreen(
                         SeiField(
                             value = pass,
                             onValueChange = { pass = it },
-                            label = xy("Password Akses PC", "PC Access Password"),
-                            hint = xy("Masukkan password PC dari XyDeskHost", "Enter PC password from XyDeskHost"),
+                            label = sei( "PC Access Password"),
+                            hint = sei( "Enter PC password from XyDeskHost"),
                             isPassword = true,
                             keyboardType = KeyboardType.Password,
                         )
@@ -1132,9 +1114,8 @@ fun AddDeviceScreen(
                     SeiField(
                         value = user,
                         onValueChange = { user = it },
-                        label = xy("Username", "Username"),
-                        hint = xy(
-                            "kosongkan kalau mau ditanya saat connect",
+                        label = sei( "Username"),
+                        hint = sei(
                             "leave empty to be asked on connect",
                         ),
                     )
@@ -1142,7 +1123,7 @@ fun AddDeviceScreen(
                     SeiField(
                         value = pass,
                         onValueChange = { pass = it },
-                        label = xy("Password", "Password"),
+                        label = sei( "Password"),
                         isPassword = true,
                         keyboardType = KeyboardType.Password,
                     )
@@ -1150,13 +1131,13 @@ fun AddDeviceScreen(
                     SeiField(
                         value = domain,
                         onValueChange = { domain = it },
-                        label = xy("Domain (opsional)", "Domain (optional)"),
+                        label = sei( "Domain (optional)"),
                         hint = "CORP",
                     )
                     Spacer(Modifier.height(6.dp))
                     SeiToggleRow(
-                        title = xy("Ingat password", "Remember password"),
-                        subtitle = xy("Disimpan terenkripsi AES-GCM, kunci di Android Keystore", "Stored AES-GCM encrypted, key in Android Keystore"),
+                        title = sei( "Remember password"),
+                        subtitle = sei( "Stored AES-GCM encrypted, key in Android Keystore"),
                         checked = rememberPass,
                         onCheckedChange = { rememberPass = it },
                         leading = SeiIcons.Lock,
@@ -1165,7 +1146,7 @@ fun AddDeviceScreen(
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         if (allAccounts.isNotEmpty()) {
                             SeiPillButton(
-                                text = xy("Pilih dari Dropdown ({0})", "Pick from Dropdown ({0})", allAccounts.size),
+                                text = sei( "Pick from Dropdown ({0})", allAccounts.size),
                                 onClick = {
                                     if (user.isBlank()) {
                                         val first = allAccounts.first()
@@ -1183,7 +1164,7 @@ fun AddDeviceScreen(
                             )
                         }
                         SeiPillButton(
-                            text = xy("Simpan Akun ke Pilihan", "Save Account to Dropdown"),
+                            text = sei( "Save Account to Dropdown"),
                             onClick = {
                                 val u = user.trim()
                                 if (u.isNotEmpty()) {
@@ -1202,17 +1183,15 @@ fun AddDeviceScreen(
 
             // Mode cepat menyembunyikan bagian ini; ada di tab Lanjutan.
             if (showAdvanced) {
-            XySectionLabel(xy("Tampilan", "Display"))
+            XySectionLabel(sei( "Display"))
             SeiCard {
                 Text(
-                    xy("Resolusi desktop remote", "Remote desktop resolution"),
+                    sei( "Remote desktop resolution"),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
-                    xy(
-                        "Default \"Otomatis\" selalu 16:9 (pas untuk desktop Windows). " +
-                            "\"Ikuti layar HP\" memakai rasio HP — untuk video/game.",
+                    sei(
                         "The \"Automatic\" default is always 16:9 (right for Windows " +
                             "desktops). \"Follow phone screen\" uses the phone ratio — for video/games.",
                     ),
@@ -1226,7 +1205,7 @@ fun AddDeviceScreen(
                             row.forEachIndexed { colIndex, option ->
                                 val index = rowIndex * 2 + colIndex
                                 SeiPillButton(
-                                    text = xy(option.id, option.en),
+                                    text = sei( option.en),
                                     onClick = { resolutionIndex = index },
                                     primary = index == resolutionIndex,
                                     compact = true,
@@ -1239,7 +1218,7 @@ fun AddDeviceScreen(
                 }
                 Spacer(Modifier.height(16.dp))
                 Text(
-                    xy("Orientasi perangkat", "Device orientation"),
+                    sei( "Device orientation"),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -1252,7 +1231,7 @@ fun AddDeviceScreen(
                 )
                 Spacer(Modifier.height(16.dp))
                 Text(
-                    xy("Skala lokal awal: {0}%", "Initial local zoom: {0}%", dpi),
+                    sei( "Initial local zoom: {0}%", dpi),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -1264,9 +1243,7 @@ fun AddDeviceScreen(
                     steps = 11,
                 )
                 Text(
-                    xy(
-                        "Zoom lokal ini menjadi nilai awal saat sesi dibuka. DPI desktop Windows " +
-                            "diatur terpisah dari panel sesi; resolusi remote juga kontrol terpisah.",
+                    sei(
                         "This local zoom is the starting value when a session opens. Windows desktop DPI " +
                             "is controlled separately in the session panel; remote resolution is separate too.",
                     ),
@@ -1277,7 +1254,7 @@ fun AddDeviceScreen(
 
             }
 
-            XySectionLabel(xy("Audio & kanal", "Audio & channels"))
+            XySectionLabel(sei( "Audio & channels"))
             SeiCard {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     SeiAudioMode.entries.forEachIndexed { index, mode ->
@@ -1300,9 +1277,9 @@ fun AddDeviceScreen(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Column(Modifier.weight(1f)) {
-                                Text(xy(mode.title, mode.titleEn), style = MaterialTheme.typography.titleSmall)
+                                Text(sei( mode.titleEn), style = MaterialTheme.typography.titleSmall)
                                 Text(
-                                    xy(mode.detail, mode.detailEn),
+                                    sei( mode.detailEn),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
@@ -1311,21 +1288,17 @@ fun AddDeviceScreen(
                     }
                     val audioNote = when (SeiAudioMode.entries[audioIndex]) {
                         SeiAudioMode.DEVICE ->
-                            xy(
-                                "Mode Perangkat memutar suara PC lewat kanal audio RDP (tanpa host agent). " +
-                                    "Kalau di PC 'Remote Audio' dimatikan demi VB-CABLE, pilih mode Remote.",
+                            sei(
                                 "Device mode plays PC sound over the RDP audio channel (no host agent). " +
                                     "If PC 'Remote Audio' is disabled for VB-CABLE, switch to Remote mode.",
                             )
                         SeiAudioMode.REMOTE ->
-                            xy(
-                                "Mode Remote = suara PC lewat jembatan UDP :4433, jadi XyDeskRemoteHost.exe " +
-                                    "harus jalan di PC. Pakai ini kalau kanal audio RDP diblokir/kosong.",
+                            sei(
                                 "Remote mode routes PC sound through the UDP :4433 bridge, so XyDeskRemoteHost.exe " +
                                     "must run on the PC. Use it when the RDP audio channel is blocked/empty.",
                             )
                         SeiAudioMode.OFF ->
-                            xy("Audio dimatikan total — jembatan UDP tidak dijalankan.", "Audio fully off — the UDP bridge stays down.")
+                            sei( "Audio fully off — the UDP bridge stays down.")
                     }
                     Text(
                         audioNote,
@@ -1336,15 +1309,13 @@ fun AddDeviceScreen(
                 Spacer(Modifier.height(8.dp))
                 val bridgeRelevant = SeiAudioMode.entries[audioIndex] == SeiAudioMode.REMOTE
                 SeiToggleRow(
-                    title = xy("Audio PC via UDP (bridge)", "PC audio over UDP (bridge)"),
+                    title = sei( "PC audio over UDP (bridge)"),
                     subtitle = if (bridgeRelevant) {
-                        xy(
-                            "Perlu XyDeskRemoteHost.exe di PC (port UDP 4433). Tanpa itu suara PC tidak sampai.",
+                        sei(
                             "Needs XyDeskRemoteHost.exe on the PC (UDP 4433). Without it, PC sound never arrives.",
                         )
                     } else {
-                        xy(
-                            "Tidak dipakai: mode Perangkat memutar suara lewat kanal RDP.",
+                        sei(
                             "Not used: Device mode plays sound through the RDP channel.",
                         )
                     },
@@ -1354,48 +1325,46 @@ fun AddDeviceScreen(
                     enabled = bridgeRelevant,
                 )
                 SeiToggleRow(
-                    title = xy("Mikrofon", "Microphone"),
-                    subtitle = xy("Kirim audio HP ke remote (butuh izin mikrofon)", "Send phone audio to remote (needs mic permission)"),
+                    title = sei( "Microphone"),
+                    subtitle = sei( "Send phone audio to remote (needs mic permission)"),
                     checked = options.microphone,
                     onCheckedChange = { options = options.copy(microphone = it) },
                     leading = SeiIcons.Mic,
                 )
                 if (options.microphone) {
                     Spacer(Modifier.height(8.dp))
-                    XySectionLabel(xy("Mic lanjutan (DSP di HP)", "Microphone DSP (on phone)"))
+                    XySectionLabel(sei( "Microphone DSP (on phone)"))
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         XySliderRow(
-                            label = xy("Gain mic", "Mic gain"),
+                            label = sei( "Mic gain"),
                             value = options.micGainDb.toFloat(),
                             suffix = " dB",
                             range = -12f..24f,
                             steps = 6,
                         ) { options = options.copy(micGainDb = it.toInt()) }
                         XySliderRow(
-                            label = xy("Noise gate", "Noise gate"),
+                            label = sei( "Noise gate"),
                             value = options.micGateDb.toFloat(),
                             suffix = " dBFS",
                             range = -70f..0f,
                             steps = 6,
                         ) { options = options.copy(micGateDb = it.toInt()) }
                         SeiToggleRow(
-                            title = xy("Noise suppression", "Noise suppression"),
-                            subtitle = xy("High-pass + expander buang desis/AC/angin", "High-pass + expander kills hiss, AC hum, wind"),
+                            title = sei( "Noise suppression"),
+                            subtitle = sei( "High-pass + expander kills hiss, AC hum, wind"),
                             checked = options.micNoiseSuppression,
                             onCheckedChange = { options = options.copy(micNoiseSuppression = it) },
                             leading = SeiIcons.Mic,
                         )
                         SeiToggleRow(
-                            title = xy("Auto gain (AGC)", "Auto gain (AGC)"),
-                            subtitle = xy("Level mic HP disamakan otomatis saat bicara", "Phone mic level auto-levelled while talking"),
+                            title = sei( "Auto gain (AGC)"),
+                            subtitle = sei( "Phone mic level auto-levelled while talking"),
                             checked = options.micAgc,
                             onCheckedChange = { options = options.copy(micAgc = it) },
                             leading = SeiIcons.Mic,
                         )
                         Text(
-                            xy(
-                                "Mic dirender ke endpoint 'CABLE Input / XyDesk Virtual Microphone' di PC; " +
-                                    "kalau tidak ada, Host Agent pakai perangkat default.",
+                            sei(
                                 "The mic renders into the PC's 'CABLE Input / XyDesk Virtual Microphone' endpoint; " +
                                     "if missing, the Host Agent falls back to the default device.",
                             ),
@@ -1405,15 +1374,15 @@ fun AddDeviceScreen(
                     }
                 }
                 SeiToggleRow(
-                    title = xy("Clipboard", "Clipboard"),
-                    subtitle = xy("Copy-paste dua arah", "Two-way copy-paste"),
+                    title = sei( "Clipboard"),
+                    subtitle = sei( "Two-way copy-paste"),
                     checked = options.clipboard,
                     onCheckedChange = { options = options.copy(clipboard = it) },
                     leading = SeiIcons.Clip,
                 )
                 SeiToggleRow(
-                    title = xy("Penyimpanan lokal", "Local storage"),
-                    subtitle = xy("Folder HP muncul sebagai drive 'XyDesk' di PC remote", "Phone folder appears as the 'XyDesk' drive on the remote PC"),
+                    title = sei( "Local storage"),
+                    subtitle = sei( "Phone folder appears as the 'XyDesk' drive on the remote PC"),
                     checked = options.localDrive,
                     onCheckedChange = { options = options.copy(localDrive = it) },
                     leading = SeiIcons.Folder,
@@ -1422,8 +1391,8 @@ fun AddDeviceScreen(
                     StorageAccessRow()
                 }
                 SeiToggleRow(
-                    title = xy("Kamera", "Camera"),
-                    subtitle = xy("Kamera HP sebagai webcam remote (kalau didukung server)", "Phone camera as remote webcam (if the server supports it)"),
+                    title = sei( "Camera"),
+                    subtitle = sei( "Phone camera as remote webcam (if the server supports it)"),
                     checked = options.camera,
                     onCheckedChange = { options = options.copy(camera = it) },
                     leading = SeiIcons.Shot,
@@ -1431,15 +1400,14 @@ fun AddDeviceScreen(
             }
 
             if (showAdvanced) {
-            XySectionLabel(xy("Streaming & Latensi", "Streaming & Latency"))
+            XySectionLabel(sei( "Streaming & Latency"))
             SeiCard {
                 Text(
-                    xy("Profil Streaming & Latensi", "Streaming & Latency Profile"),
+                    sei( "Streaming & Latency Profile"),
                     style = MaterialTheme.typography.titleSmall,
                 )
                 Text(
-                    xy(
-                        "Pilih profil instan atau atur codec, warna, dan optimasi latensi di bawah.",
+                    sei(
                         "Pick an instant preset or customize codec, color depth, and latency flags below.",
                     ),
                     style = MaterialTheme.typography.bodySmall,
@@ -1457,7 +1425,7 @@ fun AddDeviceScreen(
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         row.forEach { preset ->
                             SeiPillButton(
-                                text = xy(preset.title, preset.titleEn),
+                                text = sei( preset.titleEn),
                                 onClick = { options = options.withStreamProfile(preset) },
                                 primary = options.streamProfile == preset,
                                 compact = true,
@@ -1470,7 +1438,7 @@ fun AddDeviceScreen(
                 }
                 if (options.streamProfile == SeiStreamProfile.CUSTOM) {
                     Text(
-                        xy("Profil aktif: Kustom Manual", "Active profile: Custom Manual"),
+                        sei( "Active profile: Custom Manual"),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary,
                     )
@@ -1478,9 +1446,8 @@ fun AddDeviceScreen(
                 }
                 Spacer(Modifier.height(8.dp))
                 SeiToggleRow(
-                    title = xy("Mode Hemat Baterai & Suhu Dingin (VSYNC Pacing)", "Battery Saver & Cool Thermal Mode (VSYNC Pacing)"),
-                    subtitle = xy(
-                        "Gabungkan burst update piksel per siklus layar agar HP tidak cepat panas dan hemat baterai",
+                    title = sei( "Battery Saver & Cool Thermal Mode (VSYNC Pacing)"),
+                    subtitle = sei(
                         "Coalesce pixel burst updates per screen cycle to keep the phone cool and save battery",
                     ),
                     checked = options.batterySaver,
@@ -1488,9 +1455,8 @@ fun AddDeviceScreen(
                     leading = SeiIcons.Sliders,
                 )
                 SeiToggleRow(
-                    title = xy("Transport UDP (RDP-UDP + FEC)", "UDP transport (RDP-UDP + FEC)"),
-                    subtitle = xy(
-                        "RDP-UDP + FEC; lebih halus untuk gerakan cepat, butuh dukungan server",
+                    title = sei( "UDP transport (RDP-UDP + FEC)"),
+                    subtitle = sei(
                         "RDP-UDP + FEC; smoother fast motion, needs server support",
                     ),
                     checked = options.udpTransport,
@@ -1498,9 +1464,8 @@ fun AddDeviceScreen(
                     leading = SeiIcons.Wifi,
                 )
                 SeiToggleRow(
-                    title = xy("Deteksi bandwidth otomatis", "Automatic bandwidth detection"),
-                    subtitle = xy(
-                        "Profil otomatis FreeRDP mengikuti kondisi jaringan",
+                    title = sei( "Automatic bandwidth detection"),
+                    subtitle = sei(
                         "FreeRDP auto profile adapts to network conditions",
                     ),
                     checked = options.networkAutoDetect,
@@ -1511,9 +1476,8 @@ fun AddDeviceScreen(
                     enabled = !options.lowBandwidth,
                 )
                 SeiToggleRow(
-                    title = xy("Jaringan terbatas (broadband-low / AVC420)", "Low-bandwidth mode (broadband-low / AVC420)"),
-                    subtitle = xy(
-                        "Pakai profil broadband-low + AVC420 untuk koneksi seluler/hemat",
+                    title = sei( "Low-bandwidth mode (broadband-low / AVC420)"),
+                    subtitle = sei(
                         "Use broadband-low + AVC420 hints for cellular/metered connections",
                     ),
                     checked = options.lowBandwidth,
@@ -1523,9 +1487,8 @@ fun AddDeviceScreen(
                     leading = SeiIcons.Sliders,
                 )
                 SeiToggleRow(
-                    title = xy("H.264 / RemoteFX (GFX)", "H.264 / RemoteFX (GFX)"),
-                    subtitle = xy(
-                        "Akselerasi hardware H.264 (AVC444 di jaringan normal, AVC420 di mode hemat)",
+                    title = sei( "H.264 / RemoteFX (GFX)"),
+                    subtitle = sei(
                         "H.264 hardware acceleration (AVC444 on normal links, AVC420 in low-bandwidth)",
                     ),
                     checked = options.h264,
@@ -1535,9 +1498,8 @@ fun AddDeviceScreen(
                     leading = SeiIcons.Grid,
                 )
                 SeiToggleRow(
-                    title = xy("Async Frame Update (+async-update)", "Async Frame Update (+async-update)"),
-                    subtitle = xy(
-                        "Render layar tidak menahan antrean input untuk respons maksimal",
+                    title = sei( "Async Frame Update (+async-update)"),
+                    subtitle = sei(
                         "Decouple frame rendering from input queue for maximum responsiveness",
                     ),
                     checked = options.asyncUpdate,
@@ -1546,9 +1508,8 @@ fun AddDeviceScreen(
                     },
                 )
                 SeiToggleRow(
-                    title = xy("Async Input & Channels (+async-channels)", "Async Input & Channels (+async-channels)"),
-                    subtitle = xy(
-                        "Proses kanal input, audio, dan clipboard di thread mandiri",
+                    title = sei( "Async Input & Channels (+async-channels)"),
+                    subtitle = sei(
                         "Process input, audio, and clipboard channels on dedicated threads",
                     ),
                     checked = options.asyncChannels,
@@ -1558,15 +1519,15 @@ fun AddDeviceScreen(
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    xy("Level kompresi paket RDP", "RDP packet compression level"),
+                    sei( "RDP packet compression level"),
                     style = MaterialTheme.typography.titleSmall,
                 )
                 Spacer(Modifier.height(6.dp))
                 SeiSegmented(
                     options = listOf(
-                        xy("Mati (0)", "Off (0)"),
-                        xy("Standar (1)", "Standard (1)"),
-                        xy("Maksimum (2)", "Maximum (2)"),
+                        sei( "Off (0)"),
+                        sei( "Standard (1)"),
+                        sei( "Maximum (2)"),
                     ),
                     selectedIndex = options.compressionLevel.coerceIn(0, 2),
                     onSelect = {
@@ -1579,7 +1540,7 @@ fun AddDeviceScreen(
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    xy("Kedalaman warna (Color Depth)", "Color depth (BPP)"),
+                    sei( "Color depth (BPP)"),
                     style = MaterialTheme.typography.titleSmall,
                 )
                 Spacer(Modifier.height(6.dp))
@@ -1600,10 +1561,10 @@ fun AddDeviceScreen(
                 // Semua opsi visual kini selalu aktif (lihat default RdpOptions).
             }
 
-            XySectionLabel(xy("Keamanan & Sesi Admin", "Security & Admin Session"))
+            XySectionLabel(sei( "Security & Admin Session"))
             SeiCard {
                 Text(
-                    xy("Protokol keamanan autentikasi", "Authentication security protocol"),
+                    sei( "Authentication security protocol"),
                     style = MaterialTheme.typography.titleSmall,
                 )
                 Spacer(Modifier.height(6.dp))
@@ -1611,7 +1572,7 @@ fun AddDeviceScreen(
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         row.forEach { proto ->
                             SeiPillButton(
-                                text = xy(proto.title, proto.titleEn),
+                                text = sei( proto.titleEn),
                                 onClick = { options = options.copy(securityProtocol = proto) },
                                 primary = options.securityProtocol == proto,
                                 compact = true,
@@ -1623,17 +1584,17 @@ fun AddDeviceScreen(
                 }
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    xy("Level Kebijakan OpenSSL TLS", "OpenSSL TLS Security Level"),
+                    sei( "OpenSSL TLS Security Level"),
                     style = MaterialTheme.typography.titleSmall,
                 )
                 Spacer(Modifier.height(6.dp))
                 val tlsValues = listOf(-1, 0, 1, 2)
                 SeiSegmented(
                     options = listOf(
-                        xy("Auto", "Auto"),
-                        xy("Legacy (0)", "Legacy (0)"),
-                        xy("Standar (1)", "Standard (1)"),
-                        xy("Ketat (2)", "Strict (2)"),
+                        sei( "Auto"),
+                        sei( "Legacy (0)"),
+                        sei( "Standard (1)"),
+                        sei( "Strict (2)"),
                     ),
                     selectedIndex = tlsValues.indexOf(options.tlsSecLevel).coerceAtLeast(0),
                     onSelect = { options = options.copy(tlsSecLevel = tlsValues[it]) },
@@ -1641,9 +1602,8 @@ fun AddDeviceScreen(
                 )
                 Spacer(Modifier.height(6.dp))
                 SeiToggleRow(
-                    title = xy("Sesi Konsol / Admin (/admin)", "Console / Admin Session (/admin)"),
-                    subtitle = xy(
-                        "Masuk ke sesi konsol fisik atau sesi administrator Windows Server",
+                    title = sei( "Console / Admin Session (/admin)"),
+                    subtitle = sei(
                         "Connect to the physical console or Windows Server administrator session",
                     ),
                     checked = options.consoleAdmin,
@@ -1651,9 +1611,8 @@ fun AddDeviceScreen(
                     leading = SeiIcons.Lock,
                 )
                 SeiToggleRow(
-                    title = xy("Mode Restricted Admin (/restricted-admin)", "Restricted Admin Mode (/restricted-admin)"),
-                    subtitle = xy(
-                        "Login NLA tanpa menyerahkan kredensial plaintext ke host remote (anti pass-the-hash)",
+                    title = sei( "Restricted Admin Mode (/restricted-admin)"),
+                    subtitle = sei(
                         "Authenticate via NLA without sending plaintext credentials to the remote host",
                     ),
                     checked = options.restrictedAdmin,
@@ -1662,15 +1621,14 @@ fun AddDeviceScreen(
                 )
             }
 
-            XySectionLabel(xy("Wake-on-LAN & SSH Tunnel", "Wake-on-LAN & SSH Tunnel"))
+            XySectionLabel(sei( "Wake-on-LAN & SSH Tunnel"))
             SeiCard {
                 Text(
-                    xy("Wake-on-LAN (Magic Packet)", "Wake-on-LAN (Magic Packet)"),
+                    sei( "Wake-on-LAN (Magic Packet)"),
                     style = MaterialTheme.typography.titleSmall,
                 )
                 Text(
-                    xy(
-                        "Nyalakan PC dari kondisi Sleep/Shutdown lewat jaringan lokal atau VPN sebelum konek RDP.",
+                    sei(
                         "Wake the PC from Sleep/Shutdown over LAN or VPN before connecting via RDP.",
                     ),
                     style = MaterialTheme.typography.bodySmall,
@@ -1680,7 +1638,7 @@ fun AddDeviceScreen(
                 SeiField(
                     value = options.macAddress.orEmpty(),
                     onValueChange = { options = options.copy(macAddress = it.trim().ifEmpty { null }) },
-                    label = xy("MAC Address kartu jaringan PC (opsional)", "PC network card MAC Address (optional)"),
+                    label = sei( "PC network card MAC Address (optional)"),
                     hint = "AA:BB:CC:DD:EE:FF",
                 )
                 Spacer(Modifier.height(10.dp))
@@ -1688,7 +1646,7 @@ fun AddDeviceScreen(
                     SeiField(
                         value = options.wolBroadcast,
                         onValueChange = { options = options.copy(wolBroadcast = it.trim()) },
-                        label = xy("Broadcast / IP tujuan", "Broadcast / target IP"),
+                        label = sei( "Broadcast / target IP"),
                         hint = "255.255.255.255",
                         modifier = Modifier.weight(1.4f),
                     )
@@ -1698,7 +1656,7 @@ fun AddDeviceScreen(
                             val p = it.filter(Char::isDigit).take(5).toIntOrNull() ?: 9
                             options = options.copy(wolPort = p.coerceIn(1, 65535))
                         },
-                        label = xy("Port UDP", "UDP Port"),
+                        label = sei( "UDP Port"),
                         hint = "9",
                         keyboardType = KeyboardType.Number,
                         modifier = Modifier.weight(0.7f),
@@ -1707,16 +1665,15 @@ fun AddDeviceScreen(
                 if (!options.macAddress.isNullOrBlank()) {
                     Spacer(Modifier.height(8.dp))
                     SeiPillButton(
-                        text = xy("Kirim Tes Magic Packet Sekarang", "Send Test Magic Packet Now"),
+                        text = sei( "Send Test Magic Packet Now"),
                         onClick = {
                             val mac = options.macAddress.orEmpty()
                             if (WakeOnLan.parseMacBytes(mac) == null) {
-                                wolStatusText = xyNow(
-                                    "MAC Address belum valid (contoh: AA:BB:CC:DD:EE:FF)",
+                                wolStatusText = seiNow(
                                     "Invalid MAC address (e.g. AA:BB:CC:DD:EE:FF)",
                                 )
                             } else {
-                                wolStatusText = xyNow("Mengirim Magic Packet...", "Sending Magic Packet...")
+                                wolStatusText = seiNow( "Sending Magic Packet...")
                                 scope.launch {
                                     val endpointHost = parseRdpEndpoint(host)?.host
                                     val targets = buildList {
@@ -1731,13 +1688,11 @@ fun AddDeviceScreen(
                                         }
                                     }
                                     wolStatusText = if (result.isSuccess) {
-                                        xyNow(
-                                            "Magic Packet terkirim ke ${targets.joinToString()} (UDP ${options.wolPort})",
+                                        seiNow(
                                             "Magic Packet sent to ${targets.joinToString()} (UDP ${options.wolPort})",
                                         )
                                     } else {
-                                        xyNow(
-                                            "Gagal mengirim Magic Packet: ${result.exceptionOrNull()?.message ?: "error"}",
+                                        seiNow(
                                             "Failed to send Magic Packet: ${result.exceptionOrNull()?.message ?: "error"}",
                                         )
                                     }
@@ -1759,12 +1714,11 @@ fun AddDeviceScreen(
                 }
                 Spacer(Modifier.height(14.dp))
                 Text(
-                    xy("SSH Jump-Host / Port Forwarding Helper", "SSH Jump-Host / Port Forwarding Helper"),
+                    sei( "SSH Jump-Host / Port Forwarding Helper"),
                     style = MaterialTheme.typography.titleSmall,
                 )
                 Text(
-                    xy(
-                        "Jika PC berada di belakang firewall/NAT dan diakses via tunnel SSH lokal (mis. Termux), simpan detail jump-host di sini untuk membuat perintah port-forward otomatis.",
+                    sei(
                         "If the PC sits behind a firewall/NAT and is reached via a local SSH tunnel (e.g. Termux), save jump-host details here to generate the port-forwarding command.",
                     ),
                     style = MaterialTheme.typography.bodySmall,
@@ -1774,7 +1728,7 @@ fun AddDeviceScreen(
                 SeiField(
                     value = options.sshHost.orEmpty(),
                     onValueChange = { options = options.copy(sshHost = it.trim().ifEmpty { null }) },
-                    label = xy("SSH Jump Host", "SSH Jump Host"),
+                    label = sei( "SSH Jump Host"),
                     hint = "ssh.kantor.com",
                 )
                 if (!options.sshHost.isNullOrBlank()) {
@@ -1783,7 +1737,7 @@ fun AddDeviceScreen(
                         SeiField(
                             value = options.sshUser.orEmpty(),
                             onValueChange = { options = options.copy(sshUser = it.trim().ifEmpty { null }) },
-                            label = xy("SSH User", "SSH User"),
+                            label = sei( "SSH User"),
                             hint = "root",
                             modifier = Modifier.weight(1.3f),
                         )
@@ -1793,7 +1747,7 @@ fun AddDeviceScreen(
                                 val p = it.filter(Char::isDigit).take(5).toIntOrNull() ?: 22
                                 options = options.copy(sshPort = p.coerceIn(1, 65535))
                             },
-                            label = xy("SSH Port", "SSH Port"),
+                            label = sei( "SSH Port"),
                             hint = "22",
                             keyboardType = KeyboardType.Number,
                             modifier = Modifier.weight(0.7f),
@@ -1815,11 +1769,11 @@ fun AddDeviceScreen(
                         )
                         Spacer(Modifier.height(8.dp))
                         SeiPillButton(
-                            text = xy("Salin Perintah SSH", "Copy SSH Command"),
+                            text = sei( "Copy SSH Command"),
                             onClick = {
                                 val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
                                 cm?.setPrimaryClip(ClipData.newPlainText("SSH Tunnel", sshCmd))
-                                wolStatusText = xyNow("Perintah SSH disalin ke clipboard.", "SSH command copied to clipboard.")
+                                wolStatusText = seiNow( "SSH command copied to clipboard.")
                             },
                             primary = false,
                             compact = true,
@@ -1829,11 +1783,11 @@ fun AddDeviceScreen(
                 }
             }
 
-            XySectionLabel(xy("Gateway", "Gateway"))
+            XySectionLabel(sei( "Gateway"))
             SeiCard {
                 SeiToggleRow(
-                    title = xy("Lewat RDP Gateway", "Use RDP Gateway"),
-                    subtitle = xy("RD Gateway untuk jaringan kantor / tanpa port langsung", "RD Gateway for office networks / no direct port"),
+                    title = sei( "Use RDP Gateway"),
+                    subtitle = sei( "RD Gateway for office networks / no direct port"),
                     checked = gatewayOn,
                     onCheckedChange = { gatewayOn = it },
                     leading = SeiIcons.Lock,
@@ -1843,14 +1797,14 @@ fun AddDeviceScreen(
                     SeiField(
                         value = gwHost,
                         onValueChange = { gwHost = it.trim() },
-                        label = xy("Gateway host", "Gateway host"),
+                        label = sei( "Gateway host"),
                         hint = "gw.kantor.com",
                     )
                     Spacer(Modifier.height(12.dp))
                     SeiField(
                         value = gwPort,
                         onValueChange = { gwPort = it.filter(Char::isDigit).take(5) },
-                        label = xy("Gateway port", "Gateway port"),
+                        label = sei( "Gateway port"),
                         hint = "443",
                         keyboardType = KeyboardType.Number,
                     )
@@ -1858,13 +1812,13 @@ fun AddDeviceScreen(
                     SeiField(
                         value = gwUser,
                         onValueChange = { gwUser = it },
-                        label = xy("Gateway username (opsional)", "Gateway username (optional)"),
+                        label = sei( "Gateway username (optional)"),
                     )
                     Spacer(Modifier.height(12.dp))
                     SeiField(
                         value = gwPass,
                         onValueChange = { gwPass = it },
-                        label = xy("Gateway password (opsional)", "Gateway password (optional)"),
+                        label = sei( "Gateway password (optional)"),
                         isPassword = true,
                         keyboardType = KeyboardType.Password,
                     )
@@ -1872,7 +1826,7 @@ fun AddDeviceScreen(
                     SeiField(
                         value = gwDomain,
                         onValueChange = { gwDomain = it },
-                        label = xy("Gateway domain (opsional)", "Gateway domain (optional)"),
+                        label = sei( "Gateway domain (optional)"),
                     )
                 }
             }
@@ -1894,13 +1848,13 @@ fun AddDeviceScreen(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             SeiPillButton(
-                text = xy("Simpan", "Save"),
+                text = sei( "Save"),
                 onClick = { submit(false) },
                 primary = false,
                 modifier = Modifier.weight(1f),
             )
             SeiPillButton(
-                text = xy("Simpan & connect", "Save & connect"),
+                text = sei( "Save & connect"),
                 onClick = { submit(true) },
                 modifier = Modifier.weight(1.4f),
             )
@@ -1909,26 +1863,25 @@ fun AddDeviceScreen(
 
     if (confirmDiscard) {
         SeiDialog(
-            title = xy("Buang perubahan?", "Discard changes?"),
-            body = xy(
-                "Perubahan pada pengaturan perangkat ini belum disimpan. Kembali tanpa menyimpan?",
+            title = sei( "Discard changes?"),
+            body = sei(
                 "Changes to this device configuration have not been saved. Leave without saving?",
             ),
-            confirmLabel = xy("Buang", "Discard"),
+            confirmLabel = sei( "Discard"),
             onConfirm = {
                 confirmDiscard = false
                 onCancel()
             },
-            dismissLabel = xy("Lanjut ubah", "Keep editing"),
+            dismissLabel = sei( "Keep editing"),
             onDismiss = { confirmDiscard = false },
         )
     }
 
     validationPopup?.let { msg ->
         SeiDialog(
-            title = xy("Data belum valid", "Validation error"),
+            title = sei( "Validation error"),
             body = msg,
-            confirmLabel = xy("Mengerti", "Got it"),
+            confirmLabel = sei( "Got it"),
             onConfirm = { validationPopup = null },
             onDismiss = { validationPopup = null },
         )
@@ -1937,31 +1890,30 @@ fun AddDeviceScreen(
     if (lanScanModalOpen) {
         SeiOverlay(
             title = if (isPcQuickMode) {
-                xy("Pindai PC di Jaringan Wi-Fi (LAN)", "Scan PCs on Wi-Fi Network (LAN)")
+                sei( "Scan PCs on Wi-Fi Network (LAN)")
             } else {
-                xy("Pindai Host RDP di Jaringan Lokal", "Scan RDP Hosts on Local Network")
+                sei( "Scan RDP Hosts on Local Network")
             },
             onDismiss = { lanScanModalOpen = false },
         ) {
             Text(
                 text = if (!lanSelfIp.isNullOrBlank()) {
-                    xy("IP HP Anda: {0} · Memindai port 3389 di subnet lokal", "Your Phone IP: {0} · Scanning port 3389 on local subnet", lanSelfIp!!)
+                    sei( "Your Phone IP: {0} · Scanning port 3389 on local subnet", lanSelfIp!!)
                 } else {
-                    xy("Pastikan HP dan PC berada di jaringan Wi-Fi / Hotspot yang sama.", "Make sure your phone and PC are on the same Wi-Fi / Hotspot network.")
+                    sei( "Make sure your phone and PC are on the same Wi-Fi / Hotspot network.")
                 },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             if (lanScanning) {
                 Text(
-                    text = xy("Memindai 254 alamat lokal secara paralel...", "Scanning 254 local addresses in parallel..."),
+                    text = sei( "Scanning 254 local addresses in parallel..."),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.primary,
                 )
             } else if (lanFoundHosts.isEmpty()) {
                 Text(
-                    text = xy(
-                        "Belum ditemukan PC aktif di subnet ini. Pastikan PC menyala dan XyDeskHost / Remote Desktop (Port 3389) sudah aktif.",
+                    text = sei(
                         "No active PC found on this subnet yet. Ensure the PC is powered on and XyDeskHost / Remote Desktop (Port 3389) is enabled.",
                     ),
                     style = MaterialTheme.typography.bodySmall,
@@ -1995,9 +1947,9 @@ fun AddDeviceScreen(
                                 )
                                 Text(
                                     text = if (isPcQuickMode) {
-                                        xy("Endpoint: {0}:{1} · Ketuk untuk pakai ID ini", "Endpoint: {0}:{1} · Tap to use this ID", item.ip, item.port)
+                                        sei( "Endpoint: {0}:{1} · Tap to use this ID", item.ip, item.port)
                                     } else {
-                                        xy("ID PC: {0} · Ketuk untuk pakai IP ini", "PC ID: {0} · Tap to use this IP", item.pcId)
+                                        sei( "PC ID: {0} · Tap to use this IP", item.pcId)
                                     },
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -2015,14 +1967,14 @@ fun AddDeviceScreen(
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 SeiPillButton(
-                    text = xy("Pindai Ulang", "Rescan"),
+                    text = sei( "Rescan"),
                     onClick = { triggerLanScan() },
                     primary = false,
                     compact = true,
                     modifier = Modifier.weight(1f),
                 )
                 SeiPillButton(
-                    text = xy("Tutup", "Close"),
+                    text = sei( "Close"),
                     onClick = { lanScanModalOpen = false },
                     compact = true,
                     modifier = Modifier.weight(1f),
@@ -2066,9 +2018,9 @@ private fun StorageAccessRow() {
     ) {
         Text(
             if (granted) {
-                xy("Akses penuh: seluruh isi HP terbaca remote", "Full access: the remote reads all phone storage")
+                sei( "Full access: the remote reads all phone storage")
             } else {
-                xy("Akses terbatas: hanya folder app yang terbaca remote", "Limited access: only the app folder is visible to the remote")
+                sei( "Limited access: only the app folder is visible to the remote")
             },
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -2082,8 +2034,7 @@ private fun StorageAccessRow() {
         )
         Spacer(Modifier.height(4.dp))
         Text(
-            xy(
-                "Cara transfer file di PC: Buka File Explorer Windows -> This PC -> klik drive 'XyDesk on Android' (atau ketik \\\\tsclient\\XyDesk di address bar) untuk salin/tempel file dua arah.",
+            sei(
                 "How to transfer files on PC: Open Windows File Explorer -> This PC -> open 'XyDesk on Android' drive (or type \\\\tsclient\\XyDesk in the address bar) for two-way file copy/paste.",
             ),
             style = MaterialTheme.typography.bodySmall,
@@ -2092,7 +2043,7 @@ private fun StorageAccessRow() {
         if (!granted) {
             Spacer(Modifier.height(8.dp))
             SeiPillButton(
-                text = xy("Beri akses semua file", "Grant all-files access"),
+                text = sei( "Grant all-files access"),
                 onClick = {
                     val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                         Intent(

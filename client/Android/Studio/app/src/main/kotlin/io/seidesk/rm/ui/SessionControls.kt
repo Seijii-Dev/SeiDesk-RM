@@ -359,7 +359,7 @@ fun SessionControls(
         cm?.setPrimaryClip(
             ClipData.newPlainText("SeiDesk RM", coreInfo.joinToString("\n"))
         )
-        notice.show(xyNow("Info teknis tersalin", "Technical info copied"))
+        notice.show(seiNow( "Technical info copied"))
     }
 
     fun clipboardText(): String {
@@ -373,19 +373,18 @@ fun SessionControls(
         val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
         val json = HudKey.exportLayoutJson(keys)
         cm?.setPrimaryClip(ClipData.newPlainText("SeiDesk RM HUD Layout", json))
-        notice.show(xyNow("Layout tombol JSON disalin ke clipboard", "Button layout JSON copied to clipboard"))
+        notice.show(seiNow( "Button layout JSON copied to clipboard"))
     }
 
     fun importHudLayoutFromRaw(raw: String): Boolean {
         val imported = HudKey.importLayoutJson(raw, prefs.hudButtonSize)
         if (imported == null) {
-            notice.show(xyNow("JSON layout tidak valid atau kosong", "Layout JSON is invalid or empty"))
+            notice.show(seiNow( "Layout JSON is invalid or empty"))
             return false
         }
         onKeysChange(imported)
         notice.show(
-            xyNow(
-                "Layout diimpor ({0} tombol)",
+            seiNow(
                 "Layout imported ({0} buttons)",
                 imported.size,
             ),
@@ -424,7 +423,7 @@ fun SessionControls(
 
     fun add(option: HudKeyOption) {
         if (keys.size >= 36) {
-            notice.show(xyNow("Maksimal 36 tombol HUD", "Maximum 36 HUD buttons"))
+            notice.show(seiNow( "Maximum 36 HUD buttons"))
             return
         }
         val width = configuration.screenWidthDp.toFloat().coerceAtLeast(1f)
@@ -470,7 +469,7 @@ fun SessionControls(
             !hitsExisting && !hitsRail && !hitsPanelHandle
         }
         if (position == null) {
-            notice.show(xyNow("Ruang kontrol penuh — pindahkan tombol dulu", "No free control space — move a button first"))
+            notice.show(seiNow( "No free control space — move a button first"))
             return
         }
         val key = HudKey(
@@ -495,8 +494,7 @@ fun SessionControls(
         panelOpen = false
         onMappingModeChange(true)
         notice.show(
-            xyNow(
-                "Tombol \"{0}\" ditambahkan — geser ke posisi yang kamu mau atau tekan Selesai.",
+            seiNow(
                 "Button \"{0}\" added — drag it into position or press Done.",
                 key.label,
             ),
@@ -643,7 +641,7 @@ fun SessionControls(
                     ) {
                         RailMenuItem(
                             icon = SeiIcons.ScrollSlide,
-                            label = xy("Kontrol scroll", "Scroll control"),
+                            label = sei( "Scroll control"),
                             active = scrollPillOpen,
                         ) {
                             scrollPillOpen = !scrollPillOpen
@@ -651,30 +649,30 @@ fun SessionControls(
                         RailMenuItem(
                             icon = if (hudButtonsVisibleNow) SeiIcons.EyeOff else SeiIcons.Eye,
                             label = if (hudButtonsVisibleNow) {
-                                xy("Sembunyikan overlay", "Hide overlay")
+                                sei( "Hide overlay")
                             } else {
-                                xy("Tampilkan overlay", "Show overlay")
+                                sei( "Show overlay")
                             },
                         ) {
                             toggleHudButtonVisibility()
                         }
                         RailMenuItem(
                             icon = SeiIcons.Monitor,
-                            label = xy("Monitor & sesi", "Monitors & sessions"),
+                            label = sei( "Monitors & sessions"),
                         ) {
                             railMenuOpen = false
                             monitorGridOpen = true
                         }
                         RailMenuItem(
                             icon = SeiIcons.Home,
-                            label = xy("Ke beranda (sesi tetap jalan)", "Go home (session stays alive)"),
+                            label = sei( "Go home (session stays alive)"),
                         ) {
                             railMenuOpen = false
                             onGoHome()
                         }
                         RailMenuItem(
                             icon = SeiIcons.Power,
-                            label = xy("Putuskan sesi", "Disconnect"),
+                            label = sei( "Disconnect"),
                             danger = true,
                         ) {
                             railMenuOpen = false
@@ -685,14 +683,14 @@ fun SessionControls(
                 RailButton(
                     icon = if (railMenuOpen) SeiIcons.ChevronDown else SeiIcons.ChevronUp,
                     active = railMenuOpen,
-                    description = xy("Menu sesi", "Session menu"),
+                    description = sei( "Session menu"),
                     plate = plate,
                     onClick = { railMenuOpen = !railMenuOpen },
                 )
                 RailButton(
                     icon = SeiIcons.Keyboard,
                     active = false,
-                    description = xy("Buka keyboard HP", "Open phone keyboard"),
+                    description = sei( "Open phone keyboard"),
                     plate = plate,
                 ) { onOpenKeyboard() }
             }
@@ -710,10 +708,9 @@ fun SessionControls(
         }
 
         if (textOpen) {
-            SeiOverlay(title = xy("Kirim teks", "Send text"), onDismiss = { textOpen = false }) {
+            SeiOverlay(title = sei( "Send text"), onDismiss = { textOpen = false }) {
                 Text(
-                    xy(
-                        "Dikirim sebagai ketikan. Pakai 'Kirim sebagai clipboard' untuk Paste di Windows.",
+                    sei(
                         "Sent as keystrokes. Use 'Send as clipboard' for Windows Paste.",
                     ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -722,32 +719,32 @@ fun SessionControls(
                 SeiField(
                     value = textValue,
                     onValueChange = { textValue = it },
-                    label = xy("Teks", "Text"),
-                    hint = xy("mis. password, alamat URL", "e.g. password, a URL"),
+                    label = sei( "Text"),
+                    hint = sei( "e.g. password, a URL"),
                     imeAction = androidx.compose.ui.text.input.ImeAction.Send,
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     SeiPillButton(
-                        xy("Tempel", "Paste"),
+                        sei( "Paste"),
                         {
                             val paste = clipboardText()
                             textValue = paste
-                            if (paste.isEmpty()) notice.show(xyNow("Clipboard HP kosong", "Phone clipboard is empty"))
+                            if (paste.isEmpty()) notice.show(seiNow( "Phone clipboard is empty"))
                         },
                         primary = false,
                         compact = true,
                         modifier = Modifier.weight(1f),
                     )
                     SeiPillButton(
-                        xy("Ketik ke remote", "Type to remote"),
+                        sei( "Type to remote"),
                         {
                             val t = textValue
                             if (t.isEmpty()) {
-                                validationAlert = xyNow("Teks kosong", "Empty text") to
-                                    xyNow("Masukkan teks terlebih dahulu sebelum mengirim ke remote.", "Enter some text before sending to the remote.")
+                                validationAlert = seiNow( "Empty text") to
+                                    seiNow( "Enter some text before sending to the remote.")
                             } else {
                                 onSendText(t)
-                                notice.show(xyNow("Teks diketik ke jendela remote", "Text typed into the remote window"))
+                                notice.show(seiNow( "Text typed into the remote window"))
                                 textOpen = false
                             }
                         },
@@ -756,19 +753,19 @@ fun SessionControls(
                     )
                 }
                 SeiPillButton(
-                    xy("Kirim sebagai clipboard Windows", "Send as Windows clipboard"),
+                    sei( "Send as Windows clipboard"),
                     {
                         val text = textValue
                         when {
-                            text.isEmpty() -> validationAlert = xyNow("Teks kosong", "Empty text") to
-                                xyNow("Masukkan teks terlebih dahulu sebelum mengirim ke clipboard Windows.", "Enter some text before sending to Windows clipboard.")
-                            !clipboardSyncEnabled -> validationAlert = xyNow("Kanal clipboard nonaktif", "Clipboard channel off") to
-                                xyNow("Aktifkan kanal clipboard di pengaturan perangkat lalu sambungkan ulang.", "Enable the clipboard channel in device settings and reconnect.")
+                            text.isEmpty() -> validationAlert = seiNow( "Empty text") to
+                                seiNow( "Enter some text before sending to Windows clipboard.")
+                            !clipboardSyncEnabled -> validationAlert = seiNow( "Clipboard channel off") to
+                                seiNow( "Enable the clipboard channel in device settings and reconnect.")
                             onSendRemoteClipboardText(text) -> {
-                                notice.show(xyNow("Permintaan clipboard dikirim; tunggu sebentar sebelum Paste", "Clipboard request sent; wait briefly before Paste"))
+                                notice.show(seiNow( "Clipboard request sent; wait briefly before Paste"))
                                 textOpen = false
                             }
-                            else -> notice.show(xyNow("Gagal mengirim permintaan clipboard", "Failed to queue clipboard request"))
+                            else -> notice.show(seiNow( "Failed to queue clipboard request"))
                         }
                     },
                     primary = false,
@@ -777,7 +774,7 @@ fun SessionControls(
                     enabled = clipboardSyncEnabled && textValue.isNotEmpty(),
                 )
                 SeiPillButton(
-                    xy("Selesai", "Done"),
+                    sei( "Done"),
                     { textOpen = false },
                     primary = false,
                     compact = true,
@@ -788,12 +785,11 @@ fun SessionControls(
 
         if (layoutJsonOpen) {
             SeiOverlay(
-                title = xy("Tata letak tombol (JSON)", "Button layout (JSON)"),
+                title = sei( "Button layout (JSON)"),
                 onDismiss = { layoutJsonOpen = false },
             ) {
                 Text(
-                    xy(
-                        "Salin JSON untuk memindahkan tata letak tombol ke perangkat lain, atau tempel JSON lalu tekan Terapkan.",
+                    sei(
                         "Copy JSON to reuse this button layout on another device, or paste JSON and press Apply.",
                     ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -802,16 +798,16 @@ fun SessionControls(
                 SeiField(
                     value = layoutJsonValue,
                     onValueChange = { layoutJsonValue = it },
-                    label = xy("JSON layout", "Layout JSON"),
+                    label = sei( "Layout JSON"),
                     hint = "{\"version\":1,\"keys\":[...]}",
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     SeiPillButton(
-                        xy("Tempel dari clipboard", "Paste clipboard"),
+                        sei( "Paste clipboard"),
                         {
                             val clip = clipboardText()
                             if (clip.isEmpty()) {
-                                notice.show(xyNow("Clipboard HP kosong", "Phone clipboard is empty"))
+                                notice.show(seiNow( "Phone clipboard is empty"))
                             } else {
                                 layoutJsonValue = clip
                             }
@@ -821,13 +817,12 @@ fun SessionControls(
                         modifier = Modifier.weight(1f),
                     )
                     SeiPillButton(
-                        xy("Terapkan JSON", "Apply JSON"),
+                        sei( "Apply JSON"),
                         {
                             val imported = HudKey.importLayoutJson(layoutJsonValue, prefs.hudButtonSize)
                             if (imported == null) {
-                                validationAlert = xyNow("JSON tidak valid", "Invalid JSON") to
-                                    xyNow(
-                                        "Format JSON tata letak tombol tidak valid atau tidak memuat tombol kontrol.",
+                                validationAlert = seiNow( "Invalid JSON") to
+                                    seiNow(
                                         "The button layout JSON format is invalid or contains no control buttons.",
                                     )
                             } else {
@@ -839,7 +834,7 @@ fun SessionControls(
                     )
                 }
                 SeiPillButton(
-                    xy("Salin layout saat ini", "Copy current layout"),
+                    sei( "Copy current layout"),
                     {
                         exportHudLayoutToClipboard()
                         layoutJsonValue = HudKey.exportLayoutJson(keys)
@@ -849,7 +844,7 @@ fun SessionControls(
                     modifier = Modifier.fillMaxWidth(),
                 )
                 SeiPillButton(
-                    xy("Tutup", "Close"),
+                    sei( "Close"),
                     { layoutJsonOpen = false },
                     primary = false,
                     compact = true,
@@ -939,9 +934,8 @@ fun SessionControls(
                 onCustomApply = {
                     val parsed = DisplayPrefs.parseCustom(custom)
                     if (parsed == null) {
-                        validationAlert = xyNow("Resolusi kustom tidak valid", "Invalid custom resolution") to
-                            xyNow(
-                                "Masukkan format WxH yang valid (640..8192 x 480..8192, lebar harus genap), contoh: 1920x1080.",
+                        validationAlert = seiNow( "Invalid custom resolution") to
+                            seiNow(
                                 "Enter a valid WxH format (640..8192 x 480..8192, even width), e.g. 1920x1080.",
                             )
                     } else {
@@ -1026,8 +1020,7 @@ fun SessionControls(
                         panelOpen = false
                         onMappingModeChange(true)
                         notice.show(
-                            xyNow(
-                                "Mode Kustom aktif — geser, tambah, atau ubah tombol sesuai keinginanmu",
+                            seiNow(
                                 "Custom mode active — drag, add, or edit buttons to build your layout",
                             ),
                         )
@@ -1121,131 +1114,123 @@ fun SessionControls(
 
     confirmDeleteKey?.let { key ->
         SeiDialog(
-            title = xy("Hapus tombol kontrol?", "Delete control button?"),
-            body = xy(
-                "Hapus tombol \"{0}\" dari tata letak sesi ini?",
+            title = sei( "Delete control button?"),
+            body = sei(
                 "Delete button \"{0}\" from this session layout?",
                 key.label,
             ),
-            confirmLabel = xy("Hapus", "Delete"),
+            confirmLabel = sei( "Delete"),
             onConfirm = {
                 confirmDeleteKey = null
                 if (editing?.id == key.id) editing = null
                 onDeleteKey(key)
-                notice.show(xyNow("Tombol dihapus", "Button deleted"))
+                notice.show(seiNow( "Button deleted"))
             },
-            dismissLabel = xy("Batal", "Cancel"),
+            dismissLabel = sei( "Cancel"),
             onDismiss = { confirmDeleteKey = null },
         )
     }
 
     if (confirmResetHud) {
         SeiDialog(
-            title = xy("Reset tata letak tombol?", "Reset button layout?"),
-            body = xy(
-                "Kembalikan semua tombol kontrol ke setelan bawaan? Susunan tombol kustom saat ini akan diganti.",
+            title = sei( "Reset button layout?"),
+            body = sei(
                 "Restore all control buttons to the default set? Your current custom button layout will be replaced.",
             ),
-            confirmLabel = xy("Reset", "Reset"),
+            confirmLabel = sei( "Reset"),
             onConfirm = {
                 confirmResetHud = false
                 editing = null
                 onResetCluster()
-                notice.show(xyNow("Tata letak tombol dikembalikan ke bawaan", "Button layout restored to default"))
+                notice.show(seiNow( "Button layout restored to default"))
             },
-            dismissLabel = xy("Batal", "Cancel"),
+            dismissLabel = sei( "Cancel"),
             onDismiss = { confirmResetHud = false },
         )
     }
 
     confirmImportLayout?.let { imported ->
         SeiDialog(
-            title = xy("Terapkan tata letak JSON?", "Apply JSON layout?"),
-            body = xy(
-                "Ganti tata letak tombol saat ini dengan {0} tombol dari JSON?",
+            title = sei( "Apply JSON layout?"),
+            body = sei(
                 "Replace the current button layout with {0} buttons from JSON?",
                 imported.size,
             ),
-            confirmLabel = xy("Terapkan", "Apply"),
+            confirmLabel = sei( "Apply"),
             onConfirm = {
                 confirmImportLayout = null
                 layoutJsonOpen = false
                 panelOpen = false
                 onKeysChange(imported)
                 notice.show(
-                    xyNow(
-                        "Layout diimpor ({0} tombol)",
+                    seiNow(
                         "Layout imported ({0} buttons)",
                         imported.size,
                     ),
                 )
             },
-            dismissLabel = xy("Batal", "Cancel"),
+            dismissLabel = sei( "Cancel"),
             onDismiss = { confirmImportLayout = null },
         )
     }
 
     confirmApplyPreset?.let { preset ->
         SeiDialog(
-            title = xy("Ganti profil tombol HUD?", "Switch HUD button profile?"),
-            body = xy(
-                "Terapkan profil \"{0}\"? Susunan tombol kontrol di layar sesi akan disesuaikan dengan profil ini.",
+            title = sei( "Switch HUD button profile?"),
+            body = sei(
                 "Apply profile \"{0}\"? The on-screen control buttons will be updated to match this preset.",
-                xy(preset.title, preset.titleEn),
+                preset.titleEn,
             ),
-            confirmLabel = xy("Terapkan", "Apply"),
+            confirmLabel = sei( "Apply"),
             onConfirm = {
                 confirmApplyPreset = null
                 hudProfile = preset
                 prefs.setHudProfile(deviceId, preset)
                 onKeysChange(HudKey.presetLayout(preset, prefs.hudButtonSize))
                 notice.show(
-                    xyNow(
-                        "Profil tombol diubah ke {0}",
+                    seiNow(
                         "Button profile switched to {0}",
-                        xyNow(preset.title, preset.titleEn),
+                        preset.titleEn,
                     ),
                 )
             },
-            dismissLabel = xy("Batal", "Cancel"),
+            dismissLabel = sei( "Cancel"),
             onDismiss = { confirmApplyPreset = null },
         )
     }
 
     if (confirmLockPc) {
         SeiDialog(
-            title = xy("Kunci layar PC (Win+L)?", "Lock PC screen (Win+L)?"),
-            body = xy(
-                "Kirim perintah Win+L untuk mengunci sesi Windows di komputer remote sekarang?",
+            title = sei( "Lock PC screen (Win+L)?"),
+            body = sei(
                 "Send Win+L to lock the Windows session on the remote computer now?",
             ),
-            confirmLabel = xy("Kunci PC", "Lock PC"),
+            confirmLabel = sei( "Lock PC"),
             onConfirm = {
                 confirmLockPc = false
                 panelOpen = false
                 onLockRemotePc()
             },
-            dismissLabel = xy("Batal", "Cancel"),
+            dismissLabel = sei( "Cancel"),
             onDismiss = { confirmLockPc = false },
         )
     }
 
     confirmResolution?.let { targetRes ->
         SeiDialog(
-            title = xy("Ubah resolusi remote?", "Change remote resolution?"),
-            body = xy(
-                "Terapkan resolusi \"{0}\"? Jika server belum menerapkan perubahan langsung, sesi akan menyambung ulang otomatis.",
+            title = sei( "Change remote resolution?"),
+            body = sei(
                 "Apply resolution \"{0}\"? If the server does not apply live resize, the session will reconnect automatically.",
                 targetRes,
             ),
-            confirmLabel = xy("Terapkan", "Apply"),
+            confirmLabel = sei( "Apply"),
             onConfirm = {
                 confirmResolution = null
                 resolution = targetRes
                 DisplayPrefs.setResolution(context, deviceId, targetRes)
                 onResolutionChange(targetRes)
             },
-            dismissLabel = xy("Batal", "Cancel"),
+            dismissLabel = sei( "Cancel"),
             onDismiss = { confirmResolution = null },
         )
     }
@@ -1254,7 +1239,7 @@ fun SessionControls(
         SeiDialog(
             title = alertTitle,
             body = alertBody,
-            confirmLabel = xy("Mengerti", "Got it"),
+            confirmLabel = sei( "Got it"),
             onConfirm = { validationAlert = null },
             onDismiss = { validationAlert = null },
         )
@@ -1300,7 +1285,7 @@ private fun LiveTelemetryPill(
     val items = listOf(
         Triple("FPS", "${telemetry.fps}", Color(0xFFF2F2F4)),
         Triple("LATENCY", rttLabel, rttColor),
-        Triple("RESOLUSI", resLabel, Color(0xFFF2F2F4)),
+        Triple("RESOLUTION", resLabel, Color(0xFFF2F2F4)),
         Triple("ENCODE", telemetry.codecLabel, Color(0xFFF2F2F4)),
         Triple("RELAY", telemetry.relayLabel, Color(0xFFF2F2F4)),
         Triple("NETWORK", telemetry.networkLabel, Color(0xFFF2F2F4)),
@@ -1407,13 +1392,13 @@ private fun PanelHandle(
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(
                     SeiIcons.Sliders,
-                    contentDescription = xy("Buka panel sesi", "Open session panel"),
+                    contentDescription = sei( "Open session panel"),
                     tint = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.size(17.dp),
                 )
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    xy("Menu", "Menu"),
+                    sei( "Menu"),
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 9.sp,
                     letterSpacing = 0.8.sp,
@@ -1707,13 +1692,13 @@ private fun SessionPanel(
                     )
                 }
                 if (tab == PanelTab.BUTTONS) {
-                    PanelChip(xy("+ Tombol", "+ Add"), onAddKey)
+                    PanelChip(sei( "+ Add"), onAddKey)
                 }
                 PanelChip(
-                    if (drawerMode) xy("Popup", "Popup") else xy("Drawer", "Drawer"),
+                    if (drawerMode) sei( "Popup") else sei( "Drawer"),
                     { onDrawerModeChange(!drawerMode) },
                 )
-                PanelChip(xy("Tutup", "Close"), onClose)
+                PanelChip(sei( "Close"), onClose)
             }
 
             PanelTabTiles(tab = tab, onTab = onTab, modifier = Modifier.fillMaxWidth())
@@ -1877,21 +1862,21 @@ private fun ScreenTab(
     PanelSectionGrid(openKey = openKey, onOpenKey = onOpenKey) {
     section(
         "telemetri-kontrol-monitor-fisik-pc",
-        if (pcConnectMode) xy("Telemetri & Kontrol Monitor Fisik PC", "Live Telemetry & Physical PC Monitor")
-        else xy("Telemetri & Multi-Monitor / Sesi RDP", "Live Telemetry & Multi-Monitor / RDP Sessions"),
+        if (pcConnectMode) sei( "Live Telemetry & Physical PC Monitor")
+        else sei( "Live Telemetry & Multi-Monitor / RDP Sessions"),
         advanced = true,
     ) {
             SeiToggleRow(
-                title = xy("Status telemetri live (Update UI, Latency, Network)", "Live telemetry status (UI updates, latency, network)"),
-                subtitle = xy("FPS adalah laju penyegaran tampilan app (frame per detik yang digambar di HP). Tampilkan bersama latency, resolusi, codec, relay, dan jaringan.", "FPS is the app display refresh rate (frames per second drawn on the phone). Show it with latency, resolution, codec, relay, and network."),
+                title = sei( "Live telemetry status (UI updates, latency, network)"),
+                subtitle = sei( "FPS is the app display refresh rate (frames per second drawn on the phone). Show it with latency, resolution, codec, relay, and network."),
                 checked = showTelemetryPill,
                 onCheckedChange = onShowTelemetryPillChange,
             )
             SeiPillButton(
                 text = if (pcConnectMode) {
-                    xy("Monitor Fisik 1:1 & Mesin Direct Stream", "1:1 Physical Monitor & Direct Stream Engine")
+                    sei( "1:1 Physical Monitor & Direct Stream Engine")
                 } else {
-                    xy("Grid Monitor & Sesi Multi-User / Konsol", "Active Monitors & Multi-User / Console Grid")
+                    sei( "Active Monitors & Multi-User / Console Grid")
                 },
                 onClick = onOpenMonitorGrid,
                 icon = SeiIcons.DualMonitor,
@@ -1901,13 +1886,13 @@ private fun ScreenTab(
             )
         }
 
-    section("orientasi",xy("Orientasi", "Orientation")) {
+    section("orientasi",sei( "Orientation")) {
             // Dulu label mentah "Auto/Portrait/Landscape" — satu-satunya baris
             // Inggris di panel Indonesia.
             val labels = listOf(
-                xy("Otomatis", "Auto"),
-                xy("Potret", "Portrait"),
-                xy("Lanskap", "Landscape"),
+                sei( "Auto"),
+                sei( "Portrait"),
+                sei( "Landscape"),
             )
             SeiSegmented(
                 options = labels,
@@ -1954,14 +1939,14 @@ private fun InputTab(
     onOpenKey: (String?) -> Unit,
 ) {
     PanelSectionGrid(openKey = openKey, onOpenKey = onOpenKey) {
-    section("mode-input-klik-mouse",xy("Mode input & Klik Mouse", "Input mode & Mouse Click")) {
+    section("mode-input-klik-mouse",sei( "Input mode & Mouse Click")) {
             SeiSegmented(
-                options = InputMode.entries.map { xy(it.title, it.titleEn) },
+                options = InputMode.entries.map { sei( it.titleEn) },
                 selectedIndex = inputMode.ordinal,
                 onSelect = { onInputModeChange(InputMode.entries[it]) },
                 modifier = Modifier.fillMaxWidth(),
             )
-            PanelHint(xy(InputMode.entries[inputMode.ordinal].detail, InputMode.entries[inputMode.ordinal].detailEn))
+            PanelHint(sei( InputMode.entries[inputMode.ordinal].detailEn))
             // Switch Ikon Mouse Kiri <-> Kanan (tanpa bergantung pada teks)
             Row(
                 modifier = Modifier
@@ -2002,7 +1987,7 @@ private fun InputTab(
                     }
                     Icon(
                         SeiIcons.MouseSwap,
-                        contentDescription = xy("Tukar Klik Kiri & Kanan", "Swap Left & Right Click"),
+                        contentDescription = sei( "Swap Left & Right Click"),
                         tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(20.dp),
                     )
@@ -2028,7 +2013,7 @@ private fun InputTab(
                 )
             }
             SeiPillButton(
-                xy("Kirim teks ke remote", "Send text to remote"),
+                sei( "Send text to remote"),
                 onSendTextClick,
                 icon = SeiIcons.Keyboard,
                 primary = false,
@@ -2037,10 +2022,9 @@ private fun InputTab(
             )
         }
 
-    section("fisika-trackpad-sensor",xy("Fisika Trackpad & Sensor", "Trackpad Physics & Sensors"), advanced = true) {
+    section("fisika-trackpad-sensor",sei( "Trackpad Physics & Sensors"), advanced = true) {
             PanelHint(
-                xy(
-                    "Sensitivitas pointer: {0}x",
+                sei(
                     "Pointer sensitivity: {0}x",
                     String.format(java.util.Locale.US, "%.1f", pointerSensitivity),
                 ),
@@ -2051,50 +2035,49 @@ private fun InputTab(
                 valueRange = 0.4f..3.0f,
             )
             SeiToggleRow(
-                title = xy("Akselerasi pointer dinamis", "Dynamic pointer acceleration"),
-                subtitle = xy("Gerak cepat menjangkau layar jauh, gerak pelan tetap presisi", "Fast swipes cross the screen, slow moves stay pixel-accurate"),
+                title = sei( "Dynamic pointer acceleration"),
+                subtitle = sei( "Fast swipes cross the screen, slow moves stay pixel-accurate"),
                 checked = pointerAcceleration,
                 onCheckedChange = onPointerAcceleration,
             )
             SeiToggleRow(
-                title = xy("Inertial scroll (momentum)", "Inertial scroll (momentum)"),
-                subtitle = xy("Gulir dua jari tetap meluncur halus saat dilepas", "Two-finger scroll glides smoothly after release"),
+                title = sei( "Inertial scroll (momentum)"),
+                subtitle = sei( "Two-finger scroll glides smoothly after release"),
                 checked = inertialScroll,
                 onCheckedChange = onInertialScroll,
             )
             SeiToggleRow(
-                title = xy("Zona scroll tepi kanan", "Right-edge scroll strip"),
-                subtitle = xy("Usap 1 jari di tepi paling kanan layar untuk roda scroll", "Swipe 1 finger along the right screen edge for mouse wheel"),
+                title = sei( "Right-edge scroll strip"),
+                subtitle = sei( "Swipe 1 finger along the right screen edge for mouse wheel"),
                 checked = edgeScrollZone,
                 onCheckedChange = onEdgeScrollZone,
             )
             SeiToggleRow(
-                title = xy("Dukungan Gamepad & Joystick fisik", "Physical Gamepad & Joystick"),
-                subtitle = xy("Stik kiri WASD, stik kanan mouse, A/B klik", "Left stick WASD, right stick mouse, A/B click"),
+                title = sei( "Physical Gamepad & Joystick"),
+                subtitle = sei( "Left stick WASD, right stick mouse, A/B click"),
                 checked = gamepadEnabled,
                 onCheckedChange = onGamepadEnabled,
             )
             PanelHint(
-                xy(
-                    "Mode stik kiri: Pointer = kursor, WASD/Panah = tombol arah. Stik kanan gamepad selalu kursor.",
+                sei(
                     "Left stick mode: Pointer = cursor, WASD/Arrows = keys. The gamepad's right stick is always the cursor.",
                 ),
             )
             SeiSegmented(
-                options = listOf(xy("Pointer", "Pointer"), xy("WASD", "WASD"), xy("Panah", "Arrows")),
+                options = listOf(sei( "Pointer"), sei( "WASD"), sei( "Arrows")),
                 selectedIndex = SeiStickMode.entries.indexOf(stickMode).coerceAtLeast(0),
                 onSelect = { onStickModeChange(SeiStickMode.entries[it]) },
                 modifier = Modifier.fillMaxWidth(),
             )
             SeiToggleRow(
-                title = xy("Gyro Air-Mouse (sensor gerak HP)", "Gyro Air-Mouse (phone motion)"),
-                subtitle = xy("Arahkan kursor dengan memiringkan HP seperti pointer laser", "Aim the cursor by tilting your phone like a laser pointer"),
+                title = sei( "Gyro Air-Mouse (phone motion)"),
+                subtitle = sei( "Aim the cursor by tilting your phone like a laser pointer"),
                 checked = gyroMouseEnabled,
                 onCheckedChange = onGyroMouseEnabled,
             )
         }
 
-    section("tombol-notifikasi-kustom", xy("Tombol notifikasi sesi", "Session notification buttons"), advanced = true) {
+    section("tombol-notifikasi-kustom", sei( "Session notification buttons"), advanced = true) {
         val notifContext = androidx.compose.ui.platform.LocalContext.current
         val notifPrefs = remember { AppPrefs(notifContext) }
         var notifHome by remember { mutableStateOf(notifPrefs.notifHomeButton) }
@@ -2107,37 +2090,34 @@ private fun InputTab(
             }
         }
         SeiToggleRow(
-            title = xy("Tombol \"Beranda\" di notifikasi", "\"Home\" button in notification"),
-            subtitle = xy("Kembali ke beranda tanpa memutus sesi", "Return home without disconnecting"),
+            title = sei( "\"Home\" button in notification"),
+            subtitle = sei( "Return home without disconnecting"),
             checked = notifHome,
             onCheckedChange = { v -> notifHome = v; notifPrefs.notifHomeButton = v; refreshNotif() },
         )
         SeiToggleRow(
-            title = xy("Tombol \"Musik\" di notifikasi", "\"Music\" button in notification"),
-            subtitle = xy("Jeda/putar musik dari notifikasi", "Play/pause music from the notification"),
+            title = sei( "\"Music\" button in notification"),
+            subtitle = sei( "Play/pause music from the notification"),
             checked = notifMusic,
             onCheckedChange = { v -> notifMusic = v; notifPrefs.notifMusicButton = v; refreshNotif() },
         )
     }
 
-    section("clipboard-otomatis-teks-gambar",xy("Clipboard otomatis (Teks & Gambar)", "Automatic clipboard (Text & Image)"), advanced = true) {
+    section("clipboard-otomatis-teks-gambar",sei( "Automatic clipboard (Text & Image)"), advanced = true) {
             PanelHint(
                 if (clipboardSyncEnabled) {
-                    xy(
-                        "Sinkronisasi dua arah aktif otomatis: teks maupun gambar/screenshot yang disalin di PC langsung masuk ke clipboard HP, dan sebaliknya.",
+                    sei(
                         "Two-way sync is active automatically: text and images/screenshots copied on PC go straight to the phone clipboard, and vice versa.",
                     )
                 } else {
-                    xy(
-                        "Kanal clipboard mati di pengaturan perangkat. Aktifkan lalu sambungkan ulang untuk sinkronisasi otomatis PC dan HP.",
+                    sei(
                         "Clipboard channel is off in device settings. Enable it and reconnect for automatic PC and phone clipboard sync.",
                     )
                 },
             )
             if (clipboardSyncEnabled && !lastClipboard.isNullOrEmpty()) {
                 PanelHint(
-                    xy(
-                        "Status: teks terakhir dari remote sudah tersalin otomatis ke clipboard HP.",
+                    sei(
                         "Status: latest remote text has been automatically copied to the phone clipboard.",
                     ),
                 )
@@ -2145,25 +2125,24 @@ private fun InputTab(
             ClipboardHistoryBlock(clipboardSyncEnabled = clipboardSyncEnabled)
         }
 
-    section("pointer",xy("Pointer", "Pointer")) {
+    section("pointer",sei( "Pointer")) {
             SeiToggleRow(
-                title = xy("Tampilkan pointer", "Show pointer"),
+                title = sei( "Show pointer"),
                 checked = pointerVisible,
                 onCheckedChange = onPointerVisibilityChange,
             )
             PanelHint(
-                xy(
-                    "Bentuk pointer mengikuti kursor yang dikirim server (panah, tangan, I-beam).",
+                sei(
                     "Pointer shape follows the cursor sent by the server (arrow, hand, I-beam).",
                 ),
             )
             SeiSegmented(
-                options = PointerStyle.entries.map { xy(it.title, it.titleEn) },
+                options = PointerStyle.entries.map { sei( it.titleEn) },
                 selectedIndex = pointerStyle.ordinal,
                 onSelect = { onPointerStyle(PointerStyle.entries[it]) },
                 modifier = Modifier.fillMaxWidth(),
             )
-            PanelHint(xy("Ukuran pointer: {0} dp", "Pointer size: {0} dp", pointerSize.toInt()))
+            PanelHint(sei( "Pointer size: {0} dp", pointerSize.toInt()))
             SeiSlider(value = pointerSize, onValueChange = onPointerSize, valueRange = 10f..52f)
         }
     }
@@ -2198,28 +2177,25 @@ private fun ButtonsTab(
     onOpenKey: (String?) -> Unit,
 ) {
     PanelSectionGrid(openKey = openKey, onOpenKey = onOpenKey) {
-    section("tampilan-tombol-overlay",xy("Tampilan tombol overlay", "Overlay button display"), advanced = true) {
+    section("tampilan-tombol-overlay",sei( "Overlay button display"), advanced = true) {
             SeiToggleRow(
-                title = xy("Aktifkan tombol HUD", "Show HUD buttons"),
-                subtitle = xy(
-                    "Bisa disembunyikan kapan saja lewat ikon mata di rail sesi.",
+                title = sei( "Show HUD buttons"),
+                subtitle = sei(
                     "You can hide these any time with the eye button on the session rail.",
                 ),
                 checked = showHudButtons,
                 onCheckedChange = onShowHudButtonsChange,
             )
             SeiToggleRow(
-                title = xy("Sembunyikan otomatis saat input fisik tersambung", "Auto-hide when physical input is connected"),
-                subtitle = xy(
-                    "Mendeteksi keyboard, mouse, gamepad, dan D-pad eksternal. Menu, keyboard HP, monitor, dan disconnect tetap terlihat.",
+                title = sei( "Auto-hide when physical input is connected"),
+                subtitle = sei(
                     "Detects external keyboards, mice, gamepads, and D-pads. Menu, phone keyboard, monitors, and disconnect stay available.",
                 ),
                 checked = autoHideHudOnExternalInput,
                 onCheckedChange = onAutoHideHudOnExternalInputChange,
             )
             PanelHint(
-                xy(
-                    "Opasitas tombol HUD: {0}% (0% transparan, 100% solid). Hanya tombol overlay berubah; layar remote dan rail tidak terpengaruh.",
+                sei(
                     "HUD button opacity: {0}% (0% transparent, 100% opaque). Only overlay buttons change; the remote screen and rail are unaffected.",
                     (hudOpacity * 100).roundToInt(),
                 ),
@@ -2231,10 +2207,9 @@ private fun ButtonsTab(
             )
         }
 
-    section("preset-profil-hud",xy("Preset Profil HUD", "HUD Profile Presets")) {
+    section("preset-profil-hud",sei( "HUD Profile Presets")) {
             PanelHint(
-                xy(
-                    "Ganti susunan tombol instan sesuai aktivitas: Standar, Coding/Terminal, Gaming/WASD, Office, atau Desain/Video.",
+                sei(
                     "Switch button layouts instantly by activity: Standard, Coding/Terminal, Gaming/WASD, Office, or Design/Video.",
                 ),
             )
@@ -2242,7 +2217,7 @@ private fun ButtonsTab(
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     row.forEach { preset ->
                         SeiPillButton(
-                            text = xy(preset.title, preset.titleEn),
+                            text = sei( preset.titleEn),
                             onClick = { onSelectHudProfile(preset) },
                             primary = preset == hudProfile,
                             compact = true,
@@ -2254,31 +2229,28 @@ private fun ButtonsTab(
             }
         }
 
-    section("tombol-kontrol-0",xy("Tombol kontrol ({0})", "Control buttons ({0})", keys.size)) {
+    section("tombol-kontrol-0",sei( "Control buttons ({0})", keys.size)) {
             PanelHint(
                 if (mappingMode) {
-                    xy(
-                        "Mode atur posisi MENYALA: geser tombol ke tempat yang kamu mau, " +
-                            "ketuk tombol untuk ubah aksi/ukuran, atau tekan + Tambah di atas layar.",
+                    sei(
                         "Layout mode is ON: drag buttons where you want them, tap a " +
                             "button to change its action/size, or press + Add at the top bar.",
                     )
                 } else {
-                    xy(
-                        "Tekan \"Atur posisi & ukuran\" untuk menggeser tombol atau menambah kontrol dari bar atas (Kombinasi, F1-F12, Single Key, Numpad, Modifier, Mouse).",
+                    sei(
                         "Press \"Edit layout & size\" to drag buttons or add controls from the top bar (Combos, F1-F12, Single Key, Numpad, Modifiers, Mouse).",
                     )
                 },
             )
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 SeiPillButton(
-                    xy("+ Tambah tombol", "+ Add button"),
+                    sei( "+ Add button"),
                     onAddKey,
                     compact = true,
                     modifier = Modifier.weight(1f),
                 )
                 SeiPillButton(
-                    if (mappingMode) xy("Selesai atur", "Done layout") else xy("Atur posisi", "Edit layout"),
+                    if (mappingMode) sei( "Done layout") else sei( "Edit layout"),
                     { onMappingModeChange(!mappingMode) },
                     primary = mappingMode,
                     compact = true,
@@ -2288,14 +2260,14 @@ private fun ButtonsTab(
             HudLayoutPreview(keys)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 SeiPillButton(
-                    xy("Salin JSON", "Copy JSON"),
+                    sei( "Copy JSON"),
                     onExportLayoutJson,
                     primary = false,
                     compact = true,
                     modifier = Modifier.weight(1f),
                 )
                 SeiPillButton(
-                    xy("Impor JSON", "Import JSON"),
+                    sei( "Import JSON"),
                     onOpenLayoutJson,
                     primary = false,
                     compact = true,
@@ -2303,15 +2275,14 @@ private fun ButtonsTab(
                 )
             }
             SeiPillButton(
-                xy("Kembalikan bawaan", "Restore default"),
+                sei( "Restore default"),
                 onResetCluster,
                 primary = false,
                 compact = true,
                 modifier = Modifier.fillMaxWidth(),
             )
             PanelHint(
-                xy(
-                    "Pratinjau di bawah memakai warna tombol sungguhan di atas contoh gambar desktop, jadi hasilnya sama dengan yang tampil saat sesi berjalan.",
+                sei(
                     "The preview below uses the real button colors over a sample desktop, so it matches what you get during a session.",
                 ),
             )
@@ -2323,8 +2294,7 @@ private fun ButtonsTab(
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 if (keys.isEmpty()) {
                     PanelHint(
-                        xy(
-                            "Belum ada tombol. Tekan \"+ Tambah tombol\".",
+                        sei(
                             "No buttons yet. Press \"+ Add button\".",
                         ),
                     )
@@ -2332,7 +2302,7 @@ private fun ButtonsTab(
                 keys.forEach { key -> KeyRow(key, onEditKey, onDeleteKey) }
             }
             SeiToggleRow(
-                title = xy("Getaran saat tombol ditekan", "Haptic feedback on button press"),
+                title = sei( "Haptic feedback on button press"),
                 checked = haptics,
                 onCheckedChange = onHaptics,
             )
@@ -2361,16 +2331,15 @@ private fun SessionTab(
     onOpenKey: (String?) -> Unit,
 ) {
     PanelSectionGrid(openKey = openKey, onOpenKey = onOpenKey) {
-    section("keamanan-privasi-cepat",xy("Keamanan & Privasi Cepat", "Quick Security & Privacy")) {
+    section("keamanan-privasi-cepat",sei( "Quick Security & Privacy")) {
             PanelHint(
-                xy(
-                    "Kunci sesi Windows dari jarak jauh (Win+L) atau aktifkan Tirai Privasi agar layar HP tertutup gelap sementara.",
+                sei(
                     "Remotely lock the Windows session (Win+L) or activate the Privacy Curtain to black out the phone screen temporarily.",
                 ),
             )
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 SeiPillButton(
-                    xy("Kunci PC", "Lock PC"),
+                    sei( "Lock PC"),
                     onLockRemotePc,
                     icon = SeiIcons.Lock,
                     primary = false,
@@ -2378,7 +2347,7 @@ private fun SessionTab(
                     modifier = Modifier.weight(1f),
                 )
                 SeiPillButton(
-                    xy("Tirai Privasi", "Privacy Curtain"),
+                    sei( "Privacy Curtain"),
                     onActivatePrivacyCurtain,
                     icon = SeiIcons.EyeOff,
                     primary = false,
@@ -2388,10 +2357,9 @@ private fun SessionTab(
             }
         }
 
-    section("perekaman-lokal-pc-ke-hp",xy("Perekaman lokal · PC ke HP", "Local recording · PC to phone"), advanced = true) {
+    section("perekaman-lokal-pc-ke-hp",sei( "Local recording · PC to phone"), advanced = true) {
             PanelHint(
-                xy(
-                    "Desktop PC beserta audionya direkam ke satu MP4 di Movies/SeiDesk-RM. Layar HP dan kontrol tidak pernah ikut terekam. Kalau penggabungan gagal, video dan audio disimpan sebagai dua file. Perekaman diblokir saat FLAG_SECURE aktif.",
+                sei(
                     "The PC desktop and its audio are recorded into a single MP4 in Movies/SeiDesk-RM. The phone screen and controls are never captured. If merging fails, video and audio are saved as two files. Recording is blocked while FLAG_SECURE is on.",
                 ),
             )
@@ -2413,19 +2381,18 @@ private fun SessionTab(
             }
         }
 
-    section("transfer-file",xy("Transfer file HP ↔ PC", "File transfer phone ↔ PC")) {
+    section("transfer-file",sei( "File transfer phone ↔ PC")) {
             TransferFileSection(deviceId = deviceId, notice = notice)
         }
 
-    section("sesi",xy("Sesi", "Session")) {
+    section("sesi",sei( "Session")) {
             PanelHint(
-                xy(
-                    "Tombol bulat kanan bawah (ikon power) juga memutus — langsung kembali ke beranda setelah konfirmasi.",
+                sei(
                     "The bottom-right round button (power icon) also disconnects — returns straight to home after confirmation.",
                 ),
             )
             SeiPillButton(
-                xy("Ambil screenshot", "Take screenshot"),
+                sei( "Take screenshot"),
                 onScreenshot,
                 icon = SeiIcons.Shot,
                 primary = false,
@@ -2433,7 +2400,7 @@ private fun SessionTab(
                 modifier = Modifier.fillMaxWidth(),
             )
             SeiPillButton(
-                xy("Putuskan sesi", "Disconnect"),
+                sei( "Disconnect"),
                 onDisconnect,
                 icon = SeiIcons.Power,
                 primary = false,
@@ -2442,7 +2409,7 @@ private fun SessionTab(
             )
         }
         if (coreInfo.isNotEmpty()) {
-            PanelSection(xy("Info teknis", "Technical info")) {
+            PanelSection(sei( "Technical info")) {
                 coreInfo.forEach { line ->
                     Text(
                         line,
@@ -2451,7 +2418,7 @@ private fun SessionTab(
                     )
                 }
                 SeiPillButton(
-                    xy("Salin info teknis", "Copy technical info"),
+                    sei( "Copy technical info"),
                     onCopyCoreInfo,
                     primary = false,
                     compact = true,
@@ -2522,7 +2489,7 @@ private fun PanelTabTiles(
                 animationSpec = tween(durationMillis = 150),
                 label = "panelTabFg",
             )
-            val label = xy(entry.id, entry.en)
+            val label = sei( entry.en)
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -2721,10 +2688,9 @@ internal fun PanelSectionGrid(
             SeiGlassTile(
                 icon = SeiIcons.Sliders,
                 title = if (showAdvanced) {
-                    xy("Sembunyikan seksi lanjutan", "Hide advanced sections")
+                    sei( "Hide advanced sections")
                 } else {
-                    xy(
-                        "Lanjutan ({0} seksi lagi)",
+                    sei(
                         "Advanced ({0} more sections)",
                         advancedCount,
                     )
@@ -2839,11 +2805,10 @@ private fun KeyRow(
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
-                xy(
+                sei(
                     "{0} · {1} · {2} dp · {3}%,{4}%",
-                    "{0} · {1} · {2} dp · {3}%,{4}%",
-                    xy(key.kind.title, key.kind.titleEn),
-                    xy(key.action.title, key.action.titleEn),
+                    key.kind.titleEn,
+                    key.action.titleEn,
                     key.size.toInt(),
                     (key.x * 100).toInt(),
                     (key.y * 100).toInt(),
@@ -2864,7 +2829,7 @@ private fun KeyRow(
         ) {
             Icon(
                 SeiIcons.Trash,
-                contentDescription = xy("Hapus", "Delete"),
+                contentDescription = sei( "Delete"),
                 tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.size(14.dp),
             )
@@ -2923,7 +2888,7 @@ private fun MonitorAndUserGridModal(
     val monitorItems = listOf(
         MonitorGridItem(
             badge = "MON 1",
-            title = xy("Monitor 1 · Utama", "Monitor 1 · Primary"),
+            title = sei( "Monitor 1 · Primary"),
             subtitle = if (cleanRemoteSize.isNotBlank() && cleanRemoteSize != "--") "$cleanRemoteSize · 16:9" else "1280x720 · 16:9",
             value = DisplayPrefs.AUTOMATIC,
             icon = SeiIcons.Monitor,
@@ -2931,7 +2896,7 @@ private fun MonitorAndUserGridModal(
         ),
         MonitorGridItem(
             badge = "MON 2",
-            title = xy("Monitor 2 · QHD", "Monitor 2 · QHD"),
+            title = sei( "Monitor 2 · QHD"),
             subtitle = "2560x1440 · Studio",
             value = "2560x1440",
             icon = SeiIcons.DualMonitor,
@@ -2939,7 +2904,7 @@ private fun MonitorAndUserGridModal(
         ),
         MonitorGridItem(
             badge = "SPAN",
-            title = xy("Dual-Monitor Span", "Dual-Monitor Span"),
+            title = sei( "Dual-Monitor Span"),
             subtitle = "2560x1080 · 21:9",
             value = "2560x1080",
             icon = SeiIcons.DualMonitor,
@@ -2947,8 +2912,8 @@ private fun MonitorAndUserGridModal(
         ),
         MonitorGridItem(
             badge = "VIEW",
-            title = xy("Layar Penuh HP", "Phone Native View"),
-            subtitle = xy("Ikuti Viewport", "Follow Viewport"),
+            title = sei( "Phone Native View"),
+            subtitle = sei( "Follow Viewport"),
             value = DisplayPrefs.FOLLOW,
             icon = SeiIcons.Fit,
             active = resolution == DisplayPrefs.FOLLOW,
@@ -2957,9 +2922,9 @@ private fun MonitorAndUserGridModal(
 
     SeiOverlay(
         title = if (pcConnectMode) {
-            xy("Monitor Fisik 1:1 & Mesin Direct Stream", "1:1 Physical Monitor & Direct Stream Engine")
+            sei( "1:1 Physical Monitor & Direct Stream Engine")
         } else {
-            xy("Monitor & Sesi Multi-User / Konsol RDP", "Active Monitors & Multi-User / Console Grid")
+            sei( "Active Monitors & Multi-User / Console Grid")
         },
         maxWidth = 440.dp,
         onDismiss = onDismiss,
@@ -3000,12 +2965,12 @@ private fun MonitorAndUserGridModal(
                     Text(
                         text = buildString {
                             if (pcConnectMode) {
-                                append(xy("Koneksi PC · Direct Stream 1:1", "PC Connect · 1:1 Direct Stream"))
+                                append(sei( "PC Connect · 1:1 Direct Stream"))
                                 append(" · ${pcOptions.pcStreamEngine.badge}")
                             } else {
                                 append(
-                                    if (consoleAdminMode) xy("Konsol Fisik / Runner (/admin)", "Physical / Runner Console (/admin)")
-                                    else xy("Sesi Virtual Multi-User RDP", "Multi-User Virtual RDP Session"),
+                                    if (consoleAdminMode) sei( "Physical / Runner Console (/admin)")
+                                    else sei( "Multi-User Virtual RDP Session"),
                                 )
                                 if (!activeUsername.isNullOrBlank()) append(" · $activeUsername")
                             }
@@ -3022,7 +2987,7 @@ private fun MonitorAndUserGridModal(
             if (pcConnectMode) {
                 // Mode Koneksi PC: Eksklusif Direct Stream Engine (Tidak ada Multi-User RDP)
                 Text(
-                    text = xy("MESIN DIRECT PC STREAM (EKSKLUSIF KONEKSI PC)", "DIRECT PC STREAM ENGINE (PC CONNECT EXCLUSIVE)"),
+                    text = sei( "DIRECT PC STREAM ENGINE (PC CONNECT EXCLUSIVE)"),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 9.5.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -3049,7 +3014,7 @@ private fun MonitorAndUserGridModal(
                                         val next = pcOptions.withPcStreamEngine(engine)
                                         pcOptions = next
                                         next.write(context, deviceId)
-                                        notice.show(xyNow("Mesin Direct Stream: {0} aktif", "Direct Stream Engine: {0} active", engine.badge))
+                                        notice.show(seiNow( "Direct Stream Engine: {0} active", engine.badge))
                                     }
                                     .padding(10.dp),
                             ) {
@@ -3066,7 +3031,7 @@ private fun MonitorAndUserGridModal(
                                             modifier = Modifier.size(16.dp),
                                         )
                                         Text(
-                                            text = if (isActive) xy("AKTIF", "ACTIVE") else engine.badge,
+                                            text = if (isActive) sei( "ACTIVE") else engine.badge,
                                             fontFamily = FontFamily.Monospace,
                                             fontSize = 8.5.sp,
                                             fontWeight = FontWeight.Bold,
@@ -3074,7 +3039,7 @@ private fun MonitorAndUserGridModal(
                                         )
                                     }
                                     Text(
-                                        text = xy(engine.title, engine.titleEn),
+                                        text = sei( engine.titleEn),
                                         color = MaterialTheme.colorScheme.onSurface,
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.SemiBold,
@@ -3082,7 +3047,7 @@ private fun MonitorAndUserGridModal(
                                         overflow = TextOverflow.Ellipsis,
                                     )
                                     Text(
-                                        text = xy(engine.detail, engine.detailEn),
+                                        text = sei( engine.detailEn),
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         fontSize = 9.5.sp,
                                         maxLines = 1,
@@ -3095,7 +3060,7 @@ private fun MonitorAndUserGridModal(
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     SeiPillButton(
-                        text = xy("Layar Stealth (Privacy)", "Stealth Screen (Privacy)"),
+                        text = sei( "Stealth Screen (Privacy)"),
                         icon = SeiIcons.EyeOff,
                         onClick = onActivatePrivacyCurtain,
                         primary = false,
@@ -3103,7 +3068,7 @@ private fun MonitorAndUserGridModal(
                         modifier = Modifier.weight(1f),
                     )
                     SeiPillButton(
-                        text = xy("Kunci Fisik PC (Win+L)", "Lock Physical PC (Win+L)"),
+                        text = sei( "Lock Physical PC (Win+L)"),
                         icon = SeiIcons.Windows,
                         onClick = onLockRemotePc,
                         primary = false,
@@ -3114,7 +3079,7 @@ private fun MonitorAndUserGridModal(
             } else {
                 // Mode Koneksi RDP: Grid Monitor Virtual + Multi-User & Konsol Runner
                 Text(
-                    text = xy("GRID MONITOR & LAYAR AKTIF", "ACTIVE MONITORS & DISPLAYS GRID"),
+                    text = sei( "ACTIVE MONITORS & DISPLAYS GRID"),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 9.5.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -3154,7 +3119,7 @@ private fun MonitorAndUserGridModal(
                                             modifier = Modifier.size(17.dp),
                                         )
                                         Text(
-                                            text = if (item.active) xy("AKTIF", "ACTIVE") else item.badge,
+                                            text = if (item.active) sei( "ACTIVE") else item.badge,
                                             fontFamily = FontFamily.Monospace,
                                             fontSize = 8.5.sp,
                                             fontWeight = FontWeight.Bold,
@@ -3184,7 +3149,7 @@ private fun MonitorAndUserGridModal(
 
                 // Grid Sesi User & Konsol Runner Windows
                 Text(
-                    text = xy("GRID SESI WINDOWS: KONSOL RUNNER (/ADMIN) VS MULTI-USER", "WINDOWS SESSIONS: RUNNER CONSOLE (/ADMIN) VS MULTI-USER"),
+                    text = sei( "WINDOWS SESSIONS: RUNNER CONSOLE (/ADMIN) VS MULTI-USER"),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 9.5.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -3223,7 +3188,7 @@ private fun MonitorAndUserGridModal(
                                     modifier = Modifier.size(17.dp),
                                 )
                                 Text(
-                                    text = if (isConsole) xy("AKTIF", "ACTIVE") else "/ADMIN",
+                                    text = if (isConsole) sei( "ACTIVE") else "/ADMIN",
                                     fontFamily = FontFamily.Monospace,
                                     fontSize = 8.5.sp,
                                     fontWeight = FontWeight.Bold,
@@ -3231,14 +3196,14 @@ private fun MonitorAndUserGridModal(
                                 )
                             }
                             Text(
-                                text = xy("Konsol Runner / Admin", "Runner / Admin Console"),
+                                text = sei( "Runner / Admin Console"),
                                 color = MaterialTheme.colorScheme.onSurface,
                                 fontSize = 11.5.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 maxLines = 1,
                             )
                             Text(
-                                text = xy("Sesi 1 Konsol (runneradmin)", "Session 1 Console (runneradmin)"),
+                                text = sei( "Session 1 Console (runneradmin)"),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 9.5.sp,
                                 maxLines = 1,
@@ -3276,7 +3241,7 @@ private fun MonitorAndUserGridModal(
                                     modifier = Modifier.size(17.dp),
                                 )
                                 Text(
-                                    text = if (isVirtualUser) xy("AKTIF", "ACTIVE") else "MULTI",
+                                    text = if (isVirtualUser) sei( "ACTIVE") else "MULTI",
                                     fontFamily = FontFamily.Monospace,
                                     fontSize = 8.5.sp,
                                     fontWeight = FontWeight.Bold,
@@ -3284,7 +3249,7 @@ private fun MonitorAndUserGridModal(
                                 )
                             }
                             Text(
-                                text = xy("Sesi Virtual Multi-User", "Multi-User Virtual Session"),
+                                text = sei( "Multi-User Virtual Session"),
                                 color = MaterialTheme.colorScheme.onSurface,
                                 fontSize = 11.5.sp,
                                 fontWeight = FontWeight.SemiBold,
@@ -3292,7 +3257,7 @@ private fun MonitorAndUserGridModal(
                                 overflow = TextOverflow.Ellipsis,
                             )
                             Text(
-                                text = xy("Sesi 2 Terpisah (XyDesk)", "Separate Session 2 (XyDesk)"),
+                                text = sei( "Separate Session 2 (XyDesk)"),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 9.5.sp,
                                 maxLines = 1,
@@ -3328,7 +3293,7 @@ private fun MonitorAndUserGridModal(
                                 fontWeight = FontWeight.SemiBold,
                             )
                             Text(
-                                text = xy("Pindah ke Konsol Runner", "Switch to Runner Console"),
+                                text = sei( "Switch to Runner Console"),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 9.5.sp,
                             )
@@ -3359,7 +3324,7 @@ private fun MonitorAndUserGridModal(
                                 fontWeight = FontWeight.SemiBold,
                             )
                             Text(
-                                text = xy("Pindah ke Sesi Virtual 2", "Switch to Virtual Session 2"),
+                                text = sei( "Switch to Virtual Session 2"),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 9.5.sp,
                             )
@@ -3437,17 +3402,17 @@ private fun MonitorAndUserGridModal(
                         SeiField(
                             value = customUsername,
                             onValueChange = { customUsername = it },
-                            label = xy("Username Windows", "Windows Username"),
+                            label = sei( "Windows Username"),
                             hint = "runneradmin / Administrator / XyDesk",
                         )
                         SeiField(
                             value = customPassword,
                             onValueChange = { customPassword = it },
-                            label = xy("Password (opsional)", "Password (optional)"),
+                            label = sei( "Password (optional)"),
                             isPassword = true,
                         )
                         SeiPillButton(
-                            text = xy("Pindah ke User Ini Sekarang", "Switch to This User Now"),
+                            text = sei( "Switch to This User Now"),
                             icon = SeiIcons.Users,
                             onClick = {
                                 val u = customUsername.trim()
@@ -3467,7 +3432,7 @@ private fun MonitorAndUserGridModal(
 
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     SeiPillButton(
-                        text = xy("Pindah User Lain", "Switch User"),
+                        text = sei( "Switch User"),
                         icon = SeiIcons.Users,
                         onClick = { customUserOpen = !customUserOpen },
                         primary = customUserOpen,
@@ -3475,7 +3440,7 @@ private fun MonitorAndUserGridModal(
                         modifier = Modifier.weight(1f),
                     )
                     SeiPillButton(
-                        text = xy("Layar Kunci Windows", "Windows Lock Screen"),
+                        text = sei( "Windows Lock Screen"),
                         icon = SeiIcons.Windows,
                         onClick = onLockRemotePc,
                         primary = false,
@@ -3487,7 +3452,7 @@ private fun MonitorAndUserGridModal(
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 SeiPillButton(
-                    text = xy("Perangkat Lain (Beranda)", "Other Devices (Home)"),
+                    text = sei( "Other Devices (Home)"),
                     icon = SeiIcons.Grid,
                     onClick = onOpenHome,
                     primary = false,
@@ -3495,7 +3460,7 @@ private fun MonitorAndUserGridModal(
                     modifier = Modifier.weight(1f),
                 )
                 SeiPillButton(
-                    text = xy("Tutup", "Close"),
+                    text = sei( "Close"),
                     icon = SeiIcons.Close,
                     onClick = onDismiss,
                     primary = false,
@@ -3573,7 +3538,7 @@ private fun ClipboardHistoryBlock(clipboardSyncEnabled: Boolean) {
     var feedback by remember { mutableStateOf<String?>(null) }
 
     Text(
-        xy("Riwayat clipboard", "Clipboard history").uppercase(),
+        sei( "Clipboard history").uppercase(),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         fontSize = 10.sp,
         letterSpacing = 1.2.sp,
@@ -3581,8 +3546,7 @@ private fun ClipboardHistoryBlock(clipboardSyncEnabled: Boolean) {
     )
     if (history.isEmpty()) {
         Text(
-            xy(
-                "Belum ada yang tersalin. Salin teks di HP atau di PC, lalu daftar ini terisi sendiri (maksimal 10 entri terakhir).",
+            sei(
                 "Nothing copied yet. Copy text on the phone or the PC and this list fills itself (last 10 entries).",
             ),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -3606,16 +3570,13 @@ private fun ClipboardHistoryBlock(clipboardSyncEnabled: Boolean) {
                     .clickable {
                         val ok = ClipboardHistory.copyToPhone(context, entry)
                         feedback = when {
-                            !ok -> xyNow(
-                                "Tidak bisa menyalin ke clipboard HP.",
+                            !ok -> seiNow(
                                 "Could not copy to the phone clipboard.",
                             )
-                            clipboardSyncEnabled -> xyNow(
-                                "Disalin — otomatis diteruskan ke PC.",
+                            clipboardSyncEnabled -> seiNow(
                                 "Copied — forwarded to the PC automatically.",
                             )
-                            else -> xyNow(
-                                "Disalin ke clipboard HP.",
+                            else -> seiNow(
                                 "Copied to the phone clipboard.",
                             )
                         }
@@ -3633,8 +3594,7 @@ private fun ClipboardHistoryBlock(clipboardSyncEnabled: Boolean) {
                         overflow = TextOverflow.Ellipsis,
                     )
                     Text(
-                        xy(
-                            "{0} karakter",
+                        sei(
                             "{0} characters",
                             entry.text.length,
                         ),
@@ -3662,7 +3622,7 @@ private fun ClipboardHistoryBlock(clipboardSyncEnabled: Boolean) {
         )
     }
     SeiPillButton(
-        xy("Hapus semua riwayat", "Clear all history"),
+        sei( "Clear all history"),
         {
             ClipboardHistory.clear(context)
             feedback = null

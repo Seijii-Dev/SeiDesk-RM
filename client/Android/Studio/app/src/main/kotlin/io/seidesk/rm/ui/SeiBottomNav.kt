@@ -75,7 +75,7 @@ internal fun SeiBottomNav(
     ) {
         SeiTab.entries.forEach { tab ->
             val active = tab == selected
-            val title = xy(tab.title, tab.titleEn)
+            val title = sei( tab.titleEn)
             val pillWidth by animateDpAsState(
                 targetValue = if (active) 48.dp else 34.dp,
                 animationSpec = tween(durationMillis = 180),

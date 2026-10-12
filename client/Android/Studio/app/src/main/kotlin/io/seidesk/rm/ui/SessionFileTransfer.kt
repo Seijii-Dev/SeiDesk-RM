@@ -358,7 +358,7 @@ internal object SessionFileTransfer {
         mutableJobs.value = listOf(job) + mutableJobs.value
     }
 
-    private fun xyn(id: String, en: String): String = xyNow(id, en)
+    private fun xyn(id: String, en: String): String = seiNow( en)
 }
 
 internal enum class TransferDirection { TO_PC, FROM_PC }

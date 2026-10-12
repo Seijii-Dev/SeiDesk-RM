@@ -498,7 +498,7 @@ fun SeiTopBar(
                 onClick = onBack,
                 size = 44.dp,
                 flat = true,
-                contentDescription = "Kembali",
+                contentDescription = "Back",
             )
         }
         Text(

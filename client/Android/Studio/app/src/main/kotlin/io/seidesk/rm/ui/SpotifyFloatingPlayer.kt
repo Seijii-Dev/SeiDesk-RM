@@ -98,7 +98,7 @@ internal fun SpotifyFloatingPlayer(
             modifier = modifier
                 .size(width = 72.dp, height = 36.dp)
                 .clickable(
-                    onClickLabel = xy("Buka pemutar musik", "Open music player"),
+                    onClickLabel = sei( "Open music player"),
                     onClick = onExpand,
                 ),
             contentAlignment = Alignment.Center,
@@ -136,7 +136,7 @@ internal fun SpotifyFloatingPlayer(
                         Text(
                             // Nama aplikasi sumber, bukan tulisan "SPOTIFY" tetap:
                             // bridge sekarang menerima pemutar apa pun.
-                            (playback.sourceLabel ?: xy("Pemutar", "Player")).uppercase(),
+                            (playback.sourceLabel ?: sei( "Player")).uppercase(),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary,
                             letterSpacing = 1.1.sp,
@@ -146,8 +146,8 @@ internal fun SpotifyFloatingPlayer(
                         Text(
                             playback.title
                                 ?: if (playback.hasActiveSession) {
-                                    playback.sourceLabel ?: xy("Sedang diputar", "Now playing")
-                                } else xy("Pemutar musik", "Music player"),
+                                    playback.sourceLabel ?: sei( "Now playing")
+                                } else sei( "Music player"),
                             style = MaterialTheme.typography.titleSmall,
                             color = MaterialTheme.colorScheme.onSurface,
                             maxLines = 1,
@@ -155,9 +155,9 @@ internal fun SpotifyFloatingPlayer(
                         )
                         Text(
                             playback.artist ?: playback.album ?: when {
-                                playback.hasActiveSession -> xy("Menunggu info lagu…", "Waiting for track info…")
-                                playback.notificationAccessGranted -> xy("Putar lagu dari aplikasi musik mana pun di HP", "Play a song from any music app on your phone")
-                                else -> xy("Kontrol pemutar di HP dari sesi ini", "Control the phone player from this session")
+                                playback.hasActiveSession -> sei( "Waiting for track info…")
+                                playback.notificationAccessGranted -> sei( "Play a song from any music app on your phone")
+                                else -> sei( "Control the phone player from this session")
                             },
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -167,7 +167,7 @@ internal fun SpotifyFloatingPlayer(
                     }
                     PlayerIconButton(
                         icon = SeiIcons.ChevronUp,
-                        description = xy("Kecilkan pemutar musik", "Minimize music player"),
+                        description = sei( "Minimize music player"),
                         onClick = onMinimize,
                         modifier = Modifier.size(32.dp),
                     )
@@ -175,15 +175,14 @@ internal fun SpotifyFloatingPlayer(
 
                 if (!playback.notificationAccessGranted) {
                     Text(
-                        xy(
-                            "Izinkan akses notifikasi Android agar SeiDesk RM bisa membaca info lagu dan mengirim kontrol penuh. Pemutar apa pun didukung; login dan audio tetap di aplikasi musik itu.",
+                        sei(
                             "Allow Android notification access so SeiDesk RM can read track details and send full playback controls. Any music player works; sign-in and audio stay inside that app.",
                         ),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     SeiPillButton(
-                        text = xy("Beri akses notifikasi", "Allow notification access"),
+                        text = sei( "Allow notification access"),
                         onClick = onRequestAccess,
                         modifier = Modifier.fillMaxWidth(),
                         icon = SeiIcons.Music,
@@ -191,8 +190,7 @@ internal fun SpotifyFloatingPlayer(
                     )
                 } else if (!playback.hasActiveSession) {
                     Text(
-                        xy(
-                            "Belum ada musik yang diputar. Putar lagu dari aplikasi musik mana pun di HP, lalu kontrol dari sini.",
+                        sei(
                             "Nothing is playing yet. Start a song in any music app on your phone, then control it from here.",
                         ),
                         style = MaterialTheme.typography.bodySmall,
@@ -203,7 +201,7 @@ internal fun SpotifyFloatingPlayer(
                     // harus Spotify, jadi XyDesk tidak mendorong satu aplikasi.
                     if (isSpotifyInstalled(context)) {
                         SeiPillButton(
-                            text = xy("Buka Spotify", "Open Spotify"),
+                            text = sei( "Open Spotify"),
                             onClick = { openSpotify(context) },
                             modifier = Modifier.fillMaxWidth(),
                             icon = SeiIcons.Music,
@@ -224,7 +222,7 @@ internal fun SpotifyFloatingPlayer(
                         onCycleRepeat = onCycleRepeat,
                     )
                     Text(
-                        xy("Audio tetap di HP · kontrol dari SeiDesk RM", "Audio stays on your phone · controls from SeiDesk RM"),
+                        sei( "Audio stays on your phone · controls from SeiDesk RM"),
                         modifier = Modifier.align(Alignment.CenterHorizontally),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -234,7 +232,7 @@ internal fun SpotifyFloatingPlayer(
                 // Musik online bawaan (SoundCloud): selalu tersedia, tidak
                 // bergantung aplikasi musik lain yang terpasang di HP.
                 Text(
-                    xy("Musik online (SoundCloud)", "Online music (SoundCloud)").uppercase(),
+                    sei( "Online music (SoundCloud)").uppercase(),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     letterSpacing = 1.1.sp,
@@ -298,9 +296,9 @@ internal fun MusicTransportControls(
         ) {
             PlayerIconButton(
                 description = if (playback.shuffleEnabled) {
-                    xy("Acak: aktif", "Shuffle: on")
+                    sei( "Shuffle: on")
                 } else {
-                    xy("Acak: mati", "Shuffle: off")
+                    sei( "Shuffle: off")
                 },
                 icon = SeiIcons.Shuffle,
                 onClick = { onToggleShuffle(!playback.shuffleEnabled) },
@@ -310,7 +308,7 @@ internal fun MusicTransportControls(
             )
             Spacer(Modifier.width(8.dp))
             PlayerIconButton(
-                description = xy("Sebelumnya", "Previous"),
+                description = sei( "Previous"),
                 icon = SeiIcons.SkipPrevious,
                 onClick = onPrevious,
                 enabled = playback.canSkipPrevious,
@@ -318,7 +316,7 @@ internal fun MusicTransportControls(
             )
             Spacer(Modifier.width(8.dp))
             PlayerIconButton(
-                description = if (playback.isPlaying) xy("Jeda", "Pause") else xy("Putar", "Play"),
+                description = if (playback.isPlaying) sei( "Pause") else sei( "Play"),
                 icon = if (playback.isPlaying) SeiIcons.Pause else SeiIcons.Play,
                 onClick = onTogglePlayback,
                 enabled = playback.canPlayPause,
@@ -327,7 +325,7 @@ internal fun MusicTransportControls(
             )
             Spacer(Modifier.width(8.dp))
             PlayerIconButton(
-                description = xy("Berikutnya", "Next"),
+                description = sei( "Next"),
                 icon = SeiIcons.SkipNext,
                 onClick = onNext,
                 enabled = playback.canSkipNext,
@@ -357,7 +355,7 @@ internal fun MusicTransportControls(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 PlayerIconButton(
-                    description = xy("Mundur 10 detik", "Back 10 seconds"),
+                    description = sei( "Back 10 seconds"),
                     icon = SeiIcons.Rewind,
                     onClick = { onSeekBy(-MediaTransportMath.SKIP_STEP_MS) },
                     enabled = playback.canSkipBackward,
@@ -365,7 +363,7 @@ internal fun MusicTransportControls(
                 )
                 Spacer(Modifier.width(10.dp))
                 PlayerIconButton(
-                    description = xy("Hentikan", "Stop"),
+                    description = sei( "Stop"),
                     icon = SeiIcons.Stop,
                     onClick = onStop,
                     enabled = playback.canStop,
@@ -373,7 +371,7 @@ internal fun MusicTransportControls(
                 )
                 Spacer(Modifier.width(10.dp))
                 PlayerIconButton(
-                    description = xy("Maju 10 detik", "Forward 10 seconds"),
+                    description = sei( "Forward 10 seconds"),
                     icon = SeiIcons.Forward,
                     onClick = { onSeekBy(MediaTransportMath.SKIP_STEP_MS) },
                     enabled = playback.canSkipForward,
@@ -394,9 +392,9 @@ internal fun MusicTransportControls(
 
 @Composable
 private fun repeatDescription(mode: Int): String = when (mode) {
-    MediaTransportMath.REPEAT_ONE -> xy("Ulang: satu lagu", "Repeat: one track")
-    MediaTransportMath.REPEAT_ALL -> xy("Ulang: semua", "Repeat: all")
-    else -> xy("Ulang: mati", "Repeat: off")
+    MediaTransportMath.REPEAT_ONE -> sei( "Repeat: one track")
+    MediaTransportMath.REPEAT_ALL -> sei( "Repeat: all")
+    else -> sei( "Repeat: off")
 }
 
 /**
@@ -497,7 +495,7 @@ private fun Artwork(playback: SpotifyPlaybackState, modifier: Modifier = Modifie
         if (art != null) {
             Image(
                 bitmap = art.asImageBitmap(),
-                contentDescription = xy("Sampul album", "Album artwork"),
+                contentDescription = sei( "Album artwork"),
                 modifier = Modifier.matchParentSize().clip(RoundedCornerShape(12.dp)),
             )
         } else {

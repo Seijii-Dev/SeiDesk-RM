@@ -345,8 +345,7 @@ class SeiDeskSessionActivity : ComponentActivity() {
         lastInputFailureNoticeAt = now
         val showNotice = {
             if (!isFinishing && !isDestroyed) {
-                SeiNoticeBus.post(xyNow(
-                    "Aksi belum masuk antrean input FreeRDP. Periksa koneksi dan coba lagi.",
+                SeiNoticeBus.post(seiNow(
                     "Input was not queued by FreeRDP. Check the connection and try again.",
                 ))
             }

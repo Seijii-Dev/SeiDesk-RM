@@ -63,15 +63,15 @@ internal fun FeedbackDialog(
     onSend: (destination: FeedbackDestination, category: String, message: String) -> Unit,
 ) {
     val categories = listOf(
-        xy("Masalah", "Bug"),
-        xy("Saran fitur", "Feature idea"),
-        xy("Lainnya", "Other"),
+        sei( "Bug"),
+        sei( "Feature idea"),
+        sei( "Other"),
     )
     var selected by remember { mutableIntStateOf(1) }
     var message by remember { mutableStateOf("") }
 
     SeiOverlay(
-        title = xy("Masukan & saran", "Feedback & suggestions"),
+        title = sei( "Feedback & suggestions"),
         onDismiss = onDismiss,
     ) {
         Column(
@@ -82,7 +82,7 @@ internal fun FeedbackDialog(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
-                xy("Pilih jenis masukan", "Choose a feedback type"),
+                sei( "Choose a feedback type"),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -99,7 +99,7 @@ internal fun FeedbackDialog(
             ) {
                 if (message.isEmpty()) {
                     Text(
-                        xy("Tulis masukan Anda…", "Write your feedback…"),
+                        sei( "Write your feedback…"),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -118,8 +118,7 @@ internal fun FeedbackDialog(
                 )
             }
             Text(
-                xy(
-                    "Tidak ada yang dikirim otomatis. \"Bagikan\" membuka pemilih aplikasi Android (bebas ke aplikasi mana pun), \"Salin draf\" menaruh teks di clipboard supaya bisa ditempel sendiri. Draf hanya memuat nama aplikasi, kategori, dan teks di atas. Host, kredensial, clipboard lama, dan log tidak ikut.",
+                sei(
                     "Nothing is sent automatically. \"Share\" opens Android's app chooser (any app you like); \"Copy draft\" puts the text on the clipboard so you can paste it yourself. The draft contains only the app name, category, and the text above. Host, credentials, previous clipboard content, and logs are not attached.",
                 ),
                 style = MaterialTheme.typography.bodySmall,
@@ -131,20 +130,20 @@ internal fun FeedbackDialog(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 SeiPillButton(
-                    text = xy("Batal", "Cancel"),
+                    text = sei( "Cancel"),
                     onClick = onDismiss,
                     primary = false,
                     compact = true,
                 )
                 SeiPillButton(
-                    text = xy("Salin draf", "Copy draft"),
+                    text = sei( "Copy draft"),
                     onClick = { onSend(FeedbackDestination.COPY, categories[selected], message.trim()) },
                     enabled = message.isNotBlank(),
                     primary = false,
                     compact = true,
                 )
                 SeiPillButton(
-                    text = xy("Bagikan…", "Share…"),
+                    text = sei( "Share…"),
                     onClick = { onSend(FeedbackDestination.SHARE, categories[selected], message.trim()) },
                     enabled = message.isNotBlank(),
                     compact = true,

@@ -82,8 +82,7 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
             scope.launch {
                 val att = encodePickedFeedImage(context, uri)
                 if (att == null) {
-                    formMessage = xyNow(
-                        "Gambar tidak didukung atau melebihi 500KB.",
+                    formMessage = seiNow(
                         "Image unsupported or over 500KB.",
                     )
                     formMessageIsError = true
@@ -102,16 +101,16 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
         val reason = (error as? CommunityJokesException)?.reason.orEmpty()
         return when {
             loadingFeed && (reason == "not_found" || reason == "http_404") ->
-                xyNow("Feed server belum tersedia (404). Deploy Worker terbaru, lalu coba lagi.", "The feed endpoint isn't deployed yet (404). Deploy the latest Worker, then retry.")
+                seiNow( "The feed endpoint isn't deployed yet (404). Deploy the latest Worker, then retry.")
             loadingFeed && reason == "unavailable" ->
-                xyNow("Feed sementara tidak tersedia di server. Coba lagi sebentar.", "The feed server is temporarily unavailable. Please retry shortly.")
-            reason == "rate_limited" -> xyNow("Tunggu sebentar sebelum mengirim lagi.", "Please wait a little before posting again.")
-            reason == "invalid_text" -> xyNow("Teks harus 3–280 karakter dan tidak boleh berisi tautan.", "Text must be 3–280 characters and cannot contain links.")
-            reason == "invalid_client_id" -> xyNow("Identitas anonim tidak valid. Coba muat ulang aplikasi.", "The anonymous ID is invalid. Try reopening the app.")
-            !loadingFeed && reason == "not_found" -> xyNow("Postingan sudah tidak tersedia.", "This post is no longer available.")
-            reason == "network" -> xyNow("Jaringan gagal menjangkau server. Periksa internet lalu coba lagi.", "Couldn't reach the server. Check your connection and retry.")
-            loadingFeed -> xyNow("Feed gagal dimuat. Periksa jaringan lalu coba lagi.", "Couldn't load the feed. Check your connection and retry.")
-            else -> xyNow("Aksi gagal. Coba lagi.", "That action failed. Please retry.")
+                seiNow( "The feed server is temporarily unavailable. Please retry shortly.")
+            reason == "rate_limited" -> seiNow( "Please wait a little before posting again.")
+            reason == "invalid_text" -> seiNow( "Text must be 3–280 characters and cannot contain links.")
+            reason == "invalid_client_id" -> seiNow( "The anonymous ID is invalid. Try reopening the app.")
+            !loadingFeed && reason == "not_found" -> seiNow( "This post is no longer available.")
+            reason == "network" -> seiNow( "Couldn't reach the server. Check your connection and retry.")
+            loadingFeed -> seiNow( "Couldn't load the feed. Check your connection and retry.")
+            else -> seiNow( "That action failed. Please retry.")
         }
     }
 
@@ -158,16 +157,16 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Column(Modifier.weight(1f)) {
-                Text(xy("Feed komunitas", "Community feed"), style = MaterialTheme.typography.titleSmall)
+                Text(sei( "Community feed"), style = MaterialTheme.typography.titleSmall)
                 Text(
-                    xy("Anonim · dibagikan ke semua pengguna", "Anonymous · shared with everyone"),
+                    sei( "Anonymous · shared with everyone"),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    if (refreshing) xy("Memuat…", "Loading…") else xy("Muat ulang", "Refresh"),
+                    if (refreshing) sei( "Loading…") else sei( "Refresh"),
                     modifier = Modifier
                         .clickable(enabled = !refreshing) { refreshKey += 1 }
                         .padding(horizontal = 8.dp, vertical = 4.dp),
@@ -178,7 +177,7 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
                 // onHide bernilai null karena feed bukan kartu opsional.
                 if (onHide != null) {
                     Text(
-                        xy("Sembunyikan", "Hide"),
+                        sei( "Hide"),
                         modifier = Modifier
                             .clickable(onClick = onHide)
                             .padding(start = 8.dp, top = 2.dp),
@@ -202,21 +201,21 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
 
         when {
             refreshing && jokes.isEmpty() -> Text(
-                xy("Memuat feed komunitas…", "Loading community feed…"),
+                sei( "Loading community feed…"),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             feedError != null && jokes.isEmpty() -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(feedError.orEmpty(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
                 SeiPillButton(
-                    text = xy("Coba lagi", "Try again"),
+                    text = sei( "Try again"),
                     onClick = { refreshKey += 1 },
                     primary = false,
                     compact = true,
                 )
             }
             jokes.isEmpty() -> Text(
-                xy("Belum ada postingan. Kirim yang pertama.", "Nothing here yet. Post the first one."),
+                sei( "Nothing here yet. Post the first one."),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -272,8 +271,8 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
                     }
                     if (jokes.size > INITIAL_JOKES_VISIBLE) {
                         Text(
-                            if (showAll) xy("Tampilkan lebih sedikit", "Show less")
-                            else xy("Tampilkan {0} lainnya", "Show {0} more", jokes.size - INITIAL_JOKES_VISIBLE),
+                            if (showAll) sei( "Show less")
+                            else sei( "Show {0} more", jokes.size - INITIAL_JOKES_VISIBLE),
                             modifier = Modifier
                                 .align(Alignment.End)
                                 .clickable { showAll = !showAll }
@@ -294,11 +293,11 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text(
-                        if (editingJoke != null) xy("Edit postingan", "Edit post") else xy("Kirim postingan", "Post to feed"),
+                        if (editingJoke != null) sei( "Edit post") else sei( "Post to feed"),
                         style = MaterialTheme.typography.labelLarge,
                     )
                     Text(
-                        xy("Batal", "Cancel"),
+                        sei( "Cancel"),
                         modifier = Modifier.clickable(enabled = !submitting) {
                             composerOpen = false
                             editingJoke = null
@@ -318,7 +317,7 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
                             formMessage = null
                         }
                     },
-                    placeholder = xy("Tulis singkat. Tanpa nama atau tautan.", "Keep it short. No names or links."),
+                    placeholder = sei( "Keep it short. No names or links."),
                 )
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -326,7 +325,7 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     SeiPillButton(
-                        text = xy(" Foto / stiker / GIF", "📷 Photo / sticker / GIF"),
+                        text = sei( "📷 Photo / sticker / GIF"),
                         onClick = {
                             pickVisual.launch("image/*")
                         },
@@ -346,7 +345,7 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
                             )
                         }
                         Text(
-                            xy("Hapus", "Remove"),
+                            sei( "Remove"),
                             modifier = Modifier.clickable {
                                 pendingAttachment = null
                                 if (editingJoke != null) editRemoveAttachment = true
@@ -358,8 +357,8 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
                 }
                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     val helper = when {
-                        containsLink -> xy("Tautan tidak diterima", "Links aren't allowed")
-                        else -> xy("{0}/280 karakter", "{0}/280 characters", characterCount)
+                        containsLink -> sei( "Links aren't allowed")
+                        else -> sei( "{0}/280 characters", characterCount)
                     }
                     Text(
                         helper,
@@ -368,7 +367,7 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
                         modifier = Modifier.weight(1f),
                     )
                     SeiPillButton(
-                        text = if (submitting) xy("Mengirim…", "Posting…") else xy("Kirim anonim", "Post anonymously"),
+                        text = if (submitting) sei( "Posting…") else sei( "Post anonymously"),
                         onClick = {
                             if (canSubmit) {
                                 scope.launch {
@@ -394,8 +393,7 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
                                         editRemoveAttachment = false
                                         showAll = false
                                         composerOpen = false
-                                        formMessage = xyNow(
-                                            if (target != null) "Postingan diperbarui." else "Terkirim dan tampil di feed komunitas.",
+                                        formMessage = seiNow(
                                             if (target != null) "Post updated." else "Posted to the community feed.",
                                         )
                                         formMessageIsError = false
@@ -413,14 +411,14 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
                     )
                 }
                 Text(
-                    xy("Tanpa akun. Spam atau konten bermasalah dapat disembunyikan.", "No account needed. Spam or abusive posts may be hidden."),
+                    sei( "No account needed. Spam or abusive posts may be hidden."),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         } else {
             SeiPillButton(
-                text = xy("Tulis postingan", "Write a post"),
+                text = sei( "Write a post"),
                 onClick = { composerOpen = true },
                 primary = false,
                 compact = true,
@@ -437,26 +435,26 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
 
     deleteTarget?.let { target ->
         SeiOverlay(
-            title = xy("Hapus postingan?", "Delete post?"),
+            title = sei( "Delete post?"),
             onDismiss = { if (!deleting) deleteTarget = null },
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(
-                    xy("Postingan dan lampirannya dihapus permanen dari feed komunitas.",
+                    sei(
                        "The post and its attachment are permanently removed from the community feed."),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     SeiPillButton(
-                        text = xy("Batal", "Cancel"),
+                        text = sei( "Cancel"),
                         onClick = { deleteTarget = null },
                         primary = false,
                         compact = true,
                         modifier = Modifier.weight(1f),
                     )
                     SeiPillButton(
-                        text = if (deleting) xy("Menghapus…", "Deleting…") else xy("Hapus", "Delete"),
+                        text = if (deleting) sei( "Deleting…") else sei( "Delete"),
                         onClick = {
                             scope.launch {
                                 deleting = true
@@ -464,7 +462,7 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
                                     api.delete(target.id)
                                     jokes = jokes.filterNot { it.id == target.id }
                                     api.cacheFeed(jokes)
-                                    feedMessage = xyNow("Postingan dihapus.", "Post deleted.")
+                                    feedMessage = seiNow( "Post deleted.")
                                     feedMessageIsError = false
                                 } catch (error: Exception) {
                                     feedMessage = showCommunityError(error)
@@ -486,11 +484,11 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
 
     reportTarget?.let { joke ->
         SeiOverlay(
-            title = xy("Laporkan postingan", "Report this post"),
+            title = sei( "Report this post"),
             onDismiss = { if (!reporting) reportTarget = null },
         ) {
             Text(
-                xy("Laporan anonim membantu menjaga feed. Postingan yang mendapat cukup laporan akan disembunyikan otomatis.", "Anonymous reports help keep the feed useful. Posts with enough reports are hidden automatically."),
+                sei( "Anonymous reports help keep the feed useful. Posts with enough reports are hidden automatically."),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
@@ -499,7 +497,7 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 SeiPillButton(
-                    text = xy("Batal", "Cancel"),
+                    text = sei( "Cancel"),
                     onClick = { reportTarget = null },
                     enabled = !reporting,
                     primary = false,
@@ -507,7 +505,7 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
                     modifier = Modifier.weight(1f),
                 )
                 SeiPillButton(
-                    text = if (reporting) xy("Mengirim…", "Sending…") else xy("Kirim laporan", "Submit report"),
+                    text = if (reporting) sei( "Sending…") else sei( "Submit report"),
                     onClick = {
                         if (!reporting) {
                             reporting = true
@@ -516,7 +514,7 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
                                     val hidden = api.report(joke.id)
                                     reportedIds = reportedIds + joke.id
                                     if (hidden) jokes = jokes.filterNot { it.id == joke.id }
-                                    feedMessage = xyNow("Laporan anonim diterima.", "Anonymous report received.")
+                                    feedMessage = seiNow( "Anonymous report received.")
                                     feedMessageIsError = false
                                 } catch (error: Exception) {
                                     feedMessage = showCommunityError(error)
@@ -675,21 +673,21 @@ private fun CommunityJokeItem(
                 Spacer(Modifier.width(6.dp))
             }
             Text(
-                joke.authorName ?: xy("Anonim", "Anonymous"),
+                joke.authorName ?: sei( "Anonymous"),
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             if (joke.editedAtMillis > 0) {
                 Text(
-                    xy(" · diedit", " · edited"),
+                    sei( " · edited"),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             Spacer(Modifier.width(10.dp))
             Text(
-                xy("Komentar ({0})", "Comments ({0})", joke.commentsTotal),
+                sei( "Comments ({0})", joke.commentsTotal),
                 modifier = Modifier
                     .clickable { commentsOpen = !commentsOpen }
                     .padding(horizontal = 4.dp, vertical = 3.dp),
@@ -698,7 +696,7 @@ private fun CommunityJokeItem(
             )
             Spacer(Modifier.width(6.dp))
             Text(
-                if (alreadyReported) xy("Dilaporkan", "Reported") else xy("Laporkan", "Report"),
+                if (alreadyReported) sei( "Reported") else sei( "Report"),
                 modifier = if (alreadyReported) Modifier else Modifier
                     .clickable(onClick = onReport)
                     .padding(horizontal = 4.dp, vertical = 3.dp),
@@ -708,13 +706,13 @@ private fun CommunityJokeItem(
             if (onEdit != null) {
                 Spacer(Modifier.weight(1f))
                 Text(
-                    xy("Edit", "Edit"),
+                    sei( "Edit"),
                     modifier = Modifier.clickable(onClick = onEdit).padding(horizontal = 4.dp, vertical = 3.dp),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.primary,
                 )
                 Text(
-                    xy("Hapus", "Delete"),
+                    sei( "Delete"),
                     modifier = Modifier.clickable(onClick = { onDelete?.invoke() }).padding(horizontal = 4.dp, vertical = 3.dp),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.error,
@@ -726,7 +724,7 @@ private fun CommunityJokeItem(
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 if (joke.comments.isEmpty()) {
                     Text(
-                        xy("Belum ada komentar. Jadilah yang pertama.", "No comments yet. Be the first."),
+                        sei( "No comments yet. Be the first."),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -734,7 +732,7 @@ private fun CommunityJokeItem(
                 joke.comments.forEach { c ->
                     Column {
                         Text(
-                            c.name ?: xy("Anonim", "Anonymous"),
+                            c.name ?: sei( "Anonymous"),
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.primary,
@@ -756,7 +754,7 @@ private fun CommunityJokeItem(
                         decorationBox = { inner ->
                             if (commentDraft.isEmpty()) {
                                 Text(
-                                    xy("Tulis komentar…", "Write a comment…"),
+                                    sei( "Write a comment…"),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
@@ -765,7 +763,7 @@ private fun CommunityJokeItem(
                         },
                     )
                     SeiPillButton(
-                        text = if (isCommentBusy) "…" else xy("Kirim", "Send"),
+                        text = if (isCommentBusy) "…" else sei( "Send"),
                         onClick = {
                             val clean = commentDraft.trim()
                             if (clean.isNotEmpty() && !isCommentBusy) {

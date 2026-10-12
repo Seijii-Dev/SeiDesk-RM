@@ -14,7 +14,7 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import io.seidesk.rm.ui.AppPrefs
 import androidx.core.content.ContextCompat
-import io.seidesk.rm.ui.xyNow
+import io.seidesk.rm.ui.seiNow
 import io.seidesk.rm.ui.SeiDeskHomeActivity
 import io.seidesk.rm.ui.SeiSessionRegistry
 
@@ -90,11 +90,10 @@ class SeiSessionService : Service() {
         if (manager.getNotificationChannel(CHANNEL_ID) != null) return
         val channel = NotificationChannel(
             CHANNEL_ID,
-            xyNow("Sesi aktif", "Active session"),
+            seiNow( "Active session"),
             NotificationManager.IMPORTANCE_LOW,
         ).apply {
-            description = xyNow(
-                "Notifikasi selama sesi remote berjalan di latar",
+            description = seiNow(
                 "Notification while a remote session runs in the background",
             )
             setShowBadge(false)
@@ -134,15 +133,15 @@ class SeiSessionService : Service() {
             // android.R.drawable.stat_sys_upload_done, ikon sistem panah
             // upload yang tidak ada hubungannya dengan remote desktop.
             .setSmallIcon(io.seidesk.rm.R.drawable.ic_launcher_monochrome)
-            .setContentTitle(xyNow("Sesi remote aktif", "Remote session active"))
+            .setContentTitle(seiNow( "Remote session active"))
             .setContentText(host)
             .setSubText(versionLabel())
             .setContentIntent(open)
-            .addAction(0, xyNow("Buka", "Open"), open)
-        if (prefs.notifHomeButton) builder.addAction(0, xyNow("Beranda", "Home"), home)
-        if (prefs.notifMusicButton) builder.addAction(0, xyNow("Musik", "Music"), music)
+            .addAction(0, seiNow( "Open"), open)
+        if (prefs.notifHomeButton) builder.addAction(0, seiNow( "Home"), home)
+        if (prefs.notifMusicButton) builder.addAction(0, seiNow( "Music"), music)
         builder
-            .addAction(0, xyNow("Putuskan", "Disconnect"), stop)
+            .addAction(0, seiNow( "Disconnect"), stop)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setShowWhen(true)
@@ -172,7 +171,7 @@ class SeiSessionService : Service() {
             .setPublicVersion(
                 NotificationCompat.Builder(this, CHANNEL_ID)
                     .setSmallIcon(io.seidesk.rm.R.drawable.ic_launcher_monochrome)
-                    .setContentTitle(xyNow("Sesi remote aktif", "Remote session active"))
+                    .setContentTitle(seiNow( "Remote session active"))
                     .setContentText("SeiDesk RM")
                     .setColor(NOTIF_ACCENT)
                     .setColorized(true)

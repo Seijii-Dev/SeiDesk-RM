@@ -304,7 +304,7 @@ fun SeiDeskSessionScreen(
     val coreInfo = remember {
         runCatching {
             listOf(
-                xyNow("Inti RDP {0}", "RDP engine {0}", manager.freeRdpVersion()),
+                seiNow( "RDP engine {0}", manager.freeRdpVersion()),
                 manager.buildInfo().lineSequence().firstOrNull()?.take(120).orEmpty(),
             ).filter { it.isNotBlank() }
         }.getOrDefault(emptyList())
@@ -403,8 +403,7 @@ fun SeiDeskSessionScreen(
             prefs.hudTipShown = true
             kotlinx.coroutines.delay(900)
             notice.show(
-                xyNow(
-                    "Tombol kontrol terkunci. Gunakan \"Atur posisi\" dari menu panel kanan atas untuk memindahkannya.",
+                seiNow(
                     "Control buttons are locked. Use \"Edit layout\" from the top-right session panel to move them.",
                 ),
             )
@@ -478,8 +477,7 @@ fun SeiDeskSessionScreen(
                             // Never log remote clipboard contents or exception details.
                             ConnectionLog.add("clipboard: Android clipboard service rejected remote text")
                             SeiNoticeBus.post(
-                                xyNow(
-                                    "Clipboard remote gagal disalin ke HP; isi tidak dicatat",
+                                seiNow(
                                     "Remote clipboard could not be copied to phone; contents were not logged",
                                 ),
                             )
@@ -616,8 +614,7 @@ fun SeiDeskSessionScreen(
             remoteDpi = lastRemoteDpiRequest
             DisplayPrefs.setRemoteDpi(context, profile.id, remoteDpi)
             notice.show(
-                xyNow(
-                    "DPI remote tidak tersedia: server atau kanal Display Control belum siap.",
+                seiNow(
                     "Remote DPI is unavailable: the server or Display Control channel is not ready.",
                 ),
             )
@@ -697,12 +694,11 @@ fun SeiDeskSessionScreen(
             if (confirmed) {
                 lastRemoteDpiRequest = remoteDpi
                 controller.fitToScreen()
-                notice.show(xyNow("Resolusi terkonfirmasi: {0} x {1}", "Resolution confirmed: {0} x {1}", want.first, want.second))
+                notice.show(seiNow( "Resolution confirmed: {0} x {1}", want.first, want.second))
             } else {
-                val actual = if (telemetry.width > 0) "${telemetry.width} x ${telemetry.height}" else xyNow("belum dilaporkan", "not reported")
+                val actual = if (telemetry.width > 0) "${telemetry.width} x ${telemetry.height}" else seiNow( "not reported")
                 notice.show(
-                    xyNow(
-                        "Host melaporkan {0}; resolusi {1} x {2} tidak terkonfirmasi.",
+                    seiNow(
                         "Host reports {0}; resolution {1} x {2} was not confirmed.",
                         actual, want.first, want.second,
                     ),
@@ -857,8 +853,8 @@ fun SeiDeskSessionScreen(
                 swapMouseButtons = next
                 prefs.swapMouseButtons = next
                 notice.show(
-                    if (next) xyNow("Klik Kiri ⇄ Kanan ditukar", "Left ⇄ Right click swapped")
-                    else xyNow("Klik Kiri & Kanan normal", "Left & Right click normal"),
+                    if (next) seiNow( "Left ⇄ Right click swapped")
+                    else seiNow( "Left & Right click normal"),
                 )
             }
             HudKind.SCROLL_UP -> if (down) sendScroll(1)
@@ -1157,29 +1153,29 @@ fun SeiDeskSessionScreen(
             val recordingBusy = recordingState is RemoteRecordingState.Preparing ||
                 recordingState is RemoteRecordingState.Stopping
             val recordingLabel = when (recordingState) {
-                RemoteRecordingState.Preparing -> xy("Menyiapkan…", "Preparing…")
-                RemoteRecordingState.Stopping -> xy("Menyimpan…", "Saving…")
-                RemoteRecordingState.Recording -> xy("Hentikan & simpan", "Stop & save")
-                else -> xy("Mulai rekam PC", "Record PC")
+                RemoteRecordingState.Preparing -> sei( "Preparing…")
+                RemoteRecordingState.Stopping -> sei( "Saving…")
+                RemoteRecordingState.Recording -> sei( "Stop & save")
+                else -> sei( "Record PC")
             }
             val recordingStatus = when (val current = recordingState) {
                 RemoteRecordingState.Idle -> null
-                RemoteRecordingState.Preparing -> xy("Menyiapkan encoder video…", "Preparing the video encoder…")
-                RemoteRecordingState.Recording -> xy("Merekam desktop PC + audio PC", "Recording the PC desktop + PC audio")
-                RemoteRecordingState.Stopping -> xy("Menutup file MP4…", "Finalizing the MP4…")
-                is RemoteRecordingState.Saved -> xy("Tersimpan: {0}", "Saved: {0}", current.location)
+                RemoteRecordingState.Preparing -> sei( "Preparing the video encoder…")
+                RemoteRecordingState.Recording -> sei( "Recording the PC desktop + PC audio")
+                RemoteRecordingState.Stopping -> sei( "Finalizing the MP4…")
+                is RemoteRecordingState.Saved -> sei( "Saved: {0}", current.location)
                 is RemoteRecordingState.Failed -> when (current.reason) {
-                    "secure" -> xy("Proteksi layar aktif; perekaman diblokir.", "Screen-capture protection is on; recording is blocked.")
-                    "no_frame" -> xy("Frame desktop PC belum siap. Tunggu sampai layar tampil.", "The PC desktop frame is not ready yet. Wait for the remote screen.")
-                    "save" -> xy("MP4 gagal disimpan ke penyimpanan lokal.", "Couldn't save the MP4 to local storage.")
-                    else -> xy("Perekaman gagal. Coba lagi; sebagian perangkat mungkin tidak mendukung encoder ini.", "Recording failed. Retry; this device may not support the required encoder.")
+                    "secure" -> sei( "Screen-capture protection is on; recording is blocked.")
+                    "no_frame" -> sei( "The PC desktop frame is not ready yet. Wait for the remote screen.")
+                    "save" -> sei( "Couldn't save the MP4 to local storage.")
+                    else -> sei( "Recording failed. Retry; this device may not support the required encoder.")
                 }
             }
             SessionControls(
                 deviceId = profile.id,
                 hostLabel = activeProfile.label ?: "${activeProfile.host}:${activeProfile.port}",
-                statusText = xy("Terhubung", "Connected"),
-                remoteSize = if (telemetry.width > 0) "${telemetry.width} x ${telemetry.height}" else xy("menunggu server", "waiting for server"),
+                statusText = sei( "Connected"),
+                remoteSize = if (telemetry.width > 0) "${telemetry.width} x ${telemetry.height}" else sei( "waiting for server"),
                 zoomPercent = (zoom * 100).roundToInt(),
                 remoteDpi = remoteDpi,
                 telemetry = telemetry,
@@ -1222,7 +1218,7 @@ fun SeiDeskSessionScreen(
                 mappingMode = mappingMode,
                 onMappingModeChange = {
                     mappingMode = it
-                    if (it) notice.show(xyNow("Geser tombol ke posisi yang kamu mau", "Drag the buttons where you want them"))
+                    if (it) notice.show(seiNow( "Drag the buttons where you want them"))
                 },
                 onPhase = { key, phase -> handleHudPhase(key, phase) },
                 onScrollUnits = { sendScrollUnits(it) },
@@ -1283,12 +1279,11 @@ fun SeiDeskSessionScreen(
                     val act = context as? Activity ?: return@SessionControls
                     sessionScope.launch {
                         val uri: Uri = controller.captureScreenshot(act) ?: run {
-                            notice.show(xyNow("Screenshot gagal atau surface belum siap", "Screenshot failed or surface is not ready"))
+                            notice.show(seiNow( "Screenshot failed or surface is not ready"))
                             return@launch
                         }
                         notice.show(
-                            xyNow(
-                                "Screenshot disimpan ke Pictures/SeiDesk-RM",
+                            seiNow(
                                 "Screenshot saved to Pictures/SeiDesk-RM",
                             ),
                         )
@@ -1300,7 +1295,7 @@ fun SeiDeskSessionScreen(
                         act.startActivity(
                             Intent.createChooser(
                                 send,
-                                xyNow("Bagikan screenshot", "Share screenshot"),
+                                seiNow( "Share screenshot"),
                             ),
                         )
                     }
@@ -1332,7 +1327,7 @@ fun SeiDeskSessionScreen(
                     }
                     // Rotasi mengubah bentuk layar: ukuran dikirim ulang oleh
                     // efek yang memantau ukuran area gambar.
-                    notice.show(xyNow("Orientasi diubah ke {0}", "Orientation set to {0}", mode))
+                    notice.show(seiNow( "Orientation set to {0}", mode))
                 },
                 onResolutionChange = { preset ->
                     val size = when (preset) {
@@ -1347,15 +1342,14 @@ fun SeiDeskSessionScreen(
                     val target = size?.takeIf { it.first > 0 && it.second > 0 }
                         ?.let { normalizedRemoteResolution(it.first, it.second) }
                     if (target == null) {
-                        notice.show(xyNow("Resolusi tidak valid untuk viewport saat ini", "Resolution is invalid for the current viewport"))
+                        notice.show(seiNow( "Resolution is invalid for the current viewport"))
                     } else if (remoteResolutionMatches(target, telemetry.width, telemetry.height)) {
                         controller.fitToScreen()
-                        notice.show(xyNow("Resolusi terkonfirmasi: {0} x {1}", "Resolution confirmed: {0} x {1}", target.first, target.second))
+                        notice.show(seiNow( "Resolution confirmed: {0} x {1}", target.first, target.second))
                     } else if (isPcConnectMode || isConsoleAdminMode) {
                         controller.fitToScreen()
                         notice.show(
-                            xyNow(
-                                "Mode Konsol (/admin) mengikuti resolusi monitor host ({0} x {1})",
+                            seiNow(
                                 "Console (/admin) mode follows the host monitor resolution ({0} x {1})",
                                 telemetry.width,
                                 telemetry.height,
@@ -1374,17 +1368,16 @@ fun SeiDeskSessionScreen(
                             val confirmed = queued && manager.awaitRemoteResolution(target)
                             if (confirmed) {
                                 controller.fitToScreen()
-                                notice.show(xyNow("Resolusi terkonfirmasi: {0} x {1}", "Resolution confirmed: {0} x {1}", target.first, target.second))
+                                notice.show(seiNow( "Resolution confirmed: {0} x {1}", target.first, target.second))
                             } else if (!RdpOptions.of(context, profile.id).dynamicResolution) {
                                 pendingResize = target
                                 applyingResolution = true
                                 manager.disconnect()
-                                notice.show(xyNow("Ukuran belum berubah; menyambung ulang dengan resolusi pilihan", "Size not confirmed; reconnecting with the selected resolution"))
+                                notice.show(seiNow( "Size not confirmed; reconnecting with the selected resolution"))
                             } else {
                                 controller.fitToScreen()
                                 notice.show(
-                                    xyNow(
-                                        "Resolusi {0} x {1} disimpan (akan diterapkan saat sesi berikutnya bila kanal DISP ditolak host)",
+                                    seiNow(
                                         "Resolution {0} x {1} saved (will apply on next session if host ignores DISP)",
                                         target.first,
                                         target.second,
@@ -1443,9 +1436,9 @@ fun SeiDeskSessionScreen(
                     manager.disconnect()
                     notice.show(
                         if (useConsole) {
-                            xyNow("Beralih ke Konsol Runner ({0} · /admin)...", "Switching to Runner Console ({0} · /admin)...", nextUser ?: "admin")
+                            seiNow( "Switching to Runner Console ({0} · /admin)...", nextUser ?: "admin")
                         } else {
-                            xyNow("Beralih ke Sesi Virtual ({0} · Multi-User)...", "Switching to Virtual Session ({0} · Multi-User)...", nextUser ?: "RDP")
+                            seiNow( "Switching to Virtual Session ({0} · Multi-User)...", nextUser ?: "RDP")
                         },
                     )
                 },
@@ -1466,8 +1459,7 @@ fun SeiDeskSessionScreen(
                     applyingResolution = true
                     manager.disconnect()
                     notice.show(
-                        xyNow(
-                            "Beralih sesi ke user {0} ({1})...",
+                        seiNow(
                             "Switching session to user {0} ({1})...",
                             newUser,
                             if (wantConsole) "/admin" else "Multi-User",
@@ -1479,15 +1471,15 @@ fun SeiDeskSessionScreen(
                     swapMouseButtons = swapped
                     prefs.swapMouseButtons = swapped
                     notice.show(
-                        if (swapped) xyNow("Klik Kiri ⇄ Kanan ditukar", "Left ⇄ Right click swapped")
-                        else xyNow("Klik Kiri & Kanan normal", "Left & Right click normal"),
+                        if (swapped) seiNow( "Left ⇄ Right click swapped")
+                        else seiNow( "Left & Right click normal"),
                     )
                 },
                 onLockRemotePc = {
                     if (manager.lockRemoteSession()) {
-                        notice.show(xyNow("Layar PC dikunci (Win+L dikirim)", "PC screen locked (Win+L sent)"))
+                        notice.show(seiNow( "PC screen locked (Win+L sent)"))
                     } else {
-                        notice.show(xyNow("Gagal mengirim perintah kunci PC", "Failed to send PC lock command"))
+                        notice.show(seiNow( "Failed to send PC lock command"))
                     }
                 },
                 onActivatePrivacyCurtain = {
@@ -1526,15 +1518,14 @@ fun SeiDeskSessionScreen(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     Text(
-                        xy("LAYAR STEALTH / PRIVACY CURTAIN AKTIF", "STEALTH / PRIVACY CURTAIN ACTIVE"),
+                        sei( "STEALTH / PRIVACY CURTAIN ACTIVE"),
                         color = Color(0xFF9BA2AC),
                         fontSize = 11.sp,
                         letterSpacing = 1.4.sp,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
-                        xy(
-                            "Sesi ke {0} tetap berjalan aman di latar. Ketuk layar untuk membuka kembali tampilan.",
+                        sei(
                             "Session to {0} stays running safely. Tap anywhere to restore the display.",
                             profile.label ?: "${profile.host}:${profile.port}",
                         ),
@@ -1589,7 +1580,7 @@ fun SeiDeskSessionScreen(
         if ((state is SessionState.Disconnected || state is SessionState.Disconnecting) && applyingResolution) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(
-                    xy("Menerapkan tampilan / sesi baru...", "Applying new display / session..."),
+                    sei( "Applying new display / session..."),
                     color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.titleMedium,
                 )
@@ -1623,14 +1614,14 @@ fun SeiDeskSessionScreen(
     }
     if (!active && !reconnecting && !applyingResolution && !userDisconnect) err?.let { e ->
         SeiOverlay(
-            title = xy("Tidak dapat tersambung", "Unable to connect"),
+            title = sei( "Unable to connect"),
             onDismiss = { exitSession() },
         ) {
             // Penjelasan yang bisa ditindak dulu, pesan mentah di bawahnya
             // supaya laporan bug tetap punya isi teknis.
             val hint = RdpErrors.hint(e.code, e.message)
             if (hint != null) {
-                Text(xy(hint.first, hint.second), style = MaterialTheme.typography.bodyMedium)
+                Text(sei( hint.second), style = MaterialTheme.typography.bodyMedium)
                 Spacer(Modifier.height(6.dp))
                 Text(
                     e.message,
@@ -1645,22 +1636,22 @@ fun SeiDeskSessionScreen(
             // di log, jadi laporan bug bisa dicocokkan tanpa menebak.
             Spacer(Modifier.height(8.dp))
             Text(
-                xy("Kode", "Code") + " " + RdpFailure.formatCode(e.errorCode) +
-                    "   ·   " + xy("ID koneksi", "Connection ID") + " " +
+                sei( "Code") + " " + RdpFailure.formatCode(e.errorCode) +
+                    "   ·   " + sei( "Connection ID") + " " +
                     RdpFailure.formatConnectionId(e.connectionId),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 SeiPillButton(
-                    text = xy("Detail", "Details"),
+                    text = sei( "Details"),
                     onClick = { showLog = true },
                     primary = false,
                     compact = true,
                     modifier = Modifier.weight(1f),
                 )
                 SeiPillButton(
-                    text = xy("Reset resolusi", "Reset resolution"),
+                    text = sei( "Reset resolution"),
                     onClick = {
                         DisplayPrefs.setResolution(context, activeProfile.id, DisplayPrefs.AUTOMATIC)
                         boundInstance = 0L
@@ -1672,7 +1663,7 @@ fun SeiDeskSessionScreen(
                 )
             }
             SeiPillButton(
-                text = xy("Coba lagi", "Try again"),
+                text = sei( "Try again"),
                 onClick = {
                     showLog = false
                     boundInstance = 0L
@@ -1682,7 +1673,7 @@ fun SeiDeskSessionScreen(
                 modifier = Modifier.fillMaxWidth(),
             )
             SeiPillButton(
-                text = xy("Tutup", "Close"),
+                text = sei( "Close"),
                 onClick = { exitSession() },
                 compact = true,
                 modifier = Modifier.fillMaxWidth(),
@@ -1690,7 +1681,7 @@ fun SeiDeskSessionScreen(
         }
     }
     if (!active && err != null && showLog && !userDisconnect) {
-        SeiOverlay(title = xy("Log koneksi", "Connection log"), onDismiss = { showLog = false }) {
+        SeiOverlay(title = sei( "Connection log"), onDismiss = { showLog = false }) {
             Column(
                 Modifier
                     .fillMaxWidth()
@@ -1706,7 +1697,7 @@ fun SeiDeskSessionScreen(
                 }
             }
             SeiPillButton(
-                text = xy("Tutup", "Close"),
+                text = sei( "Close"),
                 onClick = { showLog = false },
                 compact = true,
                 modifier = Modifier.fillMaxWidth(),
@@ -1715,9 +1706,9 @@ fun SeiDeskSessionScreen(
     }
     if (!active && err == null && confirmDisconnect) {
         SeiDialog(
-            title = xy("Putuskan sesi?", "Disconnect session?"),
-            body = xy("Putuskan sesi sekarang dan kembali ke beranda?", "Disconnect the session now and return to home?"),
-            confirmLabel = xy("Putuskan", "Disconnect"),
+            title = sei( "Disconnect session?"),
+            body = sei( "Disconnect the session now and return to home?"),
+            confirmLabel = sei( "Disconnect"),
             onConfirm = {
                 confirmDisconnect = false
                 userDisconnect = true
@@ -1731,18 +1722,17 @@ fun SeiDeskSessionScreen(
                 manager.disconnect()
                 exitSession()
             },
-            dismissLabel = xy("Batal", "Cancel"),
+            dismissLabel = sei( "Cancel"),
             onDismiss = { confirmDisconnect = false },
         )
     }
     if (!active && confirmCancelConnect) {
         SeiDialog(
-            title = xy("Batalkan koneksi?", "Cancel connection?"),
-            body = xy(
-                "Hentikan proses menyambung ke server dan kembali ke beranda?",
+            title = sei( "Cancel connection?"),
+            body = sei(
                 "Stop connecting to the server and return to home?",
             ),
-            confirmLabel = xy("Batalkan", "Cancel connection"),
+            confirmLabel = sei( "Cancel connection"),
             onConfirm = {
                 confirmCancelConnect = false
                 userDisconnect = true
@@ -1751,7 +1741,7 @@ fun SeiDeskSessionScreen(
                 manager.cancelConnection()
                 exitSession()
             },
-            dismissLabel = xy("Lanjutkan", "Keep trying"),
+            dismissLabel = sei( "Keep trying"),
             onDismiss = { confirmCancelConnect = false },
         )
     }
@@ -1797,18 +1787,13 @@ private fun ReconnectingOverlay(
     ) {
         SeiSpinner(size = 24.dp, color = MaterialTheme.colorScheme.primary)
         Text(
-            xy("Jaringan terputus sementara", "Temporary network interruption"),
+            sei( "Temporary network interruption"),
             color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.titleSmall,
             textAlign = TextAlign.Center,
         )
         Text(
-            xy(
-                if (waitingForNativeRelease) {
-                    "Menunggu sesi native menutup dengan aman; percobaan {0} akan dilanjutkan setelahnya."
-                } else {
-                    "Sesi tetap terbuka. Menunggu jaringan lalu mencoba lagi (percobaan {0})."
-                },
+            sei(
                 if (waitingForNativeRelease) {
                     "Waiting for the native session to close safely; attempt {0} will continue afterward."
                 } else {
@@ -1820,7 +1805,7 @@ private fun ReconnectingOverlay(
             style = MaterialTheme.typography.bodySmall,
             textAlign = TextAlign.Center,
         )
-        SeiPillButton(xy("Berhenti mencoba", "Stop retrying"), onStop, primary = false, compact = true)
+        SeiPillButton(sei( "Stop retrying"), onStop, primary = false, compact = true)
     }
 }
 
@@ -1893,7 +1878,7 @@ private fun ConnectingScreen(
                             }
                         }
                         Text(
-                            xy(title, titleEn),
+                            sei( titleEn),
                             color = Color.White.copy(alpha = if (index <= active) 0.96f else 0.72f),
                             fontSize = 14.sp,
                             fontWeight = if (index == active) FontWeight.SemiBold else FontWeight.Normal,
@@ -1902,7 +1887,7 @@ private fun ConnectingScreen(
                 }
             }
             Spacer(Modifier.height(30.dp))
-            SeiPillButton(xy("Batalkan", "Cancel"), onCancel, primary = false, compact = true)
+            SeiPillButton(sei( "Cancel"), onCancel, primary = false, compact = true)
         }
     }
 }
@@ -1923,7 +1908,7 @@ private fun DisconnectedScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
-                xy("Sesi terputus", "Session ended"),
+                sei( "Session ended"),
                 color = Color.White,
                 style = MaterialTheme.typography.headlineSmall,
             )
@@ -1932,9 +1917,8 @@ private fun DisconnectedScreen(
             Spacer(Modifier.height(10.dp))
             val disconnectHint = RdpErrors.disconnectedHint(detail)
             Text(
-                disconnectHint?.let { xy(it.first, it.second) }
-                    ?: xy(
-                        "Sesi remote berakhir; penyebab spesifik tidak diberikan.",
+                disconnectHint?.let { sei( it.second) }
+                    ?: sei(
                         "The remote session ended; no specific cause was provided.",
                     ),
                 color = Color.White.copy(alpha = 0.86f),
@@ -1949,9 +1933,9 @@ private fun DisconnectedScreen(
                 )
             }
             Spacer(Modifier.height(20.dp))
-            SeiPillButton(xy("Sambungkan lagi", "Reconnect"), onReconnect, compact = true)
+            SeiPillButton(sei( "Reconnect"), onReconnect, compact = true)
             Spacer(Modifier.height(8.dp))
-            SeiPillButton(xy("Kembali ke home", "Back to home"), onExit, primary = false, compact = true)
+            SeiPillButton(sei( "Back to home"), onExit, primary = false, compact = true)
         }
     }
 }
@@ -2162,20 +2146,19 @@ private fun CertificateDialog(
     var showCertificateDetails by remember(info.host, info.port, info.fingerprint) { mutableStateOf(false) }
     SeiOverlay(
         title = if (info.isChanged) {
-            xy("Sertifikat server berubah", "Server certificate changed")
+            sei( "Server certificate changed")
         } else {
-            xy("Percaya sertifikat server?", "Trust server certificate?")
+            sei( "Trust server certificate?")
         },
         onDismiss = null,
     ) {
         Text("${info.host}:${info.port}", style = MaterialTheme.typography.bodyMedium)
         if (info.isGateway) {
-            Text(xy("Jenis: RDP Gateway", "Type: RDP Gateway"), style = MaterialTheme.typography.bodySmall)
+            Text(sei( "Type: RDP Gateway"), style = MaterialTheme.typography.bodySmall)
         }
         if (info.isMismatch) {
             Text(
-                xy(
-                    "PERINGATAN: nama sertifikat tidak cocok dengan host",
+                sei(
                     "WARNING: certificate name does not match the host",
                 ),
                 color = MaterialTheme.colorScheme.error,
@@ -2184,8 +2167,7 @@ private fun CertificateDialog(
         }
         if (info.isChanged) {
             Text(
-                xy(
-                    "PERINGATAN: sertifikat berubah dari yang pernah diterima.",
+                sei(
                     "WARNING: certificate changed from the one accepted before.",
                 ),
                 color = MaterialTheme.colorScheme.error,
@@ -2194,8 +2176,7 @@ private fun CertificateDialog(
         }
         if (oldFingerprint != null && oldFingerprint != info.fingerprint) {
             Text(
-                xy(
-                    "PERINGATAN: sertifikat BERUBAH dari yang pernah kamu percaya.",
+                sei(
                     "WARNING: the certificate CHANGED from the one you trusted.",
                 ),
                 color = MaterialTheme.colorScheme.error,
@@ -2203,7 +2184,7 @@ private fun CertificateDialog(
             )
         }
         Text(
-            text = "${if (showCertificateDetails) "▾" else "▸"} ${xy("Detail sertifikat", "Certificate details")}",
+            text = "${if (showCertificateDetails) "▾" else "▸"} ${sei( "Certificate details")}",
             modifier = Modifier.fillMaxWidth().clickable { showCertificateDetails = !showCertificateDetails },
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.primary,
@@ -2211,29 +2192,29 @@ private fun CertificateDialog(
         if (showCertificateDetails) {
             Text("Subject: ${info.subject}", style = MaterialTheme.typography.bodySmall)
             Text("Issuer: ${info.issuer}", style = MaterialTheme.typography.bodySmall)
-            Text(xy("Fingerprint SHA-256:", "Fingerprint SHA-256:"), style = MaterialTheme.typography.bodySmall)
+            Text(sei( "Fingerprint SHA-256:"), style = MaterialTheme.typography.bodySmall)
             Text(info.fingerprint, style = MaterialTheme.typography.bodySmall, fontFamily = FontFamily.Monospace)
             if (oldFingerprint != null && oldFingerprint != info.fingerprint) {
-                Text(xy("Fingerprint tersimpan: {0}", "Stored fingerprint: {0}", oldFingerprint),
+                Text(sei( "Stored fingerprint: {0}", oldFingerprint),
                     style = MaterialTheme.typography.bodySmall, fontFamily = FontFamily.Monospace)
             }
         }
         SeiPillButton(
-            text = xy("Percaya & ingat", "Trust & remember"),
+            text = sei( "Trust & remember"),
             onClick = onTrustRemember,
             compact = true,
             modifier = Modifier.fillMaxWidth(),
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             SeiPillButton(
-                text = xy("Percaya (sekali)", "Trust (once)"),
+                text = sei( "Trust (once)"),
                 onClick = { onReply(CertificateInfo.VERIFY_ACCEPT) },
                 primary = false,
                 compact = true,
                 modifier = Modifier.weight(1f),
             )
             SeiPillButton(
-                text = xy("Tolak kali ini", "Deny this time"),
+                text = sei( "Deny this time"),
                 onClick = { onReply(CertificateInfo.VERIFY_DENY) },
                 primary = false,
                 compact = true,
@@ -2251,28 +2232,28 @@ private fun NlaDialog(
     var user by remember { mutableStateOf(p.user ?: "") }
     var domain by remember { mutableStateOf(p.domain ?: "") }
     var pass by remember { mutableStateOf("") }
-    SeiOverlay(title = xy("Masuk ke server", "Sign in to server"), onDismiss = null) {
+    SeiOverlay(title = sei( "Sign in to server"), onDismiss = null) {
         Text(
-            xy("Server meminta kredensial (NLA/CredSSP).", "The server asks for credentials (NLA/CredSSP)."),
+            sei( "The server asks for credentials (NLA/CredSSP)."),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        SeiField(value = user, onValueChange = { user = it }, label = xy("Username", "Username"))
+        SeiField(value = user, onValueChange = { user = it }, label = sei( "Username"))
         SeiField(
             value = domain,
             onValueChange = { domain = it },
-            label = xy("Domain (opsional)", "Domain (optional)"),
+            label = sei( "Domain (optional)"),
         )
         SeiField(
             value = pass,
             onValueChange = { pass = it },
-            label = xy("Password", "Password"),
+            label = sei( "Password"),
             isPassword = true,
             imeAction = ImeAction.Done,
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             SeiPillButton(
-                text = xy("Masuk", "Sign in"),
+                text = sei( "Sign in"),
                 onClick = {
                     onReply(
                         user.ifBlank { null },
@@ -2285,7 +2266,7 @@ private fun NlaDialog(
                 modifier = Modifier.weight(1f),
             )
             SeiPillButton(
-                text = xy("Batal", "Cancel"),
+                text = sei( "Cancel"),
                 onClick = { onReply(null, null, null) },
                 primary = false,
                 compact = true,

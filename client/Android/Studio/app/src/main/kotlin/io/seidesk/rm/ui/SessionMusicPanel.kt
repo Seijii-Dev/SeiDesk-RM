@@ -71,16 +71,15 @@ internal fun MusicTab(
     }
 
     PanelSectionGrid(openKey = openKey, onOpenKey = onOpenKey) {
-        section("sumber-musik", xy("Sumber & izin", "Source & access")) {
+        section("sumber-musik", sei( "Source & access")) {
             PanelHint(
-                xy(
-                    "SeiDesk RM mengendalikan sesi media Android, jadi pemutar apa pun bisa dipakai — Spotify, SoundCloud, YouTube Music, atau pemutar lokal. Audio dan login tetap di aplikasi itu.",
+                sei(
                     "SeiDesk RM drives Android's media session, so any player works — Spotify, SoundCloud, YouTube Music, or a local player. Audio and sign-in stay inside that app.",
                 ),
             )
             if (!playback.notificationAccessGranted) {
                 SeiPillButton(
-                    text = xy("Beri akses notifikasi", "Allow notification access"),
+                    text = sei( "Allow notification access"),
                     onClick = { openSpotifyNotificationAccess(context) },
                     icon = SeiIcons.Music,
                     primary = false,
@@ -89,8 +88,7 @@ internal fun MusicTab(
                 )
             } else {
                 Text(
-                    xy(
-                        "Akses notifikasi aktif. {0} sesi terdeteksi.",
+                    sei(
                         "{0} session(s) detected.",
                         playback.sources.size,
                     ),
@@ -101,8 +99,7 @@ internal fun MusicTab(
 
             if (playback.sources.isEmpty() && playback.notificationAccessGranted) {
                 Text(
-                    xy(
-                        "Belum ada aplikasi musik yang membuka sesi. Putar satu lagu dulu, lalu ketuk Segarkan.",
+                    sei(
                         "No music app has opened a session yet. Play a song first, then tap Refresh.",
                     ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -122,7 +119,7 @@ internal fun MusicTab(
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 SeiPillButton(
-                    xy("Segarkan", "Refresh"),
+                    sei( "Refresh"),
                     { SpotifyMediaBridge.refresh(context) },
                     icon = SeiIcons.Refresh,
                     primary = false,
@@ -131,7 +128,7 @@ internal fun MusicTab(
                 )
                 if (playback.sources.any { it.active }) {
                     SeiPillButton(
-                        xy("Pilih otomatis", "Auto pick"),
+                        sei( "Auto pick"),
                         { SpotifyMediaBridge.clearSourcePreference(context) },
                         primary = false,
                         compact = true,
@@ -141,21 +138,20 @@ internal fun MusicTab(
             }
         }
 
-        section("musik-online", xy("Musik online (SoundCloud)", "Online music (SoundCloud)")) {
+        section("musik-online", sei( "Online music (SoundCloud)")) {
             OnlineMusicSection()
         }
 
-        section("kontrol-pemutar", xy("Kontrol penuh", "Full control")) {
+        section("kontrol-pemutar", sei( "Full control")) {
             if (!playback.hasActiveSession) {
                 PanelHint(
-                    xy(
-                        "Belum ada lagu aktif. Kontrol muncul begitu ada pemutar yang membuka sesi.",
+                    sei(
                         "No active track yet. The controls appear as soon as a player opens a session.",
                     ),
                 )
             } else {
                 Text(
-                    playback.title ?: xy("(tanpa judul)", "(untitled)"),
+                    playback.title ?: sei( "(untitled)"),
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -184,16 +180,15 @@ internal fun MusicTab(
                     modifier = Modifier.fillMaxWidth(),
                 )
                 val unsupported = buildList {
-                    if (!playback.canSeek) add(xy("geser posisi", "seeking"))
-                    if (!playback.canSkipNext || !playback.canSkipPrevious) add(xy("ganti lagu", "skipping tracks"))
-                    if (!playback.canShuffle) add(xy("acak", "shuffle"))
-                    if (!playback.canRepeat) add(xy("ulang", "repeat"))
-                    if (!playback.canStop) add(xy("hentikan", "stop"))
+                    if (!playback.canSeek) add(sei( "seeking"))
+                    if (!playback.canSkipNext || !playback.canSkipPrevious) add(sei( "skipping tracks"))
+                    if (!playback.canShuffle) add(sei( "shuffle"))
+                    if (!playback.canRepeat) add(sei( "repeat"))
+                    if (!playback.canStop) add(sei( "stop"))
                 }
                 if (unsupported.isNotEmpty()) {
                     Text(
-                        xy(
-                            "Pemutar ini tidak membuka: {0}. Tombolnya dimatikan, bukan disembunyikan.",
+                        sei(
                             "This player does not expose: {0}. Those buttons are disabled rather than hidden.",
                             unsupported.joinToString(", "),
                         ),
@@ -205,10 +200,9 @@ internal fun MusicTab(
             }
         }
 
-        section("antrian-musik", xy("Antrian / playlist", "Queue / playlist")) {
+        section("antrian-musik", sei( "Queue / playlist")) {
             PanelHint(
-                xy(
-                    "Antrian adalah daftar yang sudah dimuat pemutar — playlist, album, atau radio yang sedang jalan. Ketuk satu lagu untuk langsung memutarnya.",
+                sei(
                     "The queue is what the player already loaded — the running playlist, album, or radio. Tap a track to play it now.",
                 ),
             )
@@ -224,8 +218,7 @@ internal fun MusicTab(
             }
             if (playback.queue.isEmpty()) {
                 Text(
-                    xy(
-                        "Pemutar ini tidak membagikan antriannya. Banyak pemutar hanya membukanya saat satu daftar sedang diputar.",
+                    sei(
                         "This player does not share its queue. Many players only expose it while a list is playing.",
                     ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -247,23 +240,22 @@ internal fun MusicTab(
                     }
                 }
                 Text(
-                    xy("{0} lagu di antrian", "{0} tracks in queue", playback.queue.size),
+                    sei( "{0} tracks in queue", playback.queue.size),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 10.sp,
                 )
             }
         }
 
-        section("pustaka-musik", xy("Pustaka", "Library")) {
+        section("pustaka-musik", sei( "Library")) {
             PanelHint(
-                xy(
-                    "Pustaka dibaca lewat MediaBrowserService: album, playlist, dan artis yang BELUM diputar. Tidak semua aplikasi membukanya — kalau ditolak, antrian tetap jalan.",
+                sei(
                     "The library is read through MediaBrowserService: albums, playlists, and artists that are NOT loaded yet. Not every app opens it — if refused, the queue still works.",
                 ),
             )
             if (!library.discovered) {
                 SeiPillButton(
-                    xy("Cari pemutar", "Find players"),
+                    sei( "Find players"),
                     { MediaLibraryBrowser.discover(context) },
                     icon = SeiIcons.Search,
                     primary = false,
@@ -272,8 +264,7 @@ internal fun MusicTab(
                 )
             } else if (library.sources.isEmpty()) {
                 Text(
-                    xy(
-                        "Tidak ada aplikasi terpasang yang membuka pustaka lewat MediaBrowserService.",
+                    sei(
                         "No installed app exposes a library through MediaBrowserService.",
                     ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -301,7 +292,7 @@ internal fun MusicTab(
 
             if (library.connecting) {
                 Text(
-                    xy("Menyambungkan pustaka…", "Connecting to the library…"),
+                    sei( "Connecting to the library…"),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 11.sp,
                 )
@@ -322,7 +313,7 @@ internal fun MusicTab(
                     )
                     if (library.crumbs.size > 1) {
                         SeiPillButton(
-                            xy("Naik", "Up"),
+                            sei( "Up"),
                             { MediaLibraryBrowser.up() },
                             icon = SeiIcons.ChevronLeft,
                             primary = false,
@@ -334,7 +325,7 @@ internal fun MusicTab(
 
             if (library.loading) {
                 Text(
-                    xy("Memuat folder…", "Loading folder…"),
+                    sei( "Loading folder…"),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 11.sp,
                 )
@@ -405,10 +396,10 @@ private fun SourceRow(source: MediaSourceEntry, onSelect: () -> Unit) {
             )
             Text(
                 when {
-                    source.active && source.playing -> xy("Dikendalikan · sedang diputar", "Controlled · playing")
-                    source.active -> xy("Sedang dikendalikan", "Being controlled")
-                    source.playing -> xy("Sedang diputar", "Playing")
-                    else -> xy("Sesi tersedia", "Session available")
+                    source.active && source.playing -> sei( "Controlled · playing")
+                    source.active -> sei( "Being controlled")
+                    source.playing -> sei( "Playing")
+                    else -> sei( "Session available")
                 },
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 10.sp,
@@ -440,7 +431,7 @@ private fun QueueRow(entry: MediaQueueEntry, onClick: () -> Unit) {
         )
         Column(Modifier.weight(1f)) {
             Text(
-                entry.title ?: xy("(tanpa judul)", "(untitled)"),
+                entry.title ?: sei( "(untitled)"),
                 color = if (entry.active) {
                     MaterialTheme.colorScheme.primary
                 } else {
@@ -543,8 +534,7 @@ internal fun OnlineMusicSection() {
     var scSearched by remember { mutableStateOf(false) }
 
     PanelHint(
-        xy(
-            "Cari dan putar trek publik SoundCloud langsung di dalam SeiDesk RM — tanpa login dan tanpa aplikasi tambahan. Pemutarnya milik SeiDesk RM sendiri, jadi tetap jalan saat panel ditutup.",
+        sei(
             "Search and play public SoundCloud tracks right inside SeiDesk RM — no sign-in, no extra app. SeiDesk RM's own player keeps going after the panel closes.",
         ),
     )
@@ -559,7 +549,7 @@ internal fun OnlineMusicSection() {
         ) {
             if (scQuery.isEmpty()) {
                 Text(
-                    xy("Cari lagu, artis…", "Search songs, artists…"),
+                    sei( "Search songs, artists…"),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 12.sp,
                 )
@@ -578,7 +568,7 @@ internal fun OnlineMusicSection() {
             )
         }
         SeiPillButton(
-            xy("Cari", "Search"),
+            sei( "Search"),
             {
                 val q = scQuery.trim()
                 if (q.isNotEmpty() && !scSearching) {
@@ -598,14 +588,13 @@ internal fun OnlineMusicSection() {
     }
     if (scSearching) {
         Text(
-            xy("Mencari…", "Searching…"),
+            sei( "Searching…"),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 11.sp,
         )
     } else if (scSearched && scResults.isEmpty()) {
         Text(
-            xy(
-                "Tidak ada hasil atau jaringan sedang bermasalah. Coba kata kunci lain.",
+            sei(
                 "No results or the network is having trouble. Try a different keyword.",
             ),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -631,14 +620,14 @@ internal fun OnlineMusicSection() {
             }
         }
         Text(
-            xy("{0} hasil", "{0} results", scResults.size),
+            sei( "{0} results", scResults.size),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 10.sp,
         )
     }
     online.current?.let { track ->
         Text(
-            xy("Sedang diputar", "Now playing").uppercase(),
+            sei( "Now playing").uppercase(),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 10.sp,
             letterSpacing = 1.2.sp,
@@ -655,8 +644,7 @@ internal fun OnlineMusicSection() {
         Text(
             listOfNotNull(
                 track.artist.ifBlank { null },
-                xyNow(
-                    "{0} / {1}",
+                seiNow(
                     "{0} / {1}",
                     formatTrackMs(online.positionMs),
                     formatTrackMs(track.durationMs),
@@ -667,12 +655,12 @@ internal fun OnlineMusicSection() {
         )
         when (online.status) {
             OnlineMusicPlayer.Status.LOADING -> Text(
-                xy("Memuat stream…", "Loading stream…"),
+                sei( "Loading stream…"),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 11.sp,
             )
             OnlineMusicPlayer.Status.ERROR -> Text(
-                online.message ?: xy("Pemutaran gagal.", "Playback failed."),
+                online.message ?: sei( "Playback failed."),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 11.sp,
             )
@@ -688,9 +676,9 @@ internal fun OnlineMusicSection() {
             )
             SeiPillButton(
                 if (online.status == OnlineMusicPlayer.Status.PLAYING) {
-                    xy("Jeda", "Pause")
+                    sei( "Pause")
                 } else {
-                    xy("Putar", "Play")
+                    sei( "Play")
                 },
                 { OnlineMusicPlayer.toggle() },
                 icon = SeiIcons.Music,

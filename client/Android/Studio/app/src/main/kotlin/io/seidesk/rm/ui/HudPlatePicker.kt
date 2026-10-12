@@ -83,7 +83,7 @@ internal fun HudPlatePicker(
                 animationSpec = tween(durationMillis = 140),
                 label = "plateBorder",
             )
-            val title = xy(plate.title, plate.titleEn)
+            val title = sei( plate.titleEn)
 
             Column(
                 modifier = Modifier
@@ -137,8 +137,7 @@ internal fun HudPlatePicker(
         }
     }
     Text(
-        xy(
-            "Kiri: normal · Tengah: ditekan · Kanan: joystick",
+        sei(
             "Left: normal · Middle: pressed · Right: joystick",
         ),
         color = MaterialTheme.colorScheme.onSurfaceVariant,

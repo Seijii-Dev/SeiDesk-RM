@@ -37,7 +37,7 @@ internal fun SeiFeedScreen(
             .verticalScroll(rememberScrollState()),
     ) {
         SeiTopBar(
-            title = xy("Feed", "Feed"),
+            title = sei( "Feed"),
             actions = { SeiIconPill(SeiIcons.Menu, onMenu, flat = true, contentDescription = "Menu") },
         )
         Column(
@@ -47,7 +47,7 @@ internal fun SeiFeedScreen(
                 .padding(bottom = 18.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            SeiGlassSectionLabel(xy("Komunitas", "Community"))
+            SeiGlassSectionLabel(sei( "Community"))
             SeiGlassCard(padding = 14.dp) {
                 FunHubCard(onHide = null)
             }

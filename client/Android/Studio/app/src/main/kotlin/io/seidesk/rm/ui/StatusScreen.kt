@@ -116,10 +116,10 @@ fun StatusScreen(
             .padding(horizontal = 16.dp),
     ) {
         SeiTopBar(
-            title = xy("Status", "Status"),
+            title = sei( "Status"),
             onBack = onBack,
             actions = {
-                SeiIconPill(SeiIcons.Info, onShowLog, flat = true, contentDescription = xy("Log sesi", "Session log"))
+                SeiIconPill(SeiIcons.Info, onShowLog, flat = true, contentDescription = sei( "Session log"))
             },
         )
         Column(
@@ -128,29 +128,28 @@ fun StatusScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            XySectionLabel(xy("Aplikasi ini", "This app"))
+            XySectionLabel(sei( "This app"))
             SeiCard {
                 KeyValue("Versi", "$versionName ($versionCode)")
                 KeyValue("ABI", abi)
                 KeyValue("Paket", context.packageName)
                 KeyValue(
-                    xy("Mikrofon", "Microphone"),
+                    sei( "Microphone"),
                     if (micGranted) {
-                        xy("izin diberikan", "permission granted")
+                        sei( "permission granted")
                     } else {
-                        xy("izin belum diberikan", "permission not granted")
+                        sei( "permission not granted")
                     },
                 )
             }
 
-            XySectionLabel(xy("Portal rilis", "Release portal"))
+            XySectionLabel(sei( "Release portal"))
             SeiCard {
                 if (portalLoading) {
-                    Text(xy("Memuat…", "Loading…"), style = MaterialTheme.typography.bodyMedium)
+                    Text(sei( "Loading…"), style = MaterialTheme.typography.bodyMedium)
                 } else if (portalError != null) {
                     Text(
-                        text = xy(
-                            "Tidak bisa menghubungi portal: $portalError",
+                        text = sei(
                             "Cannot reach the portal: $portalError",
                         ),
                         style = MaterialTheme.typography.bodySmall,
@@ -166,14 +165,14 @@ fun StatusScreen(
                 Spacer(Modifier.height(10.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     SeiPillButton(
-                        text = xy("Muat ulang", "Reload"),
+                        text = sei( "Reload"),
                         onClick = { scope.launch { fetchPortal() } },
                         icon = SeiIcons.Rotate,
                         compact = true,
                         modifier = Modifier.weight(1f),
                     )
                     SeiPillButton(
-                        text = xy("Salin diagnostik", "Copy diagnostics"),
+                        text = sei( "Copy diagnostics"),
                         onClick = {
                             val tail = ConnectionLog.last(25).joinToString("\n")
                             copyToClipboard(
@@ -191,14 +190,10 @@ fun StatusScreen(
                 }
             }
 
-            XySectionLabel(xy("Kalau audio/mic bermasalah", "If audio/mic misbehaves"))
+            XySectionLabel(sei( "If audio/mic misbehaves"))
             SeiCard {
                 Text(
-                    text = xy(
-                        "1. Mode audio \"Putar di perangkat ini\" = suara + mic lewat kanal RDP (tanpa host agent).\n" +
-                            "2. Mode \"Putar di komputer remote\" = lewat XyDeskRemoteHost.exe di PC (UDP 4433).\n" +
-                            "3. Mic tidak jalan: cek izin mikrofon di baris atas, lalu di PC pastikan " +
-                            "fDisableAudioCapture=0 pada RDP-Tcp.",
+                    text = sei(
                         "1. Audio mode \"Play on this device\" = sound + mic over the RDP channel (no host agent).\n" +
                             "2. \"Play on the remote computer\" = through XyDeskRemoteHost.exe on the PC (UDP 4433).\n" +
                             "3. Mic not working: check the permission row above, then make sure the PC has " +

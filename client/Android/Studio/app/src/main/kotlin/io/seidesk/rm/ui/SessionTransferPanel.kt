@@ -81,15 +81,13 @@ internal fun TransferFileSection(deviceId: String, notice: SeiNoticeState) {
                 incoming = listed
                 notice.show(
                     if (sent > 0) {
-                        xyNow(
-                            "{0} file siap di folder bersama. Di PC buka {1}.",
+                        seiNow(
                             "{0} file(s) are in the shared folder. On the PC open {1}.",
                             sent,
                             root?.remoteHint ?: "\\\\tsclient\\XyDesk",
                         )
                     } else {
-                        xyNow(
-                            "Tidak ada file yang berhasil disalin. Lihat catatan di bawah.",
+                        seiNow(
                             "No file could be copied. See the log below.",
                         )
                     },
@@ -97,8 +95,7 @@ internal fun TransferFileSection(deviceId: String, notice: SeiNoticeState) {
             }
             result.onFailure { t ->
                 notice.show(
-                    xyNow(
-                        "Transfer terhenti: {0}",
+                    seiNow(
                         "Transfer stopped: {0}",
                         t.message ?: t.javaClass.simpleName,
                     ),
@@ -113,8 +110,7 @@ internal fun TransferFileSection(deviceId: String, notice: SeiNoticeState) {
             incoming = SessionFileTransfer.listIncoming(context)
         }.onFailure { t ->
             notice.show(
-                xyNow(
-                    "Tidak bisa membaca folder bersama: {0}",
+                seiNow(
                     "Could not read the shared folder: {0}",
                     t.message ?: t.javaClass.simpleName,
                 ),
@@ -125,8 +121,7 @@ internal fun TransferFileSection(deviceId: String, notice: SeiNoticeState) {
 
     Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
         PanelHint(
-            xy(
-                "Kirim file dari HP ke PC dan sebaliknya lewat folder bersama. Di Windows foldernya muncul sebagai drive XyDesk (\\\\tsclient\\XyDesk) — salin/tempel biasa di File Explorer juga jalan.",
+            sei(
                 "Move files between phone and PC through the shared folder. On Windows it appears as the XyDesk drive (\\\\tsclient\\XyDesk) — plain copy/paste in File Explorer works too.",
             ),
         )
@@ -134,13 +129,11 @@ internal fun TransferFileSection(deviceId: String, notice: SeiNoticeState) {
         if (!driveAvailable) {
             Text(
                 if (options.pcConnectMode) {
-                    xy(
-                        "Drive lokal dimatikan di mode PC Connect, jadi transfer file tidak tersedia di sesi ini. Sambungkan dengan mode RDP biasa untuk memakainya.",
+                    sei(
                         "Local drive is off in PC Connect mode, so file transfer is unavailable in this session. Connect with plain RDP mode to use it.",
                     )
                 } else {
-                    xy(
-                        "Drive lokal belum diaktifkan untuk perangkat ini. Aktifkan di pengaturan perangkat (opsi Drive lokal), lalu sambungkan ulang.",
+                    sei(
                         "Local drive is not enabled for this device. Turn on the Local drive option in the device settings, then reconnect.",
                     )
                 },
@@ -152,7 +145,7 @@ internal fun TransferFileSection(deviceId: String, notice: SeiNoticeState) {
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             SeiPillButton(
-                xy("Kirim file ke PC", "Send files to PC"),
+                sei( "Send files to PC"),
                 { picker.launch(arrayOf("*/*")) },
                 icon = SeiIcons.Upload,
                 primary = false,
@@ -161,7 +154,7 @@ internal fun TransferFileSection(deviceId: String, notice: SeiNoticeState) {
                 modifier = Modifier.weight(1f),
             )
             SeiPillButton(
-                xy("Segarkan", "Refresh"),
+                sei( "Refresh"),
                 refreshIncoming,
                 icon = SeiIcons.Refresh,
                 primary = false,
@@ -172,14 +165,14 @@ internal fun TransferFileSection(deviceId: String, notice: SeiNoticeState) {
 
         root?.let { active ->
             Text(
-                xy("Folder HP: {0}", "Phone folder: {0}", active.dir.absolutePath),
+                sei( "Phone folder: {0}", active.dir.absolutePath),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 10.sp,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
-                xy("Di PC: {0}", "On the PC: {0}", active.remoteHint),
+                sei( "On the PC: {0}", active.remoteHint),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 10.sp,
             )
@@ -187,7 +180,7 @@ internal fun TransferFileSection(deviceId: String, notice: SeiNoticeState) {
 
         if (jobs.isNotEmpty()) {
             Text(
-                xy("Catatan transfer", "Transfer log").uppercase(),
+                sei( "Transfer log").uppercase(),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 10.sp,
                 letterSpacing = 1.2.sp,
@@ -203,7 +196,7 @@ internal fun TransferFileSection(deviceId: String, notice: SeiNoticeState) {
                 jobs.take(12).forEach { job -> JobRow(job) }
             }
             SeiPillButton(
-                xy("Bersihkan catatan selesai", "Clear finished entries"),
+                sei( "Clear finished entries"),
                 { SessionFileTransfer.clearFinished() },
                 primary = false,
                 compact = true,
@@ -212,7 +205,7 @@ internal fun TransferFileSection(deviceId: String, notice: SeiNoticeState) {
         }
 
         Text(
-            xy("Dari PC", "From the PC").uppercase(),
+            sei( "From the PC").uppercase(),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 10.sp,
             letterSpacing = 1.2.sp,
@@ -220,8 +213,7 @@ internal fun TransferFileSection(deviceId: String, notice: SeiNoticeState) {
         )
         if (incoming.isEmpty()) {
             Text(
-                xy(
-                    "Belum ada file dari PC. Di Windows, salin file ke drive XyDesk, lalu ketuk Segarkan.",
+                sei(
                     "Nothing from the PC yet. On Windows, copy a file into the XyDesk drive, then tap Refresh.",
                 ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -242,16 +234,14 @@ internal fun TransferFileSection(deviceId: String, notice: SeiNoticeState) {
                             scope.launch {
                                 when (val result = SessionFileTransfer.saveToPhone(context, file.name)) {
                                     is ReceiveResult.Saved -> notice.show(
-                                        xyNow(
-                                            "Disimpan ke {0}",
+                                        seiNow(
                                             "Saved to {0}",
                                             result.label,
                                         ),
                                     )
 
                                     is ReceiveResult.Failed -> notice.show(
-                                        xyNow(
-                                            "Gagal menyimpan {0}: {1}",
+                                        seiNow(
                                             "Could not save {0}: {1}",
                                             file.name,
                                             result.message,
@@ -264,8 +254,7 @@ internal fun TransferFileSection(deviceId: String, notice: SeiNoticeState) {
                             val uri = SessionFileTransfer.sharedUri(context, file.name)
                             if (uri == null) {
                                 notice.show(
-                                    xyNow(
-                                        "File tidak bisa dibuka untuk dibagikan.",
+                                    seiNow(
                                         "The file could not be opened for sharing.",
                                     ),
                                 )
@@ -280,13 +269,12 @@ internal fun TransferFileSection(deviceId: String, notice: SeiNoticeState) {
                                 context.startActivity(
                                     Intent.createChooser(
                                         send,
-                                        xyNow("Bagikan file", "Share file"),
+                                        seiNow( "Share file"),
                                     ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
                                 )
                             }.onFailure {
                                 notice.show(
-                                    xyNow(
-                                        "Tidak ada aplikasi yang bisa menerima file ini.",
+                                    seiNow(
                                         "No app can receive this file.",
                                     ),
                                 )
@@ -297,9 +285,9 @@ internal fun TransferFileSection(deviceId: String, notice: SeiNoticeState) {
                             incoming = SessionFileTransfer.listIncoming(context)
                             notice.show(
                                 if (removed) {
-                                    xyNow("{0} dihapus dari folder bersama.", "{0} removed from the shared folder.", file.name)
+                                    seiNow( "{0} removed from the shared folder.", file.name)
                                 } else {
-                                    xyNow("Gagal menghapus {0}.", "Could not delete {0}.", file.name)
+                                    seiNow( "Could not delete {0}.", file.name)
                                 },
                             )
                         },
@@ -349,7 +337,7 @@ private fun JobRow(job: TransferJob) {
                 when (job.phase) {
                     TransferPhase.RUNNING -> "$percent%"
                     TransferPhase.DONE -> FileTransferPlan.formatBytes(job.bytes)
-                    TransferPhase.FAILED -> xy("gagal", "failed")
+                    TransferPhase.FAILED -> sei( "failed")
                 },
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 10.sp,
@@ -431,7 +419,7 @@ private fun IncomingRow(
         }
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             SeiPillButton(
-                xy("Simpan ke HP", "Save to phone"),
+                sei( "Save to phone"),
                 onSave,
                 icon = SeiIcons.Download,
                 primary = false,
@@ -439,14 +427,14 @@ private fun IncomingRow(
                 modifier = Modifier.weight(1f),
             )
             SeiPillButton(
-                xy("Bagikan", "Share"),
+                sei( "Share"),
                 onShare,
                 icon = SeiIcons.ExternalLink,
                 primary = false,
                 compact = true,
             )
             SeiPillButton(
-                xy("Hapus", "Delete"),
+                sei( "Delete"),
                 onDelete,
                 icon = SeiIcons.Trash,
                 primary = false,

@@ -42,8 +42,7 @@ internal object MediaLibraryBrowser {
                 mutableState.value = current.copy(
                     connecting = false,
                     loading = false,
-                    message = xyNow(
-                        "Aplikasi ini terhubung tapi tidak memberi folder akar pustaka.",
+                    message = seiNow(
                         "This app connected but did not expose a library root.",
                     ),
                 )
@@ -68,8 +67,7 @@ internal object MediaLibraryBrowser {
                 connectedPackage = null,
                 crumbs = emptyList(),
                 entries = emptyList(),
-                message = xyNow(
-                    "Koneksi pustaka terputus oleh aplikasinya. Coba sambungkan lagi.",
+                message = seiNow(
                     "The library connection was dropped by the app. Try connecting again.",
                 ),
             )
@@ -83,8 +81,7 @@ internal object MediaLibraryBrowser {
                 connectedPackage = null,
                 crumbs = emptyList(),
                 entries = emptyList(),
-                message = xyNow(
-                    "Aplikasi menolak koneksi pustaka. Tidak semua pemutar membuka MediaBrowserService; antrian lagu tetap bisa dipakai.",
+                message = seiNow(
                     "The app refused the library connection. Not every player opens a MediaBrowserService; the play queue still works.",
                 ),
             )
@@ -101,7 +98,7 @@ internal object MediaLibraryBrowser {
                 loading = false,
                 entries = children.map { it.toEntry() },
                 message = if (children.isEmpty()) {
-                    xyNow("Folder ini kosong.", "This folder is empty.")
+                    seiNow( "This folder is empty.")
                 } else {
                     null
                 },
@@ -114,8 +111,7 @@ internal object MediaLibraryBrowser {
             mutableState.value = current.copy(
                 loading = false,
                 entries = emptyList(),
-                message = xyNow(
-                    "Aplikasi menolak membaca folder ini.",
+                message = seiNow(
                     "The app refused to read this folder.",
                 ),
             )
@@ -184,8 +180,7 @@ internal object MediaLibraryBrowser {
             mutableState.value = mutableState.value.copy(
                 connecting = false,
                 connectedPackage = null,
-                message = xyNow(
-                    "Tidak bisa membuat koneksi pustaka ke aplikasi ini.",
+                message = seiNow(
                     "Could not open a library connection to this app.",
                 ),
             )
@@ -197,8 +192,7 @@ internal object MediaLibraryBrowser {
             mutableState.value = mutableState.value.copy(
                 connecting = false,
                 connectedPackage = null,
-                message = xyNow(
-                    "Koneksi pustaka gagal dimulai.",
+                message = seiNow(
                     "The library connection failed to start.",
                 ),
             )
@@ -259,8 +253,7 @@ internal object MediaLibraryBrowser {
         if (active == null || !runCatching { active.isConnected }.getOrDefault(false)) {
             mutableState.value = mutableState.value.copy(
                 loading = false,
-                message = xyNow(
-                    "Pustaka belum tersambung. Pilih aplikasi di atas dulu.",
+                message = seiNow(
                     "The library is not connected yet. Pick an app above first.",
                 ),
             )
@@ -289,7 +282,7 @@ internal object MediaLibraryBrowser {
         return MediaLibraryEntry(
             mediaId = this.mediaId,
             title = description?.title?.toString()?.trim()?.takeIf { it.isNotEmpty() }
-                ?: xyNow("(tanpa judul)", "(untitled)"),
+                ?: seiNow( "(untitled)"),
             subtitle = description?.subtitle?.toString()?.trim()?.takeIf { it.isNotEmpty() }
                 ?: description?.description?.toString()?.trim()?.takeIf { it.isNotEmpty() },
             playable = this.isPlayable,
