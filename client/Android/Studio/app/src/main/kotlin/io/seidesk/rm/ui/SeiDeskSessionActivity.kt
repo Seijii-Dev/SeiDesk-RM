@@ -477,7 +477,6 @@ class SeiDeskSessionActivity : ComponentActivity() {
                             sessionPrefs.virtualPadStickMode = next
                         },
                     )
-                    AppChannelGate(onExit = { finish() })
                 }
             }
         }

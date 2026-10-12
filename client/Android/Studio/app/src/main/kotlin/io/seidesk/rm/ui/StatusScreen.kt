@@ -211,7 +211,7 @@ fun StatusScreen(
 
             Spacer(Modifier.height(6.dp))
             Text(
-                text = "XyVerse Technology Global",
+                text = AppBrand.PUBLISHER,
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

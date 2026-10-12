@@ -28,42 +28,40 @@ import io.seidesk.rm.R
 import io.seidesk.rm.ui.AppPrefs
 
 // =============================================================
-// XyDesk design tokens.
-//
-// Aturan: monokrom (hitam-putih), permukaan matte dan rounded, kontras
-// tinggi, tanpa glow/gradient. Warna hanya untuk status (ok/warn/danger).
-// Garis dekoratif dibuat lembut; input, slider, dan switch tetap jelas terbaca.
+// SeiDesk design tokens.
+// Modern, sleek cyber-aesthetic with electric indigo accents,
+// high-contrast obsidian dark surfaces, and vivid semantic indicators.
 // =============================================================
 
-// Tema gelap matte: latar nyaris hitam, permukaan solid, tanpa efek kaca.
-// Perbedaan luminans kecil antarlapisan menjaga hierarki tanpa menambah
-// gradient, blur, atau glow dekoratif. Teks tetap off-white demi kontras.
-val XyBg = Color(0xFF08080A)
-val XySurface = Color(0xFF101013)
-val XySurfaceAlt = Color(0xFF1A1A1E)
-val XyPrimaryContainer = Color(0xFF232327)
-val XyLine = Color(0xFF2A2A2E)
-val XyLineStrong = Color(0xFF3C3C42)
-val XyText = Color(0xFFF3F3F5)
-val XyTextDim = Color(0xFFB2B2B8)
-val XyTextFaint = Color(0xFF808086)
-// Aksen monokrom: nyaris putih di tema gelap. Dulu lavender (0xFFD8C9FF);
-// diganti atas permintaan pengguna supaya app hitam-putih seperti semula.
-val XyAccent = Color(0xFFF2F2F4)
-val XyAccentInk = Color(0xFF111114)
-val XyOk = Color(0xFFE2E2E6)
-val XyWarn = Color(0xFFA9A9B0)
-val XyDanger = Color(0xFF84848C)
+// Tema gelap modern: latar obsidian pekat, permukaan berlapis dengan kontras terukur.
+val XyBg = Color(0xFF0A0C10)
+val XySurface = Color(0xFF131722)
+val XySurfaceAlt = Color(0xFF1B2030)
+val XyPrimaryContainer = Color(0xFF23293E)
+val XyLine = Color(0xFF262C3D)
+val XyLineStrong = Color(0xFF384259)
+val XyText = Color(0xFFF8FAFC)
+val XyTextDim = Color(0xFF94A3B8)
+val XyTextFaint = Color(0xFF64748B)
+
+// Aksen modern: Electric Indigo & Cyber Sky
+val XyAccent = Color(0xFF6366F1)
+val XyAccentInk = Color(0xFFFFFFFF)
+
+// Indikator status hidup (vivid status colors)
+val XyOk = Color(0xFF10B981)      // Emerald Green
+val XyWarn = Color(0xFFF59E0B)    // Vibrant Amber
+val XyDanger = Color(0xFFF43F5E)  // Vivid Rose Red
 
 val DarkScheme = darkColorScheme(
     primary = XyAccent,
-    onPrimary = XyAccentInk,
+    onPrimary = Color.White,
     primaryContainer = XyPrimaryContainer,
-    onPrimaryContainer = XyText,
-    secondary = XyTextDim,
-    onSecondary = XyAccentInk,
-    secondaryContainer = XySurfaceAlt,
-    onSecondaryContainer = XyText,
+    onPrimaryContainer = Color(0xFFE0E7FF),
+    secondary = Color(0xFF38BDF8),
+    onSecondary = Color(0xFF03223A),
+    secondaryContainer = Color(0xFF16253B),
+    onSecondaryContainer = Color(0xFFBAE6FD),
     tertiary = XyOk,
     background = XyBg,
     onBackground = XyText,
@@ -74,34 +72,34 @@ val DarkScheme = darkColorScheme(
     outline = XyLine,
     outlineVariant = XyLineStrong,
     error = XyDanger,
-    onError = XyAccentInk,
-    errorContainer = Color(0xFF2C2C31),
-    onErrorContainer = Color(0xFFE4E4E8),
-    scrim = Color(0x47000000),
+    onError = Color.White,
+    errorContainer = Color(0xFF3E121B),
+    onErrorContainer = Color(0xFFFFD1D8),
+    scrim = Color(0x66000000),
 )
 
 val LightScheme = lightColorScheme(
-    primary = Color(0xFF16161A),
-    onPrimary = Color(0xFFFFFFFF),
-    primaryContainer = Color(0xFFEDEDEF),
-    onPrimaryContainer = Color(0xFF24242A),
-    secondary = Color(0xFF5E5E64),
-    onSecondary = Color(0xFFFFFFFF),
-    secondaryContainer = Color(0xFFEDEDEF),
-    onSecondaryContainer = Color(0xFF232328),
-    tertiary = Color(0xFF55555B),
-    background = Color(0xFFF7F7F8),
-    onBackground = Color(0xFF1A1A1D),
+    primary = Color(0xFF4F46E5),
+    onPrimary = Color.White,
+    primaryContainer = Color(0xFFEEF2FF),
+    onPrimaryContainer = Color(0xFF312E81),
+    secondary = Color(0xFF0284C7),
+    onSecondary = Color.White,
+    secondaryContainer = Color(0xFFE0F2FE),
+    onSecondaryContainer = Color(0xFF075985),
+    tertiary = Color(0xFF059669),
+    background = Color(0xFFF8FAFC),
+    onBackground = Color(0xFF0F172A),
     surface = Color(0xFFFFFFFF),
-    onSurface = Color(0xFF1B1B1F),
-    surfaceVariant = Color(0xFFF1F1F3),
-    onSurfaceVariant = Color(0xFF5F5F65),
-    outline = Color(0xFFDDDDDF),
-    outlineVariant = Color(0xFFCECED2),
-    error = Color(0xFF4A4A50),
+    onSurface = Color(0xFF0F172A),
+    surfaceVariant = Color(0xFFF1F5F9),
+    onSurfaceVariant = Color(0xFF475569),
+    outline = Color(0xFFE2E8F0),
+    outlineVariant = Color(0xFFCBD5E1),
+    error = Color(0xFFE11D48),
     onError = Color.White,
-    errorContainer = Color(0xFFE6E6E9),
-    onErrorContainer = Color(0xFF29292D),
+    errorContainer = Color(0xFFFFE4E6),
+    onErrorContainer = Color(0xFF881337),
     scrim = Color(0x38000000),
 )
 

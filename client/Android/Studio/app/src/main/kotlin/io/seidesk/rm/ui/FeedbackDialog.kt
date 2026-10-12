@@ -34,7 +34,7 @@ import io.seidesk.rm.ui.components.XyPillButton
 import io.seidesk.rm.ui.components.XySegmented
 
 internal fun feedbackShareDraft(category: String, message: String): String = buildString {
-    appendLine("SeiDesk RM — XyVerse Technology Global")
+    appendLine("SeiDesk RM — ${AppBrand.PUBLISHER}")
     appendLine("Category: $category")
     appendLine()
     append(message)

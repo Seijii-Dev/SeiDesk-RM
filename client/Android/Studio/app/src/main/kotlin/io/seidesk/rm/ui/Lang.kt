@@ -90,11 +90,11 @@ object XyText {
         "about.license.body" to mapOf(
             XyLang.ID to "FreeRDP — Apache License 2.0\n" +
                 "Copyright (C) 2012-2026 FreeRDP contributors.\n\n" +
-                "SeiDesk RM — \u00a9 XyVerse.\n" +
+                "SeiDesk RM — \u00a9 SeiDesk.\n" +
                 "Font: Space Grotesk & Inter (SIL Open Font License 1.1).",
             XyLang.EN to "FreeRDP — Apache License 2.0\n" +
                 "Copyright (C) 2012-2026 FreeRDP contributors.\n\n" +
-                "SeiDesk RM — \u00a9 XyVerse.\n" +
+                "SeiDesk RM — \u00a9 SeiDesk.\n" +
                 "Fonts: Space Grotesk & Inter (SIL Open Font License 1.1).",
         ),
         "about.support.title" to mapOf(

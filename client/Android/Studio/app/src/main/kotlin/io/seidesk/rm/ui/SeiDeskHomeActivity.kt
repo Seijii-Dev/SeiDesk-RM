@@ -91,7 +91,6 @@ class SeiDeskHomeActivity : ComponentActivity() {
                             onDone = { boot = false },
                         )
                     }
-                    AppChannelGate(onExit = { finish() })
                 }
             }
         }

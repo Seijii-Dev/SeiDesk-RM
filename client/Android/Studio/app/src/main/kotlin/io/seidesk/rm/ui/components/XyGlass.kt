@@ -71,20 +71,30 @@ val XyGlassTileShape: Shape = RoundedCornerShape(16.dp)
  * tidak perlu diubah; [opacity] masih berpengaruh, [strength] diabaikan
  * (dipertahankan hanya untuk kompatibilitas tanda tangan).
  */
-@Suppress("UNUSED_PARAMETER")
 @Composable
 fun Modifier.xyGlass(
     shape: Shape = XyGlassShape,
     opacity: Float = 1f,
     strength: Float = 1f,
     edge: Boolean = true,
-): Modifier = this
-    .clip(shape)
-    .background(MaterialTheme.colorScheme.surface.copy(alpha = (0.97f * opacity).coerceIn(0f, 1f)))
-    .then(
-        if (edge) Modifier.border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.45f), shape)
-        else Modifier
-    )
+): Modifier {
+    val surfaceColor = MaterialTheme.colorScheme.surface.copy(alpha = (0.95f * opacity).coerceIn(0f, 1f))
+    val topTint = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = (0.32f * opacity).coerceIn(0f, 1f))
+    val borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.40f)
+    return this
+        .clip(shape)
+        .background(
+            Brush.verticalGradient(
+                0f to topTint,
+                0.3f to surfaceColor,
+                1f to surfaceColor,
+            ),
+        )
+        .then(
+            if (edge) Modifier.border(1.dp, borderColor, shape)
+            else Modifier,
+        )
+}
 
 /**
  * Liquid glass UNGU glossy — PENGECUALIAN resmi aturan matte.

@@ -84,13 +84,20 @@ fun XyCard(
         modifier = modifier
             .clip(shape)
             .background(MaterialTheme.colorScheme.surface)
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.42f), shape)
+            .border(
+                1.dp,
+                androidx.compose.ui.graphics.Brush.verticalGradient(
+                    0f to MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.65f),
+                    1f to MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.22f),
+                ),
+                shape,
+            )
             .padding(padding),
         content = content,
     )
 }
 
-/** Tombol aksi rounded; `primary` = isi penuh; `false` = outline saja. */
+/** Tombol aksi rounded; `primary` = isi penuh bergradien aksen; `false` = outline kaca. */
 @Composable
 fun XyPillButton(
     text: String,
@@ -101,12 +108,19 @@ fun XyPillButton(
     enabled: Boolean = true,
     compact: Boolean = false,
 ) {
-    val container = when {
-        !enabled -> MaterialTheme.colorScheme.surfaceVariant
-        primary -> MaterialTheme.colorScheme.primary
-        else -> Color.Transparent
+    val bgModifier = when {
+        !enabled -> Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
+        primary -> Modifier.background(
+            androidx.compose.ui.graphics.Brush.horizontalGradient(
+                listOf(
+                    MaterialTheme.colorScheme.primary,
+                    MaterialTheme.colorScheme.primary.copy(alpha = 0.88f),
+                ),
+            ),
+        )
+        else -> Modifier.background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
     }
-    val content = when {
+    val contentColor = when {
         !enabled -> MaterialTheme.colorScheme.onSurfaceVariant
         primary -> MaterialTheme.colorScheme.onPrimary
         else -> MaterialTheme.colorScheme.onSurface
@@ -114,10 +128,10 @@ fun XyPillButton(
     Row(
         modifier = modifier
             .clip(XyPill)
-            .background(container)
+            .then(bgModifier)
             .then(
                 if (primary && enabled) Modifier
-                else Modifier.border(1.dp, MaterialTheme.colorScheme.outline, XyPill)
+                else Modifier.border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f), XyPill)
             )
             .clickable(enabled = enabled, onClick = onClick)
             .padding(
@@ -128,12 +142,12 @@ fun XyPillButton(
         horizontalArrangement = Arrangement.Center,
     ) {
         if (icon != null) {
-            Icon(icon, contentDescription = null, tint = content, modifier = Modifier.size(17.dp))
+            Icon(icon, contentDescription = null, tint = contentColor, modifier = Modifier.size(17.dp))
             Spacer(Modifier.width(9.dp))
         }
         Text(
             text,
-            color = content,
+            color = contentColor,
             style = MaterialTheme.typography.labelLarge,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -253,43 +267,41 @@ fun XySwitch(
         label = "track",
     )
     val knobColor by animateColorAsState(
-        if (checked) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+        if (checked) Color.White else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
         label = "knob",
     )
     val knobOffset by animateDpAsState(if (checked) 23.dp else 3.dp, label = "knobOffset")
-    // Area sentuh diperbesar (52x38) tanpa mengubah visual track 46x28:
-    // pemilik mengeluh toggle kurang presisi saat ditekan.
     Box(
         modifier = Modifier
             .size(width = 52.dp, height = 38.dp),
         contentAlignment = Alignment.Center,
     ) {
-    Box(
-        modifier = Modifier
-            .size(width = 46.dp, height = 28.dp)
-            .clip(XyPill)
-            .background(trackColor)
-            .border(
-                1.dp,
-                if (checked) MaterialTheme.colorScheme.primary.copy(alpha = 0.55f)
-                else MaterialTheme.colorScheme.outlineVariant,
-                XyPill,
-            )
-            .toggleable(
-                value = checked,
-                enabled = enabled,
-                role = Role.Switch,
-                onValueChange = onCheckedChange,
-            ),
-    ) {
         Box(
             modifier = Modifier
-                .padding(start = knobOffset, top = 3.dp)
-                .size(20.dp)
-                .clip(CircleShape)
-                .background(knobColor),
-        )
-    }
+                .size(width = 46.dp, height = 28.dp)
+                .clip(XyPill)
+                .background(trackColor)
+                .border(
+                    1.dp,
+                    if (checked) MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+                    else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                    XyPill,
+                )
+                .toggleable(
+                    value = checked,
+                    enabled = enabled,
+                    role = Role.Switch,
+                    onValueChange = onCheckedChange,
+                ),
+        ) {
+            Box(
+                modifier = Modifier
+                    .padding(start = knobOffset, top = 3.dp)
+                    .size(22.dp)
+                    .clip(CircleShape)
+                    .background(knobColor),
+            )
+        }
     }
 }
 
@@ -394,15 +406,16 @@ fun XyField(
     var pwVisible by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
     val focused by interactionSource.collectIsFocusedAsState()
-    val fieldOutline = if (focused) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+    val fieldOutline = if (focused) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)
     val fieldOutlineWidth = if (focused) 1.5.dp else 1.dp
+    val fieldBg = if (focused) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
     Column(modifier.fillMaxWidth()) {
         Text(
             label.uppercase(),
             style = MaterialTheme.typography.labelSmall,
             fontFamily = XyDisplay,
             letterSpacing = 1.2.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = if (focused) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.height(6.dp))
         BasicTextField(
@@ -423,7 +436,7 @@ fun XyField(
                         .fillMaxWidth()
                         .heightIn(min = 52.dp)
                         .clip(XyPill)
-                        .background(MaterialTheme.colorScheme.surface)
+                        .background(fieldBg)
                         .border(fieldOutlineWidth, fieldOutline, XyPill)
                         .padding(horizontal = 14.dp, vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -433,7 +446,7 @@ fun XyField(
                             Text(
                                 hint,
                                 style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.65f),
                             )
                         }
                         inner()
@@ -505,9 +518,17 @@ fun XyStatusDot(color: Color, label: String, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        horizontalArrangement = Arrangement.spacedBy(7.dp),
     ) {
-        Box(Modifier.size(7.dp).clip(CircleShape).background(color))
+        Box(
+            modifier = Modifier
+                .size(11.dp)
+                .clip(CircleShape)
+                .background(color.copy(alpha = 0.24f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Box(Modifier.size(6.dp).clip(CircleShape).background(color))
+        }
         Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface)
     }
 }
@@ -668,6 +689,7 @@ fun XyOverlay(
                 }
                 .clip(RoundedCornerShape(24.dp))
                 .background(MaterialTheme.colorScheme.surface)
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f), RoundedCornerShape(24.dp))
                 .pointerInput(Unit) {}
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),

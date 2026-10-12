@@ -4,6 +4,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -80,19 +81,24 @@ internal fun XyBottomNav(
             // dalam lambda semantics {} yang bukan composable.
             val title = xy(tab.title, tab.titleEn)
             val pillWidth by animateDpAsState(
-                targetValue = if (active) 44.dp else 34.dp,
+                targetValue = if (active) 48.dp else 34.dp,
                 animationSpec = tween(durationMillis = 180),
                 label = "navPill",
             )
             val pillColor by animateColorAsState(
-                targetValue = if (active) ink else Color.Transparent,
+                targetValue = if (active) MaterialTheme.colorScheme.primary.copy(alpha = 0.16f) else Color.Transparent,
                 animationSpec = tween(durationMillis = 180),
                 label = "navPillColor",
             )
             val iconTint by animateColorAsState(
-                targetValue = if (active) MaterialTheme.colorScheme.surface else ink.copy(alpha = 0.42f),
+                targetValue = if (active) MaterialTheme.colorScheme.primary else ink.copy(alpha = 0.45f),
                 animationSpec = tween(durationMillis = 180),
                 label = "navIconTint",
+            )
+            val textColor by animateColorAsState(
+                targetValue = if (active) MaterialTheme.colorScheme.primary else ink.copy(alpha = 0.45f),
+                animationSpec = tween(durationMillis = 180),
+                label = "navTextColor",
             )
 
             Column(
@@ -108,23 +114,31 @@ internal fun XyBottomNav(
                 Box(
                     modifier = Modifier
                         .width(pillWidth)
-                        .height(26.dp)
-                        .clip(RoundedCornerShape(13.dp))
-                        .background(pillColor),
+                        .height(28.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(pillColor)
+                        .then(
+                            if (active) Modifier.border(
+                                1.dp,
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.35f),
+                                RoundedCornerShape(14.dp),
+                            )
+                            else Modifier
+                        ),
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
                         tabIcon(tab),
                         contentDescription = null,
                         tint = iconTint,
-                        modifier = Modifier.size(17.dp),
+                        modifier = Modifier.size(18.dp),
                     )
                 }
                 Text(
                     text = title,
-                    color = if (active) ink else ink.copy(alpha = 0.42f),
-                    fontSize = 10.sp,
-                    fontWeight = if (active) FontWeight.SemiBold else FontWeight.Normal,
+                    color = textColor,
+                    fontSize = 10.5.sp,
+                    fontWeight = if (active) FontWeight.SemiBold else FontWeight.Medium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     textAlign = TextAlign.Center,
@@ -142,10 +156,7 @@ private fun tabIcon(tab: XyTab): ImageVector = when (tab) {
 }
 
 /**
- * Garis pemisah tipis di atas bar.
- *
- * Tetap dipertahankan sebagai penegas batas walaupun bar sudah berkaca: di
- * tema terang lapisan kaca saja tidak selalu cukup memisahkan isi dari nav.
+ * Garis pemisah bergradien halus di atas bar.
  */
 @Composable
 internal fun XyBottomNavHairline(modifier: Modifier = Modifier) {
@@ -153,6 +164,16 @@ internal fun XyBottomNavHairline(modifier: Modifier = Modifier) {
         modifier
             .fillMaxWidth()
             .height(1.dp)
-            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)),
+            .background(
+                androidx.compose.ui.graphics.Brush.horizontalGradient(
+                    listOf(
+                        Color.Transparent,
+                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.25f),
+                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
+                        Color.Transparent,
+                    ),
+                ),
+            ),
     )
 }

@@ -133,7 +133,7 @@ fun XySplashScreen(
                 .scale(scale),
         )
         Text(
-            text = "XyVerse Technology Global",
+            text = AppBrand.PUBLISHER,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 14.dp),

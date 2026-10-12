@@ -19,6 +19,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.zIndex
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -513,7 +514,7 @@ fun SeiDeskHome(
                 Column {
                     XyWordmark(fontSize = 21.sp)
                     Text(
-                        "XyVerse \u2022 Remote Desktop",
+                        "SeiDesk \u2022 Remote Desktop",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -809,7 +810,7 @@ fun SeiDeskHome(
             onDismiss = { updateModalOpen = false },
         ) {
             Text(
-                text = "SeiDesk RM v${appVersion(context)}  ·  XyVerse Technology Global",
+                text = "SeiDesk RM v${appVersion(context)}  ·  ${AppBrand.PUBLISHER}",
                 style = MaterialTheme.typography.titleSmall,
             )
             Text(
@@ -1272,11 +1273,13 @@ private fun DeviceCard(
     val previewSeed = remember(profile.id, profile.label, profile.host) {
         (profile.label ?: profile.host) + "|" + profile.host
     }
-    val shape = RoundedCornerShape(6.dp)
+    val cardShape = RoundedCornerShape(18.dp)
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(shape)
+            .clip(cardShape)
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.40f), cardShape)
             .clickable(onClick = onConnect),
     ) {
         // Preview desktop penuh yang lebih tinggi (212.dp) supaya proporsi
@@ -1285,7 +1288,7 @@ private fun DeviceCard(
             Modifier
                 .fillMaxWidth()
                 .height(212.dp)
-                .clip(shape),
+                .clip(RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp)),
         ) {
             DevicePreviewArt(seed = previewSeed, os = wall)
             Box(
