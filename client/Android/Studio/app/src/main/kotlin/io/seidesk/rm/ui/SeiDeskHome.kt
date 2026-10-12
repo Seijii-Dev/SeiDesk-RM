@@ -160,11 +160,9 @@ fun SeiDeskHome(
     LaunchedEffect(dataReady) { if (dataReady) onReady() }
     val scope = rememberCoroutineScope()
     val appPrefs = remember { AppPrefs(context) }
-    var drawerOpen by remember { mutableStateOf(false) }
-    var helpToolsOpen by remember { mutableStateOf(false) }
     var section by remember { mutableStateOf(SeiSection.PERANGKAT) }
     // Tab nav bawah (3 tujuan). `section` tetap ada karena seksi dibuka dari
-    // drawer maupun dari layar Profil, dan keduanya menggambar SectionScreen.
+    // layar Profil, dan menggambar SectionScreen.
     var tab by remember { mutableStateOf(SeiTab.HOME) }
     var route by remember { mutableStateOf<SeiRoute>(SeiRoute.Devices) }
     var crashLog by remember { mutableStateOf(CrashLog.last(context.applicationContext)) }
@@ -364,7 +362,6 @@ fun SeiDeskHome(
             confirmDeleteDevice != null -> confirmDeleteDevice = null
             confirmExitApp -> confirmExitApp = false
             feedbackOpen -> feedbackOpen = false
-            drawerOpen -> drawerOpen = false
             route != SeiRoute.Devices || section != SeiSection.PERANGKAT -> {
                 route = SeiRoute.Devices
                 section = SeiSection.PERANGKAT
@@ -407,7 +404,10 @@ fun SeiDeskHome(
                         bootTail = bootTail,
                         sharedFileNotice = sharedFileNotice,
                         onDismissSharedNotice = onDismissSharedNotice,
-                        onMenu = { drawerOpen = true },
+                        onMenu = {
+                            tab = SeiTab.PROFILE
+                            route = SeiRoute.Profile
+                        },
                         onAddRdp = { route = SeiRoute.EditDevice(null, pcQuickMode = false) },
                         onAddPcQuick = { route = SeiRoute.EditDevice(null, pcQuickMode = true) },
                         onCreateRdp = { route = SeiRoute.CreateRdp },
@@ -440,7 +440,10 @@ fun SeiDeskHome(
                     SectionScreen(
                         section = section,
                         favorites = favorites,
-                        onMenu = { drawerOpen = true },
+                        onMenu = {
+                            tab = SeiTab.PROFILE
+                            route = SeiRoute.Profile
+                        },
                         appPrefs = appPrefs,
                         onEditDevice = {
                             route = SeiRoute.EditDevice(
@@ -462,10 +465,14 @@ fun SeiDeskHome(
                     )
                 }
 
-                SeiRoute.Feed -> SeiFeedScreen(onMenu = { drawerOpen = true })
+                SeiRoute.Feed -> SeiFeedScreen(
+                    onMenu = {
+                        tab = SeiTab.PROFILE
+                        route = SeiRoute.Profile
+                    },
+                )
 
                 SeiRoute.Profile -> SeiProfileScreen(
-                    onMenu = { drawerOpen = true },
                     onOpenSection = {
                         section = it
                         route = SeiRoute.Devices
@@ -473,6 +480,18 @@ fun SeiDeskHome(
                     appPrefs = appPrefs,
                     deviceCount = favorites.size,
                     onShowLog = { showBoot = true },
+                    onBackupProfiles = {
+                        backupJsonInput = exportProfilesJson(context, favorites)
+                        backupModalOpen = true
+                    },
+                    onCheckUpdates = {
+                        updateModalOpen = true
+                        updateStatusText = seiNow("Checking latest release status from www.xydeskremote.biz.id...")
+                        scope.launch {
+                            val status = withContext(Dispatchers.IO) { fetchRemoteReleaseStatus(context) }
+                            updateStatusText = status
+                        }
+                    },
                     onOpenFeedback = { feedbackOpen = true },
                 )
 
@@ -501,144 +520,6 @@ fun SeiDeskHome(
                 }
             }
         }
-
-    // ---- drawer kiri (custom, bukan ModalNavigationDrawer bawaan) ----
-    if (drawerOpen) {
-        Box(
-            Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.55f))
-                .clickable { drawerOpen = false }
-                .zIndex(40f),
-        )
-    }
-    AnimatedVisibility(
-        visible = drawerOpen,
-        enter = slideInHorizontally { -it },
-        exit = slideOutHorizontally { -it },
-        modifier = Modifier.zIndex(41f),
-    ) {
-        Column(
-            Modifier
-                .width(300.dp)
-                .fillMaxHeight()
-                .clip(RoundedCornerShape(topEnd = 6.dp, bottomEnd = 6.dp))
-                .background(MaterialTheme.colorScheme.surface)
-                .pointerInput(Unit) {}
-                .padding(vertical = 16.dp),
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                SeiLogo(modifier = Modifier.size(30.dp))
-                Column {
-                    SeiWordmark(fontSize = 21.sp)
-                    Text(
-                        "SeiDesk \u2022 Remote Desktop",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
-            Spacer(Modifier.height(14.dp))
-            SeiDivider()
-            Spacer(Modifier.height(8.dp))
-            SeiSection.entries.filter { it != SeiSection.TAMPILAN }.forEach { item ->
-                SeiRow(
-                    // Dulu title mentah (Indonesia saja) — drawer satu-satunya
-                    // tempat yang tidak ikut bahasa. Sekarang dua bahasa.
-                    title = sei( item.titleEn),
-                    modifier = Modifier.padding(horizontal = 8.dp),
-                    leading = when (item) {
-                        SeiSection.PERANGKAT -> SeiIcons.Monitor
-                        SeiSection.TAMPILAN -> SeiIcons.Fit
-                        SeiSection.KREDENSIAL -> SeiIcons.Lock
-                        SeiSection.UMUM -> SeiIcons.Sliders
-                        // Dulu Info — sama dengan Tentang, jadi dua seksi
-                        // bersebelahan punya ikon identik.
-                        SeiSection.KEAMANAN -> SeiIcons.Shield
-                        SeiSection.TENTANG -> SeiIcons.Info
-                    },
-                    leadingTint = if (item == section) MaterialTheme.colorScheme.onSurface
-                    else MaterialTheme.colorScheme.onSurfaceVariant,
-                    onClick = {
-                        section = item
-                        route = SeiRoute.Devices
-                        // Tab ikut menyorot: seksi adalah bagian Profil, kecuali
-                        // Perangkat yang memang isi Beranda.
-                        tab = if (item == SeiSection.PERANGKAT) SeiTab.HOME else SeiTab.PROFILE
-                        drawerOpen = false
-                    },
-                )
-            }
-            SeiRow(
-                title = sei( "Tools & help"),
-                subtitle = sei( "Backup, updates, and feedback"),
-                modifier = Modifier.padding(horizontal = 8.dp),
-                leading = SeiIcons.Folder,
-                trailing = {
-                    Text(
-                        if (helpToolsOpen) "−" else "+",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                },
-                onClick = { helpToolsOpen = !helpToolsOpen },
-            )
-            if (helpToolsOpen) {
-                SeiPillButton(
-                    text = sei( "Backup / Restore Profiles"),
-                    onClick = {
-                        drawerOpen = false
-                        backupJsonInput = exportProfilesJson(context, favorites)
-                        backupModalOpen = true
-                    },
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                    primary = false,
-                    icon = SeiIcons.Folder,
-                    compact = true,
-                )
-                Spacer(Modifier.height(6.dp))
-                SeiPillButton(
-                    text = sei( "Check Update & RilisIn Store"),
-                    onClick = {
-                        drawerOpen = false
-                        updateModalOpen = true
-                        updateStatusText = seiNow( "Checking latest release status from www.xydeskremote.biz.id...")
-                        scope.launch {
-                            val status = withContext(Dispatchers.IO) { fetchRemoteReleaseStatus(context) }
-                            updateStatusText = status
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                    primary = false,
-                    icon = SeiIcons.Shield,
-                    compact = true,
-                )
-                Spacer(Modifier.height(6.dp))
-                SeiPillButton(
-                    text = sei( "Feedback & suggestions"),
-                    onClick = {
-                        drawerOpen = false
-                        feedbackOpen = true
-                    },
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                    primary = false,
-                    icon = SeiIcons.Info,
-                    compact = true,
-                )
-            }
-            Spacer(Modifier.weight(1f))
-            Text(
-                "v${appVersion(context)}",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(20.dp),
-            )
-        }
-    }
 
     if (showCrash) {
         InfoDialog(

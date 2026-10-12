@@ -54,11 +54,12 @@ import io.seidesk.rm.ui.theme.SeiThemeState
  */
 @Composable
 internal fun SeiProfileScreen(
-    onMenu: () -> Unit,
     onOpenSection: (SeiSection) -> Unit,
     appPrefs: AppPrefs,
     deviceCount: Int,
     onShowLog: () -> Unit,
+    onBackupProfiles: () -> Unit = {},
+    onCheckUpdates: () -> Unit = {},
     onOpenFeedback: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -83,8 +84,8 @@ internal fun SeiProfileScreen(
             .verticalScroll(rememberScrollState()),
     ) {
         SeiTopBar(
-            title = sei( "Profile"),
-            actions = { SeiIconPill(SeiIcons.Menu, onMenu, flat = true, contentDescription = "Menu") },
+            title = sei("Profile"),
+            actions = {},
         )
         Column(
             Modifier
@@ -134,16 +135,23 @@ internal fun SeiProfileScreen(
             }
 
             // ---- seksi sebagai grid kartu ----
-            SeiGlassSectionLabel(sei( "Settings"))
+            SeiGlassSectionLabel(sei("Settings"))
             SeiTileGrid(columns = 2, spacing = 10.dp) {
                 SeiSection.entries.forEach { section ->
-                    // sectionTitle() @Composable; dipanggil di sini, di luar
-                    // lambda item {} yang disimpan lalu dipanggil belakangan.
                     val title = sectionTitle(section)
+                    val summary = when (section) {
+                        SeiSection.TAMPILAN -> "1920×1080 · 60 Hz"
+                        SeiSection.KEAMANAN -> if (appPrefs.requireDeviceLock) sei("Biometric on") else sei("PIN / Biometric")
+                        SeiSection.KREDENSIAL -> sei("{0} saved", deviceCount)
+                        SeiSection.UMUM -> sei("Audio & input")
+                        SeiSection.PERANGKAT -> sei("{0} devices", deviceCount)
+                        SeiSection.TENTANG -> "v${versionName ?: "1.0.0"}"
+                    }
                     item {
                         SeiGlassTile(
                             icon = sectionIcon(section),
                             title = title,
+                            subtitle = summary,
                             onClick = { onOpenSection(section) },
                             modifier = Modifier.fillMaxWidth(),
                         )
@@ -152,10 +160,10 @@ internal fun SeiProfileScreen(
             }
 
             // ---- tema ----
-            SeiGlassSectionLabel(sei( "Appearance"))
+            SeiGlassSectionLabel(sei("Appearance"))
             SeiGlassCard(padding = 14.dp) {
                 Text(
-                    sei( "Theme mode"),
+                    sei("Theme mode"),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
@@ -169,9 +177,9 @@ internal fun SeiProfileScreen(
                 )
                 SeiSegmented(
                     options = listOf(
-                        sei( "Follow system"),
-                        sei( "Dark"),
-                        sei( "Light"),
+                        sei("Follow system"),
+                        sei("Dark"),
+                        sei("Light"),
                     ),
                     selectedIndex = themeMode,
                     onSelect = { index ->
@@ -181,19 +189,35 @@ internal fun SeiProfileScreen(
                 )
             }
 
-            // ---- lainnya ----
-            SeiGlassSectionLabel(sei( "More"))
+            // ---- diagnostik ----
+            SeiGlassSectionLabel(sei("Diagnostics & Tools"))
             SeiGlassRow(
                 icon = SeiIcons.Terminal,
-                title = sei( "Connection log"),
+                title = sei("Connection log"),
                 subtitle = sei(
                     "Last 20 lines of the native boot log.",
                 ),
                 onClick = onShowLog,
             )
             SeiGlassRow(
+                icon = SeiIcons.Folder,
+                title = sei("Backup & Restore Profiles"),
+                subtitle = sei(
+                    "Export or import device profiles via JSON.",
+                ),
+                onClick = onBackupProfiles,
+            )
+            SeiGlassRow(
+                icon = SeiIcons.Shield,
+                title = sei("Check updates"),
+                subtitle = sei(
+                    "Check release status and store updates.",
+                ),
+                onClick = onCheckUpdates,
+            )
+            SeiGlassRow(
                 icon = SeiIcons.Heart,
-                title = sei( "Feedback & suggestions"),
+                title = sei("Feedback & suggestions"),
                 subtitle = sei(
                     "Share to any app, or copy the draft.",
                 ),

@@ -201,16 +201,19 @@ fun SeiIconPill(
 }
 
 @Composable
-fun XySectionLabel(text: String, modifier: Modifier = Modifier) {
+fun SeiSectionLabel(text: String, modifier: Modifier = Modifier) {
     Text(
         text.uppercase(),
         modifier = modifier,
         style = MaterialTheme.typography.labelSmall,
-        fontFamily = SeiDisplay,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         letterSpacing = 1.4.sp,
     )
 }
+
+@Deprecated("Use SeiSectionLabel", ReplaceWith("SeiSectionLabel(text, modifier)"))
+@Composable
+fun XySectionLabel(text: String, modifier: Modifier = Modifier) = SeiSectionLabel(text, modifier)
 
 /** Baris daftar: judul + subjudul opsional + trailing. */
 @Composable
