@@ -34,44 +34,44 @@ import io.seidesk.rm.ui.AppPrefs
 // =============================================================
 
 // Tema gelap modern: latar obsidian pekat, permukaan berlapis dengan kontras terukur.
-val XyBg = Color(0xFF0A0C10)
-val XySurface = Color(0xFF131722)
-val XySurfaceAlt = Color(0xFF1B2030)
-val XyPrimaryContainer = Color(0xFF23293E)
-val XyLine = Color(0xFF262C3D)
-val XyLineStrong = Color(0xFF384259)
-val XyText = Color(0xFFF8FAFC)
-val XyTextDim = Color(0xFF94A3B8)
-val XyTextFaint = Color(0xFF64748B)
+val SeiBg = Color(0xFF0A0C10)
+val SeiSurface = Color(0xFF131722)
+val SeiSurfaceAlt = Color(0xFF1B2030)
+val SeiPrimaryContainer = Color(0xFF23293E)
+val SeiLine = Color(0xFF262C3D)
+val SeiLineStrong = Color(0xFF384259)
+val SeiText = Color(0xFFF8FAFC)
+val SeiTextDim = Color(0xFF94A3B8)
+val SeiTextFaint = Color(0xFF64748B)
 
 // Aksen modern: Electric Indigo & Cyber Sky
-val XyAccent = Color(0xFF6366F1)
+val SeiAccent = Color(0xFF6366F1)
 val XyAccentInk = Color(0xFFFFFFFF)
 
 // Indikator status hidup (vivid status colors)
-val XyOk = Color(0xFF10B981)      // Emerald Green
-val XyWarn = Color(0xFFF59E0B)    // Vibrant Amber
-val XyDanger = Color(0xFFF43F5E)  // Vivid Rose Red
+val SeiOk = Color(0xFF10B981)      // Emerald Green
+val SeiWarn = Color(0xFFF59E0B)    // Vibrant Amber
+val SeiDanger = Color(0xFFF43F5E)  // Vivid Rose Red
 
 val DarkScheme = darkColorScheme(
-    primary = XyAccent,
+    primary = SeiAccent,
     onPrimary = Color.White,
-    primaryContainer = XyPrimaryContainer,
+    primaryContainer = SeiPrimaryContainer,
     onPrimaryContainer = Color(0xFFE0E7FF),
     secondary = Color(0xFF38BDF8),
     onSecondary = Color(0xFF03223A),
     secondaryContainer = Color(0xFF16253B),
     onSecondaryContainer = Color(0xFFBAE6FD),
-    tertiary = XyOk,
-    background = XyBg,
-    onBackground = XyText,
-    surface = XySurface,
-    onSurface = XyText,
-    surfaceVariant = XySurfaceAlt,
-    onSurfaceVariant = XyTextDim,
-    outline = XyLine,
-    outlineVariant = XyLineStrong,
-    error = XyDanger,
+    tertiary = SeiOk,
+    background = SeiBg,
+    onBackground = SeiText,
+    surface = SeiSurface,
+    onSurface = SeiText,
+    surfaceVariant = SeiSurfaceAlt,
+    onSurfaceVariant = SeiTextDim,
+    outline = SeiLine,
+    outlineVariant = SeiLineStrong,
+    error = SeiDanger,
     onError = Color.White,
     errorContainer = Color(0xFF3E121B),
     onErrorContainer = Color(0xFFFFD1D8),
@@ -104,12 +104,12 @@ val LightScheme = lightColorScheme(
 )
 
 // Space Grotesk = display, Inter = body (variable fonts, OFL).
-val XyDisplay = FontFamily(
+val SeiDisplay = FontFamily(
     Font(R.font.space_grotesk, FontWeight.Medium),
     Font(R.font.space_grotesk, FontWeight.SemiBold),
     Font(R.font.space_grotesk, FontWeight.Bold),
 )
-val XyBody = FontFamily(
+val SeiBody = FontFamily(
     Font(R.font.inter, FontWeight.Normal),
     Font(R.font.inter, FontWeight.Medium),
     Font(R.font.inter, FontWeight.SemiBold),
@@ -117,9 +117,9 @@ val XyBody = FontFamily(
 )
 
 /** Radius lebih ramah sentuh; kontrol pill tetap terbaca sebagai kontrol. */
-val XyPill = RoundedCornerShape(18.dp)
+val SeiPill = RoundedCornerShape(18.dp)
 
-val XyShapes = Shapes(
+val SeiShapes = Shapes(
     small = RoundedCornerShape(10.dp),
     medium = RoundedCornerShape(14.dp),
     large = RoundedCornerShape(20.dp),
@@ -132,12 +132,12 @@ val XyShapes = Shapes(
  * Dulu mengganti tema memanggil Activity.recreate() — seluruh layar
  * kedip-kedip dan state UI (posisi scroll, drawer) ikut reset. Sekarang
  * mode disimpan di sini: mengubahnya membuat semua layar yang memakai
- * [xyDark] recompose sendiri, tanpa recreate.
+ * [seiDark] recompose sendiri, tanpa recreate.
  *
  * [mode] bernilai Int.MIN_VALUE sampai [init] dipanggil di activity
  * pertama (membaca preferensi tersimpan).
  */
-object XyThemeState {
+object SeiThemeState {
     const val FOLLOW_SYSTEM = 0
     const val DARK = 1
     const val LIGHT = 2
@@ -162,9 +162,9 @@ object XyThemeState {
  * fallback ke tema sistem.
  */
 @Composable
-fun xyDark(): Boolean = when (XyThemeState.mode) {
-    XyThemeState.DARK -> true
-    XyThemeState.LIGHT -> false
+fun seiDark(): Boolean = when (SeiThemeState.mode) {
+    SeiThemeState.DARK -> true
+    SeiThemeState.LIGHT -> false
     else -> isSystemInDarkTheme()
 }
 
@@ -186,41 +186,41 @@ fun SeiDeskTheme(
     }
     MaterialTheme(
         colorScheme = scheme,
-        shapes = XyShapes,
+        shapes = SeiShapes,
         typography = MaterialTheme.typography.copy(
             displaySmall = TextStyle(
-                fontFamily = XyDisplay, fontSize = 26.sp,
+                fontFamily = SeiDisplay, fontSize = 26.sp,
                 fontWeight = FontWeight.SemiBold, letterSpacing = (-0.6).sp,
             ),
             headlineMedium = TextStyle(
-                fontFamily = XyDisplay, fontSize = 22.sp,
+                fontFamily = SeiDisplay, fontSize = 22.sp,
                 fontWeight = FontWeight.SemiBold, letterSpacing = (-0.4).sp,
             ),
             headlineSmall = TextStyle(
-                fontFamily = XyDisplay, fontSize = 19.sp, fontWeight = FontWeight.SemiBold,
+                fontFamily = SeiDisplay, fontSize = 19.sp, fontWeight = FontWeight.SemiBold,
             ),
             titleLarge = TextStyle(
-                fontFamily = XyDisplay, fontSize = 18.sp, fontWeight = FontWeight.SemiBold,
+                fontFamily = SeiDisplay, fontSize = 18.sp, fontWeight = FontWeight.SemiBold,
             ),
             titleMedium = TextStyle(
-                fontFamily = XyDisplay, fontSize = 16.sp, fontWeight = FontWeight.SemiBold,
+                fontFamily = SeiDisplay, fontSize = 16.sp, fontWeight = FontWeight.SemiBold,
             ),
             titleSmall = TextStyle(
-                fontFamily = XyBody, fontSize = 14.sp, fontWeight = FontWeight.SemiBold,
+                fontFamily = SeiBody, fontSize = 14.sp, fontWeight = FontWeight.SemiBold,
             ),
-            bodyLarge = TextStyle(fontFamily = XyBody, fontSize = 15.5.sp, lineHeight = 22.sp),
-            bodyMedium = TextStyle(fontFamily = XyBody, fontSize = 14.sp, lineHeight = 20.sp),
-            bodySmall = TextStyle(fontFamily = XyBody, fontSize = 12.5.sp, lineHeight = 17.sp),
+            bodyLarge = TextStyle(fontFamily = SeiBody, fontSize = 15.5.sp, lineHeight = 22.sp),
+            bodyMedium = TextStyle(fontFamily = SeiBody, fontSize = 14.sp, lineHeight = 20.sp),
+            bodySmall = TextStyle(fontFamily = SeiBody, fontSize = 12.5.sp, lineHeight = 17.sp),
             labelLarge = TextStyle(
-                fontFamily = XyDisplay, fontSize = 13.5.sp,
+                fontFamily = SeiDisplay, fontSize = 13.5.sp,
                 fontWeight = FontWeight.SemiBold, letterSpacing = 0.2.sp,
             ),
             labelMedium = TextStyle(
-                fontFamily = XyBody, fontSize = 12.sp,
+                fontFamily = SeiBody, fontSize = 12.sp,
                 fontWeight = FontWeight.Medium, letterSpacing = 0.3.sp,
             ),
             labelSmall = TextStyle(
-                fontFamily = XyBody, fontSize = 10.5.sp,
+                fontFamily = SeiBody, fontSize = 10.5.sp,
                 fontWeight = FontWeight.Medium, letterSpacing = 0.6.sp,
             ),
         ),

@@ -9,7 +9,7 @@ import android.net.NetworkCapabilities
  * lewat query URI (lihat [RdpUri]) — jadi tiap toggle di UI benar-benar
  * mengubah perilaku native, bukan dekorasi.
  */
-enum class XyAudioMode(
+enum class SeiAudioMode(
     val wire: Int,
     val title: String,
     val detail: String,
@@ -34,7 +34,7 @@ enum class XyAudioMode(
  * Profil preset streaming & latensi. Memilih preset akan mengisi flag
  * pipeline grafis, kompresi, dan dekorasi desktop Windows secara otomatis.
  */
-enum class XyStreamProfile(
+enum class SeiStreamProfile(
     val title: String,
     val detail: String,
     val titleEn: String,
@@ -79,7 +79,7 @@ enum class XyStreamProfile(
 }
 
 /** Protokol autentikasi & enkripsi transport RDP (`/sec:nla|tls|rdp`). */
-enum class XySecurityProtocol(
+enum class SeiSecurityProtocol(
     val wire: String?,
     val title: String,
     val detail: String,
@@ -117,7 +117,7 @@ enum class XySecurityProtocol(
 }
 
 /** Profil penyesuaian encoder GPU pada PC Host (NVIDIA NVENC, AMD AMF, Intel QSV, atau CPU). */
-enum class XyGpuProfile(
+enum class SeiGpuProfile(
     val title: String,
     val detail: String,
     val titleEn: String,
@@ -159,7 +159,7 @@ enum class XyGpuProfile(
  * Preset profil PC (nama tipe dipertahankan untuk kompatibilitas penyimpanan).
  * Preset ini masih mengatur opsi FreeRDP/RDP; bukan transport stream mandiri.
  */
-enum class XyPcStreamEngine(
+enum class SeiPcStreamEngine(
     val title: String,
     val detail: String,
     val titleEn: String,
@@ -197,7 +197,7 @@ enum class XyPcStreamEngine(
 }
 
 /** RDP Gateway (RD Gateway). Port default 443. */
-data class XyGateway(
+data class SeiGateway(
     val host: String,
     val port: Int = 443,
     val username: String? = null,
@@ -208,7 +208,7 @@ data class XyGateway(
 }
 
 data class RdpOptions(
-    val audioMode: XyAudioMode = XyAudioMode.DEVICE,
+    val audioMode: SeiAudioMode = SeiAudioMode.DEVICE,
     val microphone: Boolean = false,
     /**
      * Kirim suara PC langsung ke HP lewat UDP/QUIC :4433 (WASAPI Loopback
@@ -241,17 +241,17 @@ data class RdpOptions(
      * Default nyala; tanpa ini server mengunci resolusi saat connect.
      */
     val dynamicResolution: Boolean = true,
-    val gateway: XyGateway? = null,
+    val gateway: SeiGateway? = null,
 
     // ---- Streaming & Latency Tuning ----
     val pcConnectMode: Boolean = false,
-    val pcStreamEngine: XyPcStreamEngine = XyPcStreamEngine.DIRECT_GAME_ULTRA,
+    val pcStreamEngine: SeiPcStreamEngine = SeiPcStreamEngine.DIRECT_GAME_ULTRA,
     /** Preferred handset display refresh for PC Connect; it does not force the host stream FPS. */
     val pcTargetFps: Int = 60,
     val pcBitrateMbps: Int = 25,
     val rawInputMouse: Boolean = true,
-    val streamProfile: XyStreamProfile = XyStreamProfile.AUTO,
-    val gpuProfile: XyGpuProfile = XyGpuProfile.AUTO,
+    val streamProfile: SeiStreamProfile = SeiStreamProfile.AUTO,
+    val gpuProfile: SeiGpuProfile = SeiGpuProfile.AUTO,
     /** Mode hemat baterai HP: gabungkan frame burst (VSYNC coalescing) & kurangi beban dekoder. */
     val batterySaver: Boolean = false,
     /** Kedalaman warna desktop remote: 16, 24, atau 32 bit per piksel (`/bpp:`). */
@@ -278,7 +278,7 @@ data class RdpOptions(
     val desktopComposition: Boolean = true,
 
     // ---- Security & Session Hardening ----
-    val securityProtocol: XySecurityProtocol = XySecurityProtocol.AUTO,
+    val securityProtocol: SeiSecurityProtocol = SeiSecurityProtocol.AUTO,
     /** Level keamanan cipher OpenSSL TLS (`-1` = bawaan, `0` = kompatibel server lama, `1` = standar, `2` = ketat). */
     val tlsSecLevel: Int = -1,
     /** `/admin`: sambung ke sesi konsol/admin fisik. */
@@ -302,9 +302,9 @@ data class RdpOptions(
     /**
      * Terapkan preset streaming & latensi ke opsi ini dan kembalikan salinan baru.
      */
-    fun withStreamProfile(profile: XyStreamProfile): RdpOptions = when (profile) {
-        XyStreamProfile.AUTO -> copy(
-            streamProfile = XyStreamProfile.AUTO,
+    fun withStreamProfile(profile: SeiStreamProfile): RdpOptions = when (profile) {
+        SeiStreamProfile.AUTO -> copy(
+            streamProfile = SeiStreamProfile.AUTO,
             networkAutoDetect = true,
             lowBandwidth = false,
             h264 = true,
@@ -327,8 +327,8 @@ data class RdpOptions(
             visualThemes = true,
             desktopComposition = true,
         )
-        XyStreamProfile.ULTRA_LOW_LATENCY -> copy(
-            streamProfile = XyStreamProfile.ULTRA_LOW_LATENCY,
+        SeiStreamProfile.ULTRA_LOW_LATENCY -> copy(
+            streamProfile = SeiStreamProfile.ULTRA_LOW_LATENCY,
             udpTransport = true,
             networkAutoDetect = false,
             lowBandwidth = true,
@@ -345,8 +345,8 @@ data class RdpOptions(
             visualThemes = false,
             desktopComposition = false,
         )
-        XyStreamProfile.BALANCED -> copy(
-            streamProfile = XyStreamProfile.BALANCED,
+        SeiStreamProfile.BALANCED -> copy(
+            streamProfile = SeiStreamProfile.BALANCED,
             udpTransport = true,
             networkAutoDetect = true,
             lowBandwidth = false,
@@ -363,8 +363,8 @@ data class RdpOptions(
             visualThemes = true,
             desktopComposition = false,
         )
-        XyStreamProfile.HIGH_VISUAL -> copy(
-            streamProfile = XyStreamProfile.HIGH_VISUAL,
+        SeiStreamProfile.HIGH_VISUAL -> copy(
+            streamProfile = SeiStreamProfile.HIGH_VISUAL,
             udpTransport = true,
             networkAutoDetect = false,
             lowBandwidth = false,
@@ -381,8 +381,8 @@ data class RdpOptions(
             visualThemes = true,
             desktopComposition = true,
         )
-        XyStreamProfile.DATA_SAVER -> copy(
-            streamProfile = XyStreamProfile.DATA_SAVER,
+        SeiStreamProfile.DATA_SAVER -> copy(
+            streamProfile = SeiStreamProfile.DATA_SAVER,
             udpTransport = true,
             networkAutoDetect = true,
             lowBandwidth = true,
@@ -399,16 +399,16 @@ data class RdpOptions(
             visualThemes = false,
             desktopComposition = false,
         )
-        XyStreamProfile.CUSTOM -> copy(streamProfile = XyStreamProfile.CUSTOM)
+        SeiStreamProfile.CUSTOM -> copy(streamProfile = SeiStreamProfile.CUSTOM)
     }
 
     /**
      * Terapkan optimasi spesifik vendor GPU Host (NVIDIA NVENC, AMD AMF, Intel QuickSync, atau CPU).
      */
-    fun withGpuProfile(gpu: XyGpuProfile): RdpOptions = when (gpu) {
-        XyGpuProfile.AUTO -> copy(gpuProfile = XyGpuProfile.AUTO)
-        XyGpuProfile.NVIDIA -> copy(
-            gpuProfile = XyGpuProfile.NVIDIA,
+    fun withGpuProfile(gpu: SeiGpuProfile): RdpOptions = when (gpu) {
+        SeiGpuProfile.AUTO -> copy(gpuProfile = SeiGpuProfile.AUTO)
+        SeiGpuProfile.NVIDIA -> copy(
+            gpuProfile = SeiGpuProfile.NVIDIA,
             udpTransport = true,
             h264 = true,
             lowBandwidth = false,
@@ -418,8 +418,8 @@ data class RdpOptions(
             asyncChannels = true,
             compressionLevel = 0,
         )
-        XyGpuProfile.AMD -> copy(
-            gpuProfile = XyGpuProfile.AMD,
+        SeiGpuProfile.AMD -> copy(
+            gpuProfile = SeiGpuProfile.AMD,
             udpTransport = true,
             h264 = true,
             lowBandwidth = false,
@@ -429,8 +429,8 @@ data class RdpOptions(
             asyncChannels = true,
             compressionLevel = 1,
         )
-        XyGpuProfile.INTEL -> copy(
-            gpuProfile = XyGpuProfile.INTEL,
+        SeiGpuProfile.INTEL -> copy(
+            gpuProfile = SeiGpuProfile.INTEL,
             udpTransport = true,
             h264 = true,
             lowBandwidth = true,
@@ -440,8 +440,8 @@ data class RdpOptions(
             asyncChannels = true,
             compressionLevel = 1,
         )
-        XyGpuProfile.SOFTWARE -> copy(
-            gpuProfile = XyGpuProfile.SOFTWARE,
+        SeiGpuProfile.SOFTWARE -> copy(
+            gpuProfile = SeiGpuProfile.SOFTWARE,
             udpTransport = true,
             h264 = true,
             lowBandwidth = true,
@@ -457,10 +457,10 @@ data class RdpOptions(
      * Terapkan preset opsi PC. Saat ini nilainya tetap dipakai oleh jalur FreeRDP/RDP;
      * fungsi ini tidak membuat sesi streaming PC mandiri.
      */
-    fun withPcStreamEngine(engine: XyPcStreamEngine): RdpOptions = when (engine) {
-        XyPcStreamEngine.DIRECT_GAME_ULTRA -> copy(
+    fun withPcStreamEngine(engine: SeiPcStreamEngine): RdpOptions = when (engine) {
+        SeiPcStreamEngine.DIRECT_GAME_ULTRA -> copy(
             pcConnectMode = true,
-            pcStreamEngine = XyPcStreamEngine.DIRECT_GAME_ULTRA,
+            pcStreamEngine = SeiPcStreamEngine.DIRECT_GAME_ULTRA,
             pcTargetFps = if (pcTargetFps in setOf(30, 60, 90, 120)) pcTargetFps else 60,
             pcBitrateMbps = pcBitrateMbps.coerceIn(15, 80),
             udpTransport = true,
@@ -481,9 +481,9 @@ data class RdpOptions(
             visualThemes = true,
             desktopComposition = true,
         )
-        XyPcStreamEngine.DIRECT_STUDIO_444 -> copy(
+        SeiPcStreamEngine.DIRECT_STUDIO_444 -> copy(
             pcConnectMode = true,
-            pcStreamEngine = XyPcStreamEngine.DIRECT_STUDIO_444,
+            pcStreamEngine = SeiPcStreamEngine.DIRECT_STUDIO_444,
             pcBitrateMbps = pcBitrateMbps.coerceIn(25, 80),
             udpTransport = true,
             networkAutoDetect = false,
@@ -503,9 +503,9 @@ data class RdpOptions(
             visualThemes = true,
             desktopComposition = true,
         )
-        XyPcStreamEngine.DIRECT_CINEMA -> copy(
+        SeiPcStreamEngine.DIRECT_CINEMA -> copy(
             pcConnectMode = true,
-            pcStreamEngine = XyPcStreamEngine.DIRECT_CINEMA,
+            pcStreamEngine = SeiPcStreamEngine.DIRECT_CINEMA,
             pcBitrateMbps = pcBitrateMbps.coerceIn(15, 60),
             udpTransport = true,
             networkAutoDetect = true,
@@ -525,9 +525,9 @@ data class RdpOptions(
             visualThemes = true,
             desktopComposition = true,
         )
-        XyPcStreamEngine.DIRECT_LAN_TURBO -> copy(
+        SeiPcStreamEngine.DIRECT_LAN_TURBO -> copy(
             pcConnectMode = true,
-            pcStreamEngine = XyPcStreamEngine.DIRECT_LAN_TURBO,
+            pcStreamEngine = SeiPcStreamEngine.DIRECT_LAN_TURBO,
             pcBitrateMbps = 65,
             udpTransport = true,
             networkAutoDetect = false,
@@ -584,16 +584,16 @@ data class RdpOptions(
     fun activeCodecLabel(): String {
         val base = when {
             !h264 -> "RFX"
-            lowBandwidth || streamProfile == XyStreamProfile.ULTRA_LOW_LATENCY ||
-                streamProfile == XyStreamProfile.DATA_SAVER -> "AVC420"
+            lowBandwidth || streamProfile == SeiStreamProfile.ULTRA_LOW_LATENCY ||
+                streamProfile == SeiStreamProfile.DATA_SAVER -> "AVC420"
             else -> "AVC444"
         }
         val gpuTag = when (gpuProfile) {
-            XyGpuProfile.NVIDIA -> "NVENC"
-            XyGpuProfile.AMD -> "AMF"
-            XyGpuProfile.INTEL -> "QSV"
-            XyGpuProfile.SOFTWARE -> "CPU"
-            XyGpuProfile.AUTO -> null
+            SeiGpuProfile.NVIDIA -> "NVENC"
+            SeiGpuProfile.AMD -> "AMF"
+            SeiGpuProfile.INTEL -> "QSV"
+            SeiGpuProfile.SOFTWARE -> "CPU"
+            SeiGpuProfile.AUTO -> null
         }
         return if (gpuTag != null) "$base ($gpuTag)" else base
     }
@@ -689,26 +689,26 @@ data class RdpOptions(
         fun of(context: Context, deviceId: String): RdpOptions {
             val sp = context.applicationContext
                 .getSharedPreferences(FILE, Context.MODE_PRIVATE)
-            val audio = XyAudioMode.entries.getOrElse(sp.getInt("$deviceId.audio", 0)) {
-                XyAudioMode.DEVICE
+            val audio = SeiAudioMode.entries.getOrElse(sp.getInt("$deviceId.audio", 0)) {
+                SeiAudioMode.DEVICE
             }
-            val streamProfile = XyStreamProfile.entries.getOrElse(
+            val streamProfile = SeiStreamProfile.entries.getOrElse(
                 sp.getInt("$deviceId.stream_profile", 0),
-            ) { XyStreamProfile.AUTO }
-            val gpuProfile = XyGpuProfile.entries.getOrElse(
+            ) { SeiStreamProfile.AUTO }
+            val gpuProfile = SeiGpuProfile.entries.getOrElse(
                 sp.getInt("$deviceId.gpu_profile", 0),
-            ) { XyGpuProfile.AUTO }
-            val secProto = XySecurityProtocol.entries.getOrElse(
+            ) { SeiGpuProfile.AUTO }
+            val secProto = SeiSecurityProtocol.entries.getOrElse(
                 sp.getInt("$deviceId.sec_proto", 0),
-            ) { XySecurityProtocol.AUTO }
-            val pcEngine = XyPcStreamEngine.entries.getOrElse(
+            ) { SeiSecurityProtocol.AUTO }
+            val pcEngine = SeiPcStreamEngine.entries.getOrElse(
                 sp.getInt("$deviceId.pc_engine", 0),
-            ) { XyPcStreamEngine.DIRECT_GAME_ULTRA }
+            ) { SeiPcStreamEngine.DIRECT_GAME_ULTRA }
             val gatewayHost = sp.getString("$deviceId.ghost", "").orEmpty()
             val gateway = if (gatewayHost.isBlank()) {
                 null
             } else {
-                XyGateway(
+                SeiGateway(
                     host = gatewayHost,
                     port = sp.getInt("$deviceId.gport", 443),
                     username = sp.getString("$deviceId.guser", "")?.ifBlank { null },
@@ -717,7 +717,7 @@ data class RdpOptions(
                 )
             }
             val migratedV2 = sp.getInt("$deviceId.clarity_v2", 0) >= 2
-            val isDataSaver = streamProfile == XyStreamProfile.DATA_SAVER
+            val isDataSaver = streamProfile == SeiStreamProfile.DATA_SAVER
             return RdpOptions(
                 pcConnectMode = sp.getBoolean("$deviceId.pc_mode", false),
                 pcStreamEngine = pcEngine,

@@ -3,7 +3,7 @@ package io.seidesk.rm.ui
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.ui.unit.sp
-import io.seidesk.rm.ui.input.XyStickMode
+import io.seidesk.rm.ui.input.SeiStickMode
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -54,12 +54,12 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import io.seidesk.rm.ui.components.XyField
-import io.seidesk.rm.ui.components.XyIcons
-import io.seidesk.rm.ui.components.XyPillButton
-import io.seidesk.rm.ui.components.XySegmented
-import io.seidesk.rm.ui.components.XySlider
-import io.seidesk.rm.ui.theme.XyPill
+import io.seidesk.rm.ui.components.SeiField
+import io.seidesk.rm.ui.components.SeiIcons
+import io.seidesk.rm.ui.components.SeiPillButton
+import io.seidesk.rm.ui.components.SeiSegmented
+import io.seidesk.rm.ui.components.SeiSlider
+import io.seidesk.rm.ui.theme.SeiPill
 import kotlin.math.roundToInt
 
 /** Fase aksi tombol: layer cuma melaporkan fase, arti aksinya di screen. */
@@ -147,7 +147,7 @@ fun HudKeyLayer(
     onScrollUnits: (Int) -> Unit,
     onEdit: (HudKey) -> Unit,
     onStickAxis: (HudKey, Float, Float) -> Unit = { _, _, _ -> },
-    stickMode: XyStickMode = XyStickMode.POINTER,
+    stickMode: SeiStickMode = SeiStickMode.POINTER,
 ) {
     BoxWithConstraints(Modifier.fillMaxSize().zIndex(12f)) {
         val density = LocalDensity.current
@@ -198,7 +198,7 @@ private fun HudKeyButton(
     onScrollUnits: (Int) -> Unit,
     onEdit: () -> Unit,
     onStickAxis: (Float, Float) -> Unit = { _, _ -> },
-    stickMode: XyStickMode = XyStickMode.POINTER,
+    stickMode: SeiStickMode = SeiStickMode.POINTER,
     modifier: Modifier = Modifier,
 ) {
     var pressed by remember(key.id) { mutableStateOf(false) }
@@ -363,11 +363,11 @@ private fun HudKeyButton(
             // kelihatan langsung stiknya mengendalikan apa. Stik kanan
             // gamepad selalu mouse — tidak diberi label arah papan ketik.
             val glyphs = if (key.pad && key.label == "R") emptyList() else when (stickMode) {
-                XyStickMode.WASD -> listOf(
+                SeiStickMode.WASD -> listOf(
                     "W" to Alignment.TopCenter, "D" to Alignment.CenterEnd,
                     "S" to Alignment.BottomCenter, "A" to Alignment.CenterStart,
                 )
-                XyStickMode.ARROWS -> listOf(
+                SeiStickMode.ARROWS -> listOf(
                     "↑" to Alignment.TopCenter, "→" to Alignment.CenterEnd,
                     "↓" to Alignment.BottomCenter, "←" to Alignment.CenterStart,
                 )
@@ -409,58 +409,58 @@ internal fun hudIconFor(
     combo: List<Int> = emptyList(),
     label: String = "",
 ): ImageVector? = when (kind) {
-    HudKind.MOUSE_LEFT -> XyIcons.ClickLeft
-    HudKind.MOUSE_RIGHT -> XyIcons.ClickRight
-    HudKind.MOUSE_MIDDLE -> XyIcons.ClickMiddle
-    HudKind.MOUSE_SWAP -> XyIcons.MouseSwap
-    HudKind.SCROLL_UP -> XyIcons.ScrollUp
-    HudKind.SCROLL_DOWN -> XyIcons.ScrollDown
-    HudKind.SCROLL_SLIDER -> XyIcons.ScrollSlide
-    HudKind.PAD_STICK -> XyIcons.Gamepad
-    HudKind.INPUT_SWITCH -> XyIcons.Swap
-    HudKind.KEYBOARD -> XyIcons.Keyboard
+    HudKind.MOUSE_LEFT -> SeiIcons.ClickLeft
+    HudKind.MOUSE_RIGHT -> SeiIcons.ClickRight
+    HudKind.MOUSE_MIDDLE -> SeiIcons.ClickMiddle
+    HudKind.MOUSE_SWAP -> SeiIcons.MouseSwap
+    HudKind.SCROLL_UP -> SeiIcons.ScrollUp
+    HudKind.SCROLL_DOWN -> SeiIcons.ScrollDown
+    HudKind.SCROLL_SLIDER -> SeiIcons.ScrollSlide
+    HudKind.PAD_STICK -> SeiIcons.Gamepad
+    HudKind.INPUT_SWITCH -> SeiIcons.Swap
+    HudKind.KEYBOARD -> SeiIcons.Keyboard
     HudKind.KEY -> when (keyCode) {
         android.view.KeyEvent.KEYCODE_META_LEFT,
-        android.view.KeyEvent.KEYCODE_META_RIGHT -> XyIcons.Windows
-        android.view.KeyEvent.KEYCODE_DPAD_UP -> XyIcons.ArrowUp
-        android.view.KeyEvent.KEYCODE_DPAD_DOWN -> XyIcons.ArrowDown
-        android.view.KeyEvent.KEYCODE_DPAD_LEFT -> XyIcons.ArrowLeft
-        android.view.KeyEvent.KEYCODE_DPAD_RIGHT -> XyIcons.ArrowRight
+        android.view.KeyEvent.KEYCODE_META_RIGHT -> SeiIcons.Windows
+        android.view.KeyEvent.KEYCODE_DPAD_UP -> SeiIcons.ArrowUp
+        android.view.KeyEvent.KEYCODE_DPAD_DOWN -> SeiIcons.ArrowDown
+        android.view.KeyEvent.KEYCODE_DPAD_LEFT -> SeiIcons.ArrowLeft
+        android.view.KeyEvent.KEYCODE_DPAD_RIGHT -> SeiIcons.ArrowRight
         android.view.KeyEvent.KEYCODE_ENTER,
-        android.view.KeyEvent.KEYCODE_NUMPAD_ENTER -> XyIcons.EnterKey
-        android.view.KeyEvent.KEYCODE_DEL -> XyIcons.BackspaceKey
-        android.view.KeyEvent.KEYCODE_TAB -> XyIcons.TabKey
-        android.view.KeyEvent.KEYCODE_SPACE -> XyIcons.SpaceKey
+        android.view.KeyEvent.KEYCODE_NUMPAD_ENTER -> SeiIcons.EnterKey
+        android.view.KeyEvent.KEYCODE_DEL -> SeiIcons.BackspaceKey
+        android.view.KeyEvent.KEYCODE_TAB -> SeiIcons.TabKey
+        android.view.KeyEvent.KEYCODE_SPACE -> SeiIcons.SpaceKey
         android.view.KeyEvent.KEYCODE_SHIFT_LEFT,
-        android.view.KeyEvent.KEYCODE_SHIFT_RIGHT -> XyIcons.ShiftKey
-        android.view.KeyEvent.KEYCODE_MENU -> XyIcons.Menu
-        android.view.KeyEvent.KEYCODE_SYSRQ -> XyIcons.Shot
-        else -> if (label.startsWith("Win", ignoreCase = true)) XyIcons.Windows else null
+        android.view.KeyEvent.KEYCODE_SHIFT_RIGHT -> SeiIcons.ShiftKey
+        android.view.KeyEvent.KEYCODE_MENU -> SeiIcons.Menu
+        android.view.KeyEvent.KEYCODE_SYSRQ -> SeiIcons.Shot
+        else -> if (label.startsWith("Win", ignoreCase = true)) SeiIcons.Windows else null
     }
     HudKind.COMBO -> when {
-        combo == listOf(android.view.KeyEvent.KEYCODE_META_LEFT, android.view.KeyEvent.KEYCODE_L) -> XyIcons.Lock
-        combo == listOf(android.view.KeyEvent.KEYCODE_META_LEFT, android.view.KeyEvent.KEYCODE_D) -> XyIcons.Monitor
-        combo == listOf(android.view.KeyEvent.KEYCODE_META_LEFT, android.view.KeyEvent.KEYCODE_E) -> XyIcons.Folder
-        combo == listOf(android.view.KeyEvent.KEYCODE_META_LEFT, android.view.KeyEvent.KEYCODE_I) -> XyIcons.Gear
+        combo == listOf(android.view.KeyEvent.KEYCODE_META_LEFT, android.view.KeyEvent.KEYCODE_L) -> SeiIcons.Lock
+        combo == listOf(android.view.KeyEvent.KEYCODE_META_LEFT, android.view.KeyEvent.KEYCODE_D) -> SeiIcons.Monitor
+        combo == listOf(android.view.KeyEvent.KEYCODE_META_LEFT, android.view.KeyEvent.KEYCODE_E) -> SeiIcons.Folder
+        combo == listOf(android.view.KeyEvent.KEYCODE_META_LEFT, android.view.KeyEvent.KEYCODE_I) -> SeiIcons.Gear
         combo == listOf(android.view.KeyEvent.KEYCODE_META_LEFT, android.view.KeyEvent.KEYCODE_TAB) ||
-            combo == listOf(android.view.KeyEvent.KEYCODE_ALT_LEFT, android.view.KeyEvent.KEYCODE_TAB) -> XyIcons.Grid
+            combo == listOf(android.view.KeyEvent.KEYCODE_ALT_LEFT, android.view.KeyEvent.KEYCODE_TAB) -> SeiIcons.Grid
         combo == listOf(
             android.view.KeyEvent.KEYCODE_META_LEFT,
             android.view.KeyEvent.KEYCODE_SHIFT_LEFT,
             android.view.KeyEvent.KEYCODE_S,
-        ) -> XyIcons.Shot
-        combo == listOf(android.view.KeyEvent.KEYCODE_CTRL_LEFT, android.view.KeyEvent.KEYCODE_C) -> XyIcons.Copy
-        combo == listOf(android.view.KeyEvent.KEYCODE_CTRL_LEFT, android.view.KeyEvent.KEYCODE_V) -> XyIcons.Clip
-        combo == listOf(android.view.KeyEvent.KEYCODE_CTRL_LEFT, android.view.KeyEvent.KEYCODE_Z) -> XyIcons.Undo
-        combo == listOf(android.view.KeyEvent.KEYCODE_CTRL_LEFT, android.view.KeyEvent.KEYCODE_Y) -> XyIcons.Redo
-        combo == listOf(android.view.KeyEvent.KEYCODE_CTRL_LEFT, android.view.KeyEvent.KEYCODE_F) -> XyIcons.Search
-        combo == listOf(android.view.KeyEvent.KEYCODE_ALT_LEFT, android.view.KeyEvent.KEYCODE_F4) -> XyIcons.Close
+        ) -> SeiIcons.Shot
+        combo == listOf(android.view.KeyEvent.KEYCODE_CTRL_LEFT, android.view.KeyEvent.KEYCODE_C) -> SeiIcons.Copy
+        combo == listOf(android.view.KeyEvent.KEYCODE_CTRL_LEFT, android.view.KeyEvent.KEYCODE_V) -> SeiIcons.Clip
+        combo == listOf(android.view.KeyEvent.KEYCODE_CTRL_LEFT, android.view.KeyEvent.KEYCODE_Z) -> SeiIcons.Undo
+        combo == listOf(android.view.KeyEvent.KEYCODE_CTRL_LEFT, android.view.KeyEvent.KEYCODE_Y) -> SeiIcons.Redo
+        combo == listOf(android.view.KeyEvent.KEYCODE_CTRL_LEFT, android.view.KeyEvent.KEYCODE_F) -> SeiIcons.Search
+        combo == listOf(android.view.KeyEvent.KEYCODE_ALT_LEFT, android.view.KeyEvent.KEYCODE_F4) -> SeiIcons.Close
         else -> null
     }
     HudKind.MACRO -> when {
         label.equals("CMD", ignoreCase = true) ||
             label.equals("PShell", ignoreCase = true) ||
-            label.equals("Terminal", ignoreCase = true) -> XyIcons.Terminal
+            label.equals("Terminal", ignoreCase = true) -> SeiIcons.Terminal
         else -> null
     }
 }
@@ -578,7 +578,7 @@ fun HudKeyPicker(
                     )
                 }
             }
-            XyField(
+            SeiField(
                 value = search,
                 onValueChange = { search = it },
                 label = xy("Cari tombol", "Search button"),
@@ -592,7 +592,7 @@ fun HudKeyPicker(
                     val active = query.isEmpty() && name == group
                     Box(
                         Modifier
-                            .clip(XyPill)
+                            .clip(SeiPill)
                             .background(
                                 if (active) MaterialTheme.colorScheme.primaryContainer
                                 else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
@@ -601,7 +601,7 @@ fun HudKeyPicker(
                                 1.dp,
                                 if (active) MaterialTheme.colorScheme.primary
                                 else MaterialTheme.colorScheme.outline,
-                                XyPill,
+                                SeiPill,
                             )
                             .clickable {
                                 search = ""
@@ -701,7 +701,7 @@ fun HudKeyPicker(
                     }
                 }
             }
-            XyPillButton(
+            SeiPillButton(
                 xy("Tutup", "Close"),
                 onDismiss,
                 primary = false,
@@ -793,26 +793,26 @@ fun HudKeyEditor(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 11.sp,
                 )
-                XyPillButton(
+                SeiPillButton(
                     xy("Ganti jenis aksi", "Change action type"),
                     { rePick = true },
                     primary = false,
                     compact = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
-                XyField(
+                SeiField(
                     value = key.label,
                     onValueChange = { onChange(key.copy(label = it.take(10))) },
                     label = xy("Label tombol (maks 10 huruf)", "Button label (max 10 chars)"),
                 )
                 if (key.kind == HudKind.MACRO) {
-                    XyField(
+                    SeiField(
                         value = key.macroText,
                         onValueChange = { onChange(key.copy(macroText = it.take(160))) },
                         label = xy("Perintah / teks makro otomatis", "Auto-typed macro command / text"),
                         hint = "powershell",
                     )
-                    io.seidesk.rm.ui.components.XyToggleRow(
+                    io.seidesk.rm.ui.components.SeiToggleRow(
                         title = xy("Tekan Enter otomatis di akhir", "Press Enter automatically at the end"),
                         checked = key.macroSendEnter,
                         onCheckedChange = { onChange(key.copy(macroSendEnter = it)) },
@@ -926,7 +926,7 @@ fun HudKeyEditor(
                 Text(xy("Cara pakai", "How it works"), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp)
                 val supportedActions = HudKey.allowedActions(key.kind)
                 val selectedAction = supportedActions.indexOf(key.action).coerceAtLeast(0)
-                XySegmented(
+                SeiSegmented(
                     options = supportedActions.map { xy(it.title, it.titleEn) },
                     selectedIndex = selectedAction,
                     onSelect = { onChange(key.copy(action = supportedActions[it])) },
@@ -942,7 +942,7 @@ fun HudKeyEditor(
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 11.sp,
                 )
-                XySlider(
+                SeiSlider(
                     value = key.size,
                     onValueChange = { onChange(key.copy(size = it)) },
                     valueRange = HudKey.MIN_SIZE..HudKey.MAX_SIZE,
@@ -959,14 +959,14 @@ fun HudKeyEditor(
                 )
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                XyPillButton(
+                SeiPillButton(
                     xy("Hapus", "Delete"),
                     onDelete,
                     primary = false,
                     compact = true,
                     modifier = Modifier.weight(1f),
                 )
-                XyPillButton(
+                SeiPillButton(
                     xy("Simpan & selesai", "Save & finish"),
                     onDismiss,
                     primary = true,
@@ -1047,9 +1047,9 @@ fun HudMappingBanner(
         }
         Box(
             Modifier
-                .clip(XyPill)
+                .clip(SeiPill)
                 .background(MaterialTheme.colorScheme.primaryContainer)
-                .border(1.dp, MaterialTheme.colorScheme.primary, XyPill)
+                .border(1.dp, MaterialTheme.colorScheme.primary, SeiPill)
                 .clickable(onClick = onAdd)
                 .padding(horizontal = 12.dp, vertical = 7.dp),
         ) {
@@ -1063,8 +1063,8 @@ fun HudMappingBanner(
         if (onReset != null) {
             Box(
                 Modifier
-                    .clip(XyPill)
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, XyPill)
+                    .clip(SeiPill)
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, SeiPill)
                     .clickable(onClick = onReset)
                     .padding(horizontal = 10.dp, vertical = 7.dp),
             ) {
@@ -1077,9 +1077,9 @@ fun HudMappingBanner(
         }
         Box(
             Modifier
-                .clip(XyPill)
+                .clip(SeiPill)
                 .background(MaterialTheme.colorScheme.surfaceVariant)
-                .border(1.dp, MaterialTheme.colorScheme.outline, XyPill)
+                .border(1.dp, MaterialTheme.colorScheme.outline, SeiPill)
                 .clickable(onClick = onDone)
                 .padding(horizontal = 12.dp, vertical = 7.dp),
         ) {

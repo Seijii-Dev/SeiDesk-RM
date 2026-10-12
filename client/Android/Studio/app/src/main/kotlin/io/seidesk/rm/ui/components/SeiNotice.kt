@@ -39,7 +39,7 @@ import kotlinx.coroutines.delay
  * sistem (bulat penuh abu-abu, font sistem) dan tidak ikut tema app. Semua
  * pesan di XyDesk lewat sini supaya satu bahasa visual.
  */
-class XyNoticeState {
+class SeiNoticeState {
     internal var message by mutableStateOf<String?>(null)
     internal var seq by mutableIntStateOf(0)
 
@@ -50,14 +50,14 @@ class XyNoticeState {
 }
 
 @Composable
-fun rememberXyNotice(): XyNoticeState = remember { XyNoticeState() }
+fun rememberXyNotice(): SeiNoticeState = remember { SeiNoticeState() }
 
 /**
  * Jalur pesan untuk kejadian yang tidak punya layar lagi saat pesannya jadi
  * (mis. activity sesi gagal dibuat lalu langsung ditutup). Pesan disimpan
  * sebagai event terakhir, jadi tetap tampil di layar berikutnya.
  */
-object XyNoticeBus {
+object SeiNoticeBus {
     private val events = MutableStateFlow<String?>(null)
     val messages: kotlinx.coroutines.flow.Flow<String> = events.filterNotNull()
 
@@ -72,17 +72,17 @@ object XyNoticeBus {
  * jadi kontrasnya tidak boleh bergantung tema.
  */
 @Composable
-fun XyNoticeHost(
-    state: XyNoticeState,
+fun SeiNoticeHost(
+    state: SeiNoticeState,
     modifier: Modifier = Modifier,
 ) {
     val text = state.message
     val token = state.seq
     var visible by remember { mutableStateOf(false) }
 
-    // Pesan dari luar layar ini (XyNoticeBus) ikut ditampilkan.
+    // Pesan dari luar layar ini (SeiNoticeBus) ikut ditampilkan.
     LaunchedEffect(Unit) {
-        XyNoticeBus.messages.collect { state.show(it) }
+        SeiNoticeBus.messages.collect { state.show(it) }
     }
 
     LaunchedEffect(token) {
@@ -127,12 +127,3 @@ fun XyNoticeHost(
 }
 
 /** Rebranded aliases for SeiDesk RM notice system */
-typealias SeiNoticeState = XyNoticeState
-typealias SeiNoticeBus = XyNoticeBus
-
-@Composable
-fun rememberSeiNotice(): SeiNoticeState = rememberXyNotice()
-
-@Composable
-fun SeiNoticeHost(state: SeiNoticeState, modifier: Modifier = Modifier) = XyNoticeHost(state, modifier)
-

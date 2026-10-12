@@ -55,11 +55,11 @@ import androidx.compose.ui.unit.dp
  * desktop remote, tema terang/gelap) karena tidak bergantung pada warna latar.
  */
 
-/** Radius kartu kaca. 20dp konsisten dengan [XyCard] lama supaya grid rapi. */
-val XyGlassShape: Shape = RoundedCornerShape(20.dp)
+/** Radius kartu kaca. 20dp konsisten dengan [SeiCard] lama supaya grid rapi. */
+val SeiGlassShape: Shape = RoundedCornerShape(20.dp)
 
 /** Radius lebih kecil untuk ubin kecil di grid dashboard. */
-val XyGlassTileShape: Shape = RoundedCornerShape(16.dp)
+val SeiGlassTileShape: Shape = RoundedCornerShape(16.dp)
 
 /**
  * Permukaan datar (matte) XyDesk.
@@ -72,8 +72,8 @@ val XyGlassTileShape: Shape = RoundedCornerShape(16.dp)
  * (dipertahankan hanya untuk kompatibilitas tanda tangan).
  */
 @Composable
-fun Modifier.xyGlass(
-    shape: Shape = XyGlassShape,
+fun Modifier.seiSurface(
+    shape: Shape = SeiGlassShape,
     opacity: Float = 1f,
     strength: Float = 1f,
     edge: Boolean = true,
@@ -104,7 +104,7 @@ fun Modifier.xyGlass(
  * sapuan diagonal, dan bevel tepi dihidupkan kembali khusus di sini.
  */
 @Composable
-fun Modifier.xyPurpleGlass(shape: Shape = XyGlassShape): Modifier = this
+fun Modifier.seiMusicGlass(shape: Shape = SeiGlassShape): Modifier = this
     .clip(shape)
     .background(Color(0xEB2C1647))
     .background(
@@ -135,22 +135,22 @@ fun Modifier.xyPurpleGlass(shape: Shape = XyGlassShape): Modifier = this
     )
 
 /**
- * Kartu kaca untuk mengelompokkan konten — pengganti [XyCard] di layar yang
- * sudah memakai bahasa visual baru. Isinya `ColumnScope` seperti [XyCard]
+ * Kartu kaca untuk mengelompokkan konten — pengganti [SeiCard] di layar yang
+ * sudah memakai bahasa visual baru. Isinya `ColumnScope` seperti [SeiCard]
  * supaya pemindahan konten lama tidak perlu mengubah tubuh kartunya.
  */
 @Composable
-fun XyGlassCard(
+fun SeiGlassCard(
     modifier: Modifier = Modifier,
     padding: Dp = 16.dp,
-    shape: Shape = XyGlassShape,
+    shape: Shape = SeiGlassShape,
     opacity: Float = 1f,
     strength: Float = 1f,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Column(
         modifier = modifier
-            .xyGlass(shape = shape, opacity = opacity, strength = strength)
+            .seiSurface(shape = shape, opacity = opacity, strength = strength)
             .padding(padding),
         content = content,
     )
@@ -159,11 +159,11 @@ fun XyGlassCard(
 /**
  * Ubin dashboard: ikon dalam kotak membulat + judul + keterangan opsional.
  *
- * Dipakai berpasangan dengan [XyTileGrid] supaya daftar menu tampil sebagai
+ * Dipakai berpasangan dengan [SeiTileGrid] supaya daftar menu tampil sebagai
  * grid kartu yang rata, bukan daftar panjang yang harus digulir.
  */
 @Composable
-fun XyGlassTile(
+fun SeiGlassTile(
     icon: ImageVector,
     title: String,
     onClick: () -> Unit,
@@ -205,7 +205,7 @@ fun XyGlassTile(
 
     Row(
         modifier = modifier
-            .xyGlass(shape = XyGlassTileShape)
+            .seiSurface(shape = SeiGlassTileShape)
             .clickable(enabled = enabled, onClick = onClick)
             .semantics { contentDescription = title }
             .padding(pad),
@@ -270,7 +270,7 @@ class XyTileGridScope internal constructor() {
 }
 
 @Composable
-fun XyTileGrid(
+fun SeiTileGrid(
     modifier: Modifier = Modifier,
     columns: Int = 2,
     spacing: Dp = 10.dp,
@@ -308,10 +308,10 @@ fun XyTileGrid(
 /**
  * Baris daftar bergaya kaca: ikon + judul + keterangan + aksi di kanan.
  * Dipakai untuk daftar menu yang memang lebih cocok sebagai baris (misalnya
- * pilihan dengan status aktif), pendamping [XyGlassTile] yang berbentuk grid.
+ * pilihan dengan status aktif), pendamping [SeiGlassTile] yang berbentuk grid.
  */
 @Composable
-fun XyGlassRow(
+fun SeiGlassRow(
     icon: ImageVector?,
     title: String,
     onClick: () -> Unit,
@@ -321,7 +321,7 @@ fun XyGlassRow(
 ) {
     Row(
         modifier = modifier
-            .xyGlass(shape = RoundedCornerShape(16.dp))
+            .seiSurface(shape = RoundedCornerShape(16.dp))
             .clickable(onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 9.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -362,7 +362,7 @@ fun XyGlassRow(
 
 /** Judul seksi kecil di atas kartu/ubin, supaya hierarki dashboard jelas. */
 @Composable
-fun XyGlassSectionLabel(text: String, modifier: Modifier = Modifier) {
+fun SeiGlassSectionLabel(text: String, modifier: Modifier = Modifier) {
     Text(
         text.uppercase(),
         modifier = modifier.padding(start = 4.dp, bottom = 2.dp),
@@ -371,78 +371,3 @@ fun XyGlassSectionLabel(text: String, modifier: Modifier = Modifier) {
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
 }
-
-/** Rebranded SeiDesk RM aliases for glass design primitives */
-val SeiGlassShape: Shape get() = XyGlassShape
-val SeiGlassTileShape: Shape get() = XyGlassTileShape
-
-@Composable
-fun Modifier.seiGlass(
-    shape: Shape = SeiGlassShape,
-    opacity: Float = 1f,
-    strength: Float = 1f,
-    edge: Boolean = true,
-): Modifier = xyGlass(shape = shape, opacity = opacity, strength = strength, edge = edge)
-
-@Composable
-fun SeiGlassCard(
-    modifier: Modifier = Modifier,
-    padding: Dp = 16.dp,
-    shape: Shape = SeiGlassShape,
-    opacity: Float = 1f,
-    strength: Float = 1f,
-    content: @Composable ColumnScope.() -> Unit,
-) = XyGlassCard(
-    modifier = modifier,
-    padding = padding,
-    shape = shape,
-    opacity = opacity,
-    strength = strength,
-    content = content,
-)
-
-@Composable
-fun SeiGlassTile(
-    icon: ImageVector,
-    title: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    subtitle: String? = null,
-    selected: Boolean = false,
-    enabled: Boolean = true,
-    trailing: (@Composable () -> Unit)? = null,
-    titleMaxLines: Int = 1,
-) = XyGlassTile(
-    icon = icon,
-    title = title,
-    onClick = onClick,
-    modifier = modifier,
-    subtitle = subtitle,
-    selected = selected,
-    enabled = enabled,
-    trailing = trailing,
-    titleMaxLines = titleMaxLines,
-)
-
-@Composable
-fun SeiGlassRow(
-    icon: ImageVector?,
-    title: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    subtitle: String? = null,
-    trailing: (@Composable () -> Unit)? = null,
-) = XyGlassRow(
-    icon = icon,
-    title = title,
-    onClick = onClick,
-    modifier = modifier,
-    subtitle = subtitle,
-    trailing = trailing,
-)
-
-@Composable
-fun SeiGlassSectionLabel(text: String, modifier: Modifier = Modifier) =
-    XyGlassSectionLabel(text = text, modifier = modifier)
-
-

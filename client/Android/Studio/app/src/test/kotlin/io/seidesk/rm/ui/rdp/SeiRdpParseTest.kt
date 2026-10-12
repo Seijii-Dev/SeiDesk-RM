@@ -4,7 +4,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 
-class XyRdpParseTest {
+class SeiRdpParseTest {
     @Test
     fun `tunnel ip tanpa tailscale terbaca`() {
         val json = """
@@ -14,7 +14,7 @@ class XyRdpParseTest {
           "tailscale":{"ip":""},
           "rustdesk":{"id":"147088785"}}}
         """.trimIndent()
-        val a = XyRdpClient.parseAccess(json)!!
+        val a = SeiRdpClient.parseAccess(json)!!
         assertEquals("bore.pub:12345", a.tunnelAddress)
         assertEquals(12345, a.tunnelPort)
         assertEquals("ok", a.selftest)
@@ -24,13 +24,13 @@ class XyRdpParseTest {
 
     @Test
     fun `tanpa blok akses menghasilkan null`() {
-        assertNull(XyRdpClient.parseAccess("{}"))
-        assertNull(XyRdpClient.parseAccess("bukan json"))
+        assertNull(SeiRdpClient.parseAccess("{}"))
+        assertNull(SeiRdpClient.parseAccess("bukan json"))
     }
 
     @Test
     fun `field hilang tidak melempar`() {
-        val a = XyRdpClient.parseAccess("""{"akses":{"mode":"tunnel"}}""")!!
+        val a = SeiRdpClient.parseAccess("""{"akses":{"mode":"tunnel"}}""")!!
         assertEquals("tunnel", a.mode)
         assertEquals("", a.tunnelAddress)
         assertEquals(0, a.tunnelPort)

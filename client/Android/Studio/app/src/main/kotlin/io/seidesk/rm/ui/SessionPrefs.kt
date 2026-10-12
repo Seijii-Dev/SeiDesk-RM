@@ -2,10 +2,10 @@ package io.seidesk.rm.ui
 
 import android.content.Context
 import io.seidesk.rm.core.SmartResolution
-import io.seidesk.rm.ui.input.XyPadCluster
-import io.seidesk.rm.ui.input.XyPadLayout
-import io.seidesk.rm.ui.input.XyPadPos
-import io.seidesk.rm.ui.input.XyStickMode
+import io.seidesk.rm.ui.input.SeiPadCluster
+import io.seidesk.rm.ui.input.SeiPadLayout
+import io.seidesk.rm.ui.input.SeiPadPos
+import io.seidesk.rm.ui.input.SeiStickMode
 
 /** Cara input di layar sesi. */
 enum class InputMode(val title: String, val titleEn: String, val detail: String, val detailEn: String) {
@@ -153,32 +153,32 @@ class SessionPrefs(context: Context) {
      * pecahan ukuran layar, supaya pad tidak menutupi overlay lain dan tetap
      * pas saat orientasi berubah.
      */
-    fun virtualPadLayout(deviceId: String): Map<XyPadCluster, XyPadPos>? =
-        XyPadLayout.decode(device.getString("$deviceId.padlayout", null))
+    fun virtualPadLayout(deviceId: String): Map<SeiPadCluster, SeiPadPos>? =
+        SeiPadLayout.decode(device.getString("$deviceId.padlayout", null))
 
-    fun setVirtualPadLayout(deviceId: String, layout: Map<XyPadCluster, XyPadPos>) {
-        device.edit().putString("$deviceId.padlayout", XyPadLayout.encode(layout)).apply()
+    fun setVirtualPadLayout(deviceId: String, layout: Map<SeiPadCluster, SeiPadPos>) {
+        device.edit().putString("$deviceId.padlayout", SeiPadLayout.encode(layout)).apply()
     }
 
     /**
      * Tujuan stik kiri pada gamepad virtual: kursor, tombol WASD, atau tombol
-     * panah. Disimpan sebagai ordinal [XyStickMode].
+     * panah. Disimpan sebagai ordinal [SeiStickMode].
      */
 
     /** Varian menu sesi: popup tengah (default) atau drawer samping. */
     var menuDrawer: Boolean
         get() = input.getBoolean(KEY_MENU_DRAWER, false)
         set(v) = input.edit().putBoolean(KEY_MENU_DRAWER, v).apply()
-    var virtualPadStickMode: XyStickMode
-        get() = XyStickMode.entries.getOrElse(input.getInt(KEY_VIRTUAL_PAD_STICK, XyStickMode.WASD.ordinal)) {
-            XyStickMode.WASD
+    var virtualPadStickMode: SeiStickMode
+        get() = SeiStickMode.entries.getOrElse(input.getInt(KEY_VIRTUAL_PAD_STICK, SeiStickMode.WASD.ordinal)) {
+            SeiStickMode.WASD
         }
         set(v) = input.edit().putInt(KEY_VIRTUAL_PAD_STICK, v.ordinal).apply()
 
     /** Skala ukuran gamepad virtual (0.7x - 1.4x). */
     var virtualPadScale: Float
         get() = input.getFloat(KEY_VIRTUAL_PAD_SCALE, 1f)
-        set(v) = input.edit().putFloat(KEY_VIRTUAL_PAD_SCALE, XyPadLayout.clampScale(v)).apply()
+        set(v) = input.edit().putFloat(KEY_VIRTUAL_PAD_SCALE, SeiPadLayout.clampScale(v)).apply()
 
     /** Mode Gyro Air-Mouse (miringkan HP untuk menggerakkan kursor). */
     var gyroMouseEnabled: Boolean

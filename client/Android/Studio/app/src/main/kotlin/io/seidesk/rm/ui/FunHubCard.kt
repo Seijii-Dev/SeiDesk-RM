@@ -39,8 +39,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.draw.clip
-import io.seidesk.rm.ui.components.XyOverlay
-import io.seidesk.rm.ui.components.XyPillButton
+import io.seidesk.rm.ui.components.SeiOverlay
+import io.seidesk.rm.ui.components.SeiPillButton
 import kotlinx.coroutines.launch
 
 private const val COMMUNITY_JOKE_MAX_CHARS = 280
@@ -208,7 +208,7 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
             )
             feedError != null && jokes.isEmpty() -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(feedError.orEmpty(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
-                XyPillButton(
+                SeiPillButton(
                     text = xy("Coba lagi", "Try again"),
                     onClick = { refreshKey += 1 },
                     primary = false,
@@ -325,7 +325,7 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    XyPillButton(
+                    SeiPillButton(
                         text = xy(" Foto / stiker / GIF", "📷 Photo / sticker / GIF"),
                         onClick = {
                             pickVisual.launch("image/*")
@@ -367,7 +367,7 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
                         color = if (containsLink) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.weight(1f),
                     )
-                    XyPillButton(
+                    SeiPillButton(
                         text = if (submitting) xy("Mengirim…", "Posting…") else xy("Kirim anonim", "Post anonymously"),
                         onClick = {
                             if (canSubmit) {
@@ -419,7 +419,7 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
                 )
             }
         } else {
-            XyPillButton(
+            SeiPillButton(
                 text = xy("Tulis postingan", "Write a post"),
                 onClick = { composerOpen = true },
                 primary = false,
@@ -436,7 +436,7 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
     }
 
     deleteTarget?.let { target ->
-        XyOverlay(
+        SeiOverlay(
             title = xy("Hapus postingan?", "Delete post?"),
             onDismiss = { if (!deleting) deleteTarget = null },
         ) {
@@ -448,14 +448,14 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    XyPillButton(
+                    SeiPillButton(
                         text = xy("Batal", "Cancel"),
                         onClick = { deleteTarget = null },
                         primary = false,
                         compact = true,
                         modifier = Modifier.weight(1f),
                     )
-                    XyPillButton(
+                    SeiPillButton(
                         text = if (deleting) xy("Menghapus…", "Deleting…") else xy("Hapus", "Delete"),
                         onClick = {
                             scope.launch {
@@ -485,7 +485,7 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
     }
 
     reportTarget?.let { joke ->
-        XyOverlay(
+        SeiOverlay(
             title = xy("Laporkan postingan", "Report this post"),
             onDismiss = { if (!reporting) reportTarget = null },
         ) {
@@ -498,7 +498,7 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                XyPillButton(
+                SeiPillButton(
                     text = xy("Batal", "Cancel"),
                     onClick = { reportTarget = null },
                     enabled = !reporting,
@@ -506,7 +506,7 @@ internal fun FunHubCard(onHide: (() -> Unit)? = null) {
                     compact = true,
                     modifier = Modifier.weight(1f),
                 )
-                XyPillButton(
+                SeiPillButton(
                     text = if (reporting) xy("Mengirim…", "Sending…") else xy("Kirim laporan", "Submit report"),
                     onClick = {
                         if (!reporting) {
@@ -764,7 +764,7 @@ private fun CommunityJokeItem(
                             inner()
                         },
                     )
-                    XyPillButton(
+                    SeiPillButton(
                         text = if (isCommentBusy) "…" else xy("Kirim", "Send"),
                         onClick = {
                             val clean = commentDraft.trim()

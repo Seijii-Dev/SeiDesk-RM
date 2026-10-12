@@ -8,7 +8,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 /** Hasil pembacaan `out/rdp-status.json` dari fork pengguna. */
-internal data class XyRdpAccess(
+internal data class SeiRdpAccess(
     val mode: String,
     val tunnelStatus: String,
     val tunnelAddress: String,
@@ -20,7 +20,7 @@ internal data class XyRdpAccess(
     val rustdeskId: String,
 )
 
-internal data class XyRdpRun(
+internal data class SeiRdpRun(
     val number: Long,
     val status: String,
     val conclusion: String?,
@@ -32,7 +32,7 @@ internal data class XyRdpRun(
  * pengguna sendiri (scope `repo` + `workflow`) dan hanya menyentuh API publik
  * GitHub — tidak ada server perantara, tidak ada akun pusat.
  */
-internal object XyRdpClient {
+internal object SeiRdpClient {
     private const val API = "https://api.github.com"
 
     private fun call(
@@ -75,30 +75,30 @@ internal object XyRdpClient {
 
     suspend fun forkExists(token: String, login: String): Boolean =
         withContext(Dispatchers.IO) {
-            call(token, "/repos/$login/${XyRdpConfig.FORK_REPO_NAME}").first == 200
+            call(token, "/repos/$login/${SeiRdpConfig.FORK_REPO_NAME}").first == 200
         }
 
     suspend fun createFork(token: String): Boolean = withContext(Dispatchers.IO) {
-        val code = call(token, "/repos/${XyRdpConfig.TEMPLATE_REPO}/forks", "POST", "{}").first
+        val code = call(token, "/repos/${SeiRdpConfig.TEMPLATE_REPO}/forks", "POST", "{}").first
         code in 200..202 || code == 403 // 403 = fork sudah ada / rate limit lunak
     }
 
     /** Fork baru mematikan Actions; nyalakan workflow template lewat API. */
     suspend fun enableWorkflow(token: String, login: String): Boolean =
         withContext(Dispatchers.IO) {
-            val (code, text) = call(token, "/repos/$login/${XyRdpConfig.FORK_REPO_NAME}/actions/workflows")
+            val (code, text) = call(token, "/repos/$login/${SeiRdpConfig.FORK_REPO_NAME}/actions/workflows")
             if (code != 200) return@withContext false
             val list = runCatching { JSONObject(text).optJSONArray("workflows") }.getOrNull()
                 ?: return@withContext false
             for (i in 0 until list.length()) {
                 val wf = list.optJSONObject(i) ?: continue
                 val path = wf.optString("path")
-                if (!path.endsWith(XyRdpConfig.WORKFLOW_FILE)) continue
+                if (!path.endsWith(SeiRdpConfig.WORKFLOW_FILE)) continue
                 if (wf.optString("state") == "active") return@withContext true
                 val id = wf.optLong("id")
                 val en = call(
                     token,
-                    "/repos/$login/${XyRdpConfig.FORK_REPO_NAME}/actions/workflows/$id/enable",
+                    "/repos/$login/${SeiRdpConfig.FORK_REPO_NAME}/actions/workflows/$id/enable",
                     "PUT",
                 ).first
                 return@withContext en in 200..204
@@ -121,24 +121,24 @@ internal object XyRdpClient {
             }
             val code = call(
                 token,
-                "/repos/$login/${XyRdpConfig.FORK_REPO_NAME}/actions/workflows/${XyRdpConfig.WORKFLOW_FILE}/dispatches",
+                "/repos/$login/${SeiRdpConfig.FORK_REPO_NAME}/actions/workflows/${SeiRdpConfig.WORKFLOW_FILE}/dispatches",
                 "POST",
                 body.toString(),
             ).first
             code in 200..204
         }
 
-    suspend fun latestRun(token: String, login: String): XyRdpRun? =
+    suspend fun latestRun(token: String, login: String): SeiRdpRun? =
         withContext(Dispatchers.IO) {
             val (code, text) = call(
                 token,
-                "/repos/$login/${XyRdpConfig.FORK_REPO_NAME}/actions/runs?per_page=3",
+                "/repos/$login/${SeiRdpConfig.FORK_REPO_NAME}/actions/runs?per_page=3",
             )
             if (code != 200) return@withContext null
             val runs = runCatching { JSONObject(text).optJSONArray("workflow_runs") }.getOrNull()
                 ?: return@withContext null
             val first = runs.optJSONObject(0) ?: return@withContext null
-            XyRdpRun(
+            SeiRdpRun(
                 number = first.optLong("run_number"),
                 status = first.optString("status"),
                 conclusion = first.optString("conclusion", "").takeIf { it.isNotBlank() },
@@ -147,11 +147,11 @@ internal object XyRdpClient {
         }
 
     /** Status sesi dari branch `status` fork pengguna (konten base64). */
-    suspend fun access(token: String, login: String): XyRdpAccess? =
+    suspend fun access(token: String, login: String): SeiRdpAccess? =
         withContext(Dispatchers.IO) {
             val (code, text) = call(
                 token,
-                "/repos/$login/${XyRdpConfig.FORK_REPO_NAME}/contents/out%2Frdp-status.json?ref=${XyRdpConfig.STATUS_REF}",
+                "/repos/$login/${SeiRdpConfig.FORK_REPO_NAME}/contents/out%2Frdp-status.json?ref=${SeiRdpConfig.STATUS_REF}",
             )
             if (code != 200) return@withContext null
             val content = runCatching { JSONObject(text).optString("content") }.getOrNull()
@@ -163,13 +163,13 @@ internal object XyRdpClient {
         }
 
     /** Parser murni — bisa diuji unit tanpa jaringan. */
-    fun parseAccess(json: String): XyRdpAccess? = runCatching {
+    fun parseAccess(json: String): SeiRdpAccess? = runCatching {
         val root = JSONObject(json)
         val akses = root.optJSONObject("akses") ?: return@runCatching null
         val tunnel = akses.optJSONObject("tunnel")
         val tailscale = akses.optJSONObject("tailscale")
         val rustdesk = akses.optJSONObject("rustdesk")
-        XyRdpAccess(
+        SeiRdpAccess(
             mode = akses.optString("mode"),
             tunnelStatus = tunnel?.optString("status").orEmpty(),
             tunnelAddress = tunnel?.optString("address").orEmpty(),
@@ -182,8 +182,3 @@ internal object XyRdpClient {
         )
     }.getOrNull()
 }
-
-internal typealias SeiRdpClient = XyRdpClient
-internal typealias SeiRdpAccess = XyRdpAccess
-internal typealias SeiRdpRun = XyRdpRun
-

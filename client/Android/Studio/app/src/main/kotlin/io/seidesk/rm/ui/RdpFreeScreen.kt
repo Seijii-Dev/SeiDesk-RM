@@ -122,7 +122,7 @@ fun RdpFreeScreen(onBack: () -> Unit, onConnect: (ConnectionProfile) -> Unit) {
     }
 
     Column(Modifier.fillMaxSize()) {
-        XyTopBar(title = "RdpFree", onBack = onBack)
+        SeiTopBar(title = "RdpFree", onBack = onBack)
         Column(
             Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -130,7 +130,7 @@ fun RdpFreeScreen(onBack: () -> Unit, onConnect: (ConnectionProfile) -> Unit) {
             Text("XyRDP · kontrol native", style = MaterialTheme.typography.titleLarge)
             if (message.isNotBlank()) Text(message, color = MaterialTheme.colorScheme.primary)
             if (!connected) {
-                XyCard(Modifier.fillMaxWidth()) {
+                SeiCard(Modifier.fillMaxWidth()) {
                     Text("Hubungkan repo, lalu aplikasi", style = MaterialTheme.typography.titleMedium)
                     RdpFreeApi.ONBOARDING_STEPS.forEachIndexed { index, step ->
                         Spacer(Modifier.height(8.dp))
@@ -138,17 +138,17 @@ fun RdpFreeScreen(onBack: () -> Unit, onConnect: (ConnectionProfile) -> Unit) {
                     }
                     Text("Install GitHub App berarti memberikan izin repository di GitHub, bukan memasang APK. Login saja belum memberi akses repo.")
                     Spacer(Modifier.height(12.dp))
-                    XyPillButton("Mulai / lanjut panduan repo", { openBrowser(RdpFreeApi.CONNECTION_URL) }, primary = true)
+                    SeiPillButton("Mulai / lanjut panduan repo", { openBrowser(RdpFreeApi.CONNECTION_URL) }, primary = true)
                     Spacer(Modifier.height(12.dp))
                     Text("Sudah selesai setup? Buat token di menu XyDesk website. Jangan masukkan password admin atau token GitHub.")
                     Spacer(Modifier.height(12.dp))
-                    XyPillButton("Buka halaman token", {
+                    SeiPillButton("Buka halaman token", {
                         openBrowser(RdpFreeApi.DEVICES_URL)
                     }, primary = false)
                     Spacer(Modifier.height(12.dp))
-                    XyField(tokenInput, { tokenInput = it.take(100) }, "Token perangkat", isPassword = true)
+                    SeiField(tokenInput, { tokenInput = it.take(100) }, "Token perangkat", isPassword = true)
                     Spacer(Modifier.height(12.dp))
-                    XyPillButton("Hubungkan", {
+                    SeiPillButton("Hubungkan", {
                         if (!busy) {
                             busy = true
                             scope.launch {
@@ -167,15 +167,15 @@ fun RdpFreeScreen(onBack: () -> Unit, onConnect: (ConnectionProfile) -> Unit) {
                     }, enabled = !busy && RdpFreeApi.TOKEN_PATTERN.matches(tokenInput.trim()))
                 }
             } else {
-                XyCard(Modifier.fillMaxWidth()) {
+                SeiCard(Modifier.fillMaxWidth()) {
                     Text(status?.repo ?: "Memuat repository…", style = MaterialTheme.typography.titleMedium)
                     Text("Status: ${status?.phase ?: "menunggu"}")
                     status?.expiresAt?.let { Text("Berakhir (UTC): $it") }
                     Spacer(Modifier.height(12.dp))
-                    XyPillButton("Durasi: $duration menit", { chooseDuration = true }, primary = false,
+                    SeiPillButton("Durasi: $duration menit", { chooseDuration = true }, primary = false,
                         enabled = !busy && durations.isNotEmpty())
                     Spacer(Modifier.height(8.dp))
-                    XyPillButton("Simpan durasi", {
+                    SeiPillButton("Simpan durasi", {
                         busy = true
                         scope.launch {
                             try {
@@ -189,18 +189,18 @@ fun RdpFreeScreen(onBack: () -> Unit, onConnect: (ConnectionProfile) -> Unit) {
                     }, primary = false, enabled = !busy && inputs != null)
                     Spacer(Modifier.height(12.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        XyPillButton("Run", { confirmAction = "start" }, enabled = !busy && status != null && status?.active == false)
-                        XyPillButton("Stop", { stopRunId = status?.runId; confirmAction = "stop" }, primary = false,
+                        SeiPillButton("Run", { confirmAction = "start" }, enabled = !busy && status != null && status?.active == false)
+                        SeiPillButton("Stop", { stopRunId = status?.runId; confirmAction = "stop" }, primary = false,
                             enabled = !busy && status?.active == true && status?.runId != null)
                     }
                     Spacer(Modifier.height(8.dp))
-                    XyPillButton("Refresh", {
+                    SeiPillButton("Refresh", {
                         busy = true
                         scope.launch { try { load() } catch (e: Exception) { error(e) } finally { busy = false } }
                     }, primary = false, enabled = !busy)
                 }
                 status?.connection?.let { connection ->
-                    XyCard(Modifier.fillMaxWidth()) {
+                    SeiCard(Modifier.fillMaxWidth()) {
                         Text("${connection.host}:${connection.port}", style = MaterialTheme.typography.titleMedium)
                         Text("${connection.username} · ${connection.transport}")
                         if (connection.transport == "tailscale") Text("Pastikan Tailscale di HP terhubung ke jaringan yang sama.")
@@ -211,10 +211,10 @@ fun RdpFreeScreen(onBack: () -> Unit, onConnect: (ConnectionProfile) -> Unit) {
                         }
                         Text("Opsional: Android meminta izin mikrofon saat tersambung. Uji Windows Sound > Input, bukan hanya speaker. Wallpaper desktop aktif.")
                         Spacer(Modifier.height(12.dp))
-                        XyField(password, { password = it }, "Password RDP_PASSWORD", isPassword = true)
+                        SeiField(password, { password = it }, "Password RDP_PASSWORD", isPassword = true)
                         Text("Password tidak dibaca dari GitHub dan tidak disimpan otomatis.")
                         Spacer(Modifier.height(12.dp))
-                        XyPillButton("Hubungkan RDP", {
+                        SeiPillButton("Hubungkan RDP", {
                             busy = true
                             scope.launch {
                                 try {
@@ -231,34 +231,34 @@ fun RdpFreeScreen(onBack: () -> Unit, onConnect: (ConnectionProfile) -> Unit) {
                         }, enabled = !busy && password.isNotBlank())
                     }
                 }
-                XyCard(Modifier.fillMaxWidth()) {
+                SeiCard(Modifier.fillMaxWidth()) {
                     Text("Kelola repository", style = MaterialTheme.typography.titleMedium)
                     Text("Token ini tetap terikat repo saat dibuat. Setelah ganti repo, buat token baru. Hapus repo hanya melalui browser pemilik dengan konfirmasi, bukan lewat token aplikasi.")
                     Spacer(Modifier.height(12.dp))
-                    XyPillButton("Panduan / pilih / hapus repo", { openBrowser(RdpFreeApi.CONNECTION_URL) }, primary = false)
+                    SeiPillButton("Panduan / pilih / hapus repo", { openBrowser(RdpFreeApi.CONNECTION_URL) }, primary = false)
                     Spacer(Modifier.height(8.dp))
-                    XyPillButton("Setup Tailscale & password", { openBrowser(RdpFreeApi.SETUP_URL) }, primary = false)
+                    SeiPillButton("Setup Tailscale & password", { openBrowser(RdpFreeApi.SETUP_URL) }, primary = false)
                     Spacer(Modifier.height(8.dp))
-                    XyPillButton("Ganti token perangkat", { confirmAction = "replace" }, primary = false, enabled = !busy)
+                    SeiPillButton("Ganti token perangkat", { confirmAction = "replace" }, primary = false, enabled = !busy)
                 }
-                XyPillButton("Cabut akses perangkat", { confirmAction = "revoke" }, primary = false, enabled = !busy)
+                SeiPillButton("Cabut akses perangkat", { confirmAction = "revoke" }, primary = false, enabled = !busy)
             }
             Text("Credit: KallAncrit", style = MaterialTheme.typography.labelSmall)
         }
     }
     if (chooseDuration) {
-        XyOverlay(title = "Durasi sesi", onDismiss = { chooseDuration = false }) {
+        SeiOverlay(title = "Durasi sesi", onDismiss = { chooseDuration = false }) {
             Column(Modifier.heightIn(max = 360.dp).verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 durations.forEach { minutes ->
-                    XyPillButton("$minutes menit", { duration = minutes; chooseDuration = false },
+                    SeiPillButton("$minutes menit", { duration = minutes; chooseDuration = false },
                         primary = duration == minutes, modifier = Modifier.fillMaxWidth())
                 }
             }
         }
     }
     confirmAction?.let { action ->
-        XyDialog(
+        SeiDialog(
             title = when (action) { "start" -> "Mulai RDP?"; "stop" -> "Hentikan RDP?"; "replace" -> "Ganti token perangkat?"; else -> "Cabut token perangkat?" },
             body = when (action) {
                 "start" -> "Menggunakan pengaturan tersimpan dan kuota GitHub Actions. Jangan kirim ulang jika koneksi terputus; periksa status dahulu."

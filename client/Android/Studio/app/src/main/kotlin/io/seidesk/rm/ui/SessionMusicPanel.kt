@@ -30,10 +30,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
-import io.seidesk.rm.ui.components.XyIcons
-import io.seidesk.rm.ui.components.XyPillButton
-import io.seidesk.rm.ui.components.xyGlass
-import io.seidesk.rm.ui.components.xyPurpleGlass
+import io.seidesk.rm.ui.components.SeiIcons
+import io.seidesk.rm.ui.components.SeiPillButton
+import io.seidesk.rm.ui.components.seiSurface
+import io.seidesk.rm.ui.components.seiMusicGlass
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.mutableStateOf
@@ -79,10 +79,10 @@ internal fun MusicTab(
                 ),
             )
             if (!playback.notificationAccessGranted) {
-                XyPillButton(
+                SeiPillButton(
                     text = xy("Beri akses notifikasi", "Allow notification access"),
                     onClick = { openSpotifyNotificationAccess(context) },
-                    icon = XyIcons.Music,
+                    icon = SeiIcons.Music,
                     primary = false,
                     compact = true,
                     modifier = Modifier.fillMaxWidth(),
@@ -121,16 +121,16 @@ internal fun MusicTab(
                 )
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                XyPillButton(
+                SeiPillButton(
                     xy("Segarkan", "Refresh"),
                     { SpotifyMediaBridge.refresh(context) },
-                    icon = XyIcons.Refresh,
+                    icon = SeiIcons.Refresh,
                     primary = false,
                     compact = true,
                     modifier = Modifier.weight(1f),
                 )
                 if (playback.sources.any { it.active }) {
-                    XyPillButton(
+                    SeiPillButton(
                         xy("Pilih otomatis", "Auto pick"),
                         { SpotifyMediaBridge.clearSourcePreference(context) },
                         primary = false,
@@ -262,10 +262,10 @@ internal fun MusicTab(
                 ),
             )
             if (!library.discovered) {
-                XyPillButton(
+                SeiPillButton(
                     xy("Cari pemutar", "Find players"),
                     { MediaLibraryBrowser.discover(context) },
-                    icon = XyIcons.Search,
+                    icon = SeiIcons.Search,
                     primary = false,
                     compact = true,
                     modifier = Modifier.fillMaxWidth(),
@@ -288,10 +288,10 @@ internal fun MusicTab(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     library.sources.forEach { source ->
-                        XyPillButton(
+                        SeiPillButton(
                             source.label,
                             { MediaLibraryBrowser.connect(context, source) },
-                            icon = XyIcons.Library,
+                            icon = SeiIcons.Library,
                             primary = library.connectedPackage == source.packageName,
                             compact = true,
                         )
@@ -321,10 +321,10 @@ internal fun MusicTab(
                         overflow = TextOverflow.Ellipsis,
                     )
                     if (library.crumbs.size > 1) {
-                        XyPillButton(
+                        SeiPillButton(
                             xy("Naik", "Up"),
                             { MediaLibraryBrowser.up() },
-                            icon = XyIcons.ChevronLeft,
+                            icon = SeiIcons.ChevronLeft,
                             primary = false,
                             compact = true,
                         )
@@ -386,7 +386,7 @@ private fun SourceRow(source: MediaSourceEntry, onSelect: () -> Unit) {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Icon(
-            if (source.active) XyIcons.Check else XyIcons.Music,
+            if (source.active) SeiIcons.Check else SeiIcons.Music,
             contentDescription = null,
             tint = if (source.active) {
                 MaterialTheme.colorScheme.primary
@@ -429,7 +429,7 @@ private fun QueueRow(entry: MediaQueueEntry, onClick: () -> Unit) {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Icon(
-            if (entry.active) XyIcons.Play else XyIcons.Music,
+            if (entry.active) SeiIcons.Play else SeiIcons.Music,
             contentDescription = null,
             tint = if (entry.active) {
                 MaterialTheme.colorScheme.primary
@@ -478,9 +478,9 @@ private fun LibraryRow(entry: MediaLibraryEntry, onClick: () -> Unit) {
     ) {
         Icon(
             when {
-                entry.browsable -> XyIcons.Folder
-                entry.playable -> XyIcons.Music
-                else -> XyIcons.File
+                entry.browsable -> SeiIcons.Folder
+                entry.playable -> SeiIcons.Music
+                else -> SeiIcons.File
             },
             contentDescription = null,
             tint = if (enabled) {
@@ -511,7 +511,7 @@ private fun LibraryRow(entry: MediaLibraryEntry, onClick: () -> Unit) {
         if (entry.browsable) {
             Spacer(Modifier.width(2.dp))
             Icon(
-                XyIcons.ChevronRight,
+                SeiIcons.ChevronRight,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(14.dp),
@@ -519,7 +519,7 @@ private fun LibraryRow(entry: MediaLibraryEntry, onClick: () -> Unit) {
         } else if (entry.playable) {
             Spacer(Modifier.width(2.dp))
             Icon(
-                XyIcons.Play,
+                SeiIcons.Play,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(13.dp),
@@ -553,7 +553,7 @@ internal fun OnlineMusicSection() {
             Modifier
                 .weight(1f)
                 .heightIn(min = 40.dp)
-                .xyPurpleGlass(RoundedCornerShape(12.dp))
+                .seiMusicGlass(RoundedCornerShape(12.dp))
                 .padding(horizontal = 12.dp, vertical = 10.dp),
             contentAlignment = Alignment.CenterStart,
         ) {
@@ -577,7 +577,7 @@ internal fun OnlineMusicSection() {
                 singleLine = true,
             )
         }
-        XyPillButton(
+        SeiPillButton(
             xy("Cari", "Search"),
             {
                 val q = scQuery.trim()
@@ -590,7 +590,7 @@ internal fun OnlineMusicSection() {
                     }
                 }
             },
-            icon = XyIcons.Search,
+            icon = SeiIcons.Search,
             primary = false,
             compact = true,
             enabled = !scSearching,
@@ -679,26 +679,26 @@ internal fun OnlineMusicSection() {
             else -> Unit
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            XyPillButton(
+            SeiPillButton(
                 "\u25c0\u25c0",
                 { OnlineMusicPlayer.previous() },
                 primary = false,
                 compact = true,
                 modifier = Modifier.weight(1f),
             )
-            XyPillButton(
+            SeiPillButton(
                 if (online.status == OnlineMusicPlayer.Status.PLAYING) {
                     xy("Jeda", "Pause")
                 } else {
                     xy("Putar", "Play")
                 },
                 { OnlineMusicPlayer.toggle() },
-                icon = XyIcons.Music,
+                icon = SeiIcons.Music,
                 primary = false,
                 compact = true,
                 modifier = Modifier.weight(1f),
             )
-            XyPillButton(
+            SeiPillButton(
                 "\u25b6\u25b6",
                 { OnlineMusicPlayer.next() },
                 primary = false,
@@ -722,7 +722,7 @@ private fun ScResultRow(track: ScTrack, active: Boolean, onClick: () -> Unit) {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Icon(
-            if (active) XyIcons.Play else XyIcons.Music,
+            if (active) SeiIcons.Play else SeiIcons.Music,
             contentDescription = null,
             tint = if (active) {
                 MaterialTheme.colorScheme.primary

@@ -33,7 +33,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.seidesk.rm.ui.components.XyIcons
+import io.seidesk.rm.ui.components.SeiIcons
 
 /**
  * Latar contoh untuk pratinjau gaya tombol.
@@ -53,7 +53,7 @@ private val HudPreviewBackdrop = Brush.linearGradient(
 /**
  * Pemilih gaya tombol kontrol dengan **pratinjau gaya aslinya**.
  *
- * Sebelumnya pilihan ini berupa `XySegmented` berisi teks ("Gelap tegas",
+ * Sebelumnya pilihan ini berupa `SeiSegmented` berisi teks ("Gelap tegas",
  * "Gelap lembut", "Transparan") sehingga pengguna harus menebak hasilnya lalu
  * mencoba satu per satu di atas layar remote. Sekarang tiap pilihan menggambar
  * tombol sungguhan memakai [hudPalette] — fungsi yang sama yang dipakai lapisan
@@ -171,7 +171,7 @@ private fun HudPreviewKey(plate: HudPlate, pressed: Boolean) {
         contentAlignment = Alignment.Center,
     ) {
         Icon(
-            XyIcons.ClickLeft,
+            SeiIcons.ClickLeft,
             contentDescription = null,
             tint = hudPalette(plate).ink,
             modifier = Modifier.size(HudPreviewKeySize * 0.47f),

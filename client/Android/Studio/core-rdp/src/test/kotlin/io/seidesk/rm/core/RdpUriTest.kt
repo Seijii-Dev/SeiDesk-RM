@@ -106,14 +106,14 @@ class RdpUriTest {
 
     @Test
     fun audioRemoteTidakKirimSound() {
-        val p = params(simple(), RdpOptions(audioMode = XyAudioMode.REMOTE))
+        val p = params(simple(), RdpOptions(audioMode = SeiAudioMode.REMOTE))
         assertEquals("1", p["audio-mode"])
         assertFalse(p.containsKey("sound"))
     }
 
     @Test
     fun audioMatiPakaiModeDua() {
-        val p = params(simple(), RdpOptions(audioMode = XyAudioMode.OFF))
+        val p = params(simple(), RdpOptions(audioMode = SeiAudioMode.OFF))
         assertEquals("2", p["audio-mode"])
         assertFalse(p.containsKey("sound"))
     }
@@ -163,10 +163,10 @@ class RdpUriTest {
 
     @Test
     fun gatewayArgPortDefaultDihilangkan() {
-        assertEquals("g:gw.corp.id", RdpUri.gatewayArg(XyGateway(host = "gw.corp.id")))
+        assertEquals("g:gw.corp.id", RdpUri.gatewayArg(SeiGateway(host = "gw.corp.id")))
         assertEquals(
             "g:gw.corp.id:8443",
-            RdpUri.gatewayArg(XyGateway(host = "gw.corp.id", port = 8443)),
+            RdpUri.gatewayArg(SeiGateway(host = "gw.corp.id", port = 8443)),
         )
     }
 
@@ -175,7 +175,7 @@ class RdpUriTest {
         assertEquals(
             "g:gw.corp.id,u:kal,d:CORP,p:s3cret",
             RdpUri.gatewayArg(
-                XyGateway(host = "gw.corp.id", username = "kal", password = "s3cret", domain = "CORP"),
+                SeiGateway(host = "gw.corp.id", username = "kal", password = "s3cret", domain = "CORP"),
             ),
         )
     }
@@ -184,13 +184,13 @@ class RdpUriTest {
     fun gatewayArgLewatiFieldKosong() {
         assertEquals(
             "g:gw.corp.id",
-            RdpUri.gatewayArg(XyGateway(host = "gw.corp.id", username = "  ", password = "", domain = null)),
+            RdpUri.gatewayArg(SeiGateway(host = "gw.corp.id", username = "  ", password = "", domain = null)),
         )
     }
 
     @Test
     fun gatewayMasukQueryParams() {
-        val p = params(simple(), RdpOptions(gateway = XyGateway(host = "gw.corp.id", port = 8443)))
+        val p = params(simple(), RdpOptions(gateway = SeiGateway(host = "gw.corp.id", port = 8443)))
         assertEquals("g:gw.corp.id:8443", p["gateway"])
     }
 
@@ -198,7 +198,7 @@ class RdpUriTest {
 
     @Test
     fun ultraLowLatencyProfileMenghasilkanFlagAsyncDanMatikanDekorasi() {
-        val opts = RdpOptions().withStreamProfile(XyStreamProfile.ULTRA_LOW_LATENCY)
+        val opts = RdpOptions().withStreamProfile(SeiStreamProfile.ULTRA_LOW_LATENCY)
         val p = params(simple(), opts)
         assertEquals("AVC420", p["gfx"])
         assertEquals("24", p["bpp"])
@@ -214,7 +214,7 @@ class RdpUriTest {
     @Test
     fun securityDanSessionHardeningFlagsMasukKeQueryParams() {
         val opts = RdpOptions(
-            securityProtocol = XySecurityProtocol.NLA,
+            securityProtocol = SeiSecurityProtocol.NLA,
             tlsSecLevel = 0,
             consoleAdmin = true,
             restrictedAdmin = true,
@@ -241,8 +241,8 @@ class RdpUriTest {
             camera = true,
             microphone = true,
             remoteProgram = "cmd.exe",
-            gateway = XyGateway(host = "gw.corp.id"),
-        ).withPcStreamEngine(XyPcStreamEngine.DIRECT_GAME_ULTRA)
+            gateway = SeiGateway(host = "gw.corp.id"),
+        ).withPcStreamEngine(SeiPcStreamEngine.DIRECT_GAME_ULTRA)
         val p = params(simple(), opts)
         assertTrue(p.containsKey("admin"))
         assertFalse(p.containsKey("dynamic-resolution"))

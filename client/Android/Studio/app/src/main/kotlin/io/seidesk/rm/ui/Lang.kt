@@ -11,7 +11,7 @@ import java.util.Locale
  *
  * Dua bahasa penuh untuk seluruh alur utama: Indonesia (default kalau bahasa
  * sistem Indonesia) dan English. Pilihan disimpan di prefs dan dipakai
- * seluruh layar lewat [XyText.t].
+ * seluruh layar lewat [SeiText.t].
  */
 enum class XyLang(val code: String, val label: String) {
     EN("en", "English"),
@@ -29,7 +29,7 @@ enum class XyLang(val code: String, val label: String) {
  * Ditulis sebagai objek (bukan resource XML) karena banyak yang dipakai
  * sebagai argumen langsung atau dibentuk runtime.
  */
-object XyText {
+object SeiText {
     /**
      * Bahasa aktif sebagai state Compose. Default: English.
      */
@@ -176,19 +176,19 @@ object LangPrefs {
         val lang = stored?.let { code ->
             XyLang.entries.firstOrNull { it.code == code }
         } ?: XyLang.EN
-        XyText.setLang(lang)
+        SeiText.setLang(lang)
         loaded = true
         return lang
     }
 
-    fun current(): XyLang = XyText.current()
+    fun current(): XyLang = SeiText.current()
 
     fun set(context: Context, lang: XyLang) {
         context.getSharedPreferences("seidesk.lang", Context.MODE_PRIVATE)
             .edit()
             .putString("lang", lang.code)
             .apply()
-        XyText.setLang(lang)
+        SeiText.setLang(lang)
     }
 
     fun isLoaded(): Boolean = loaded
@@ -200,13 +200,13 @@ object LangPrefs {
  * teks yang memakai `xy()` / `t()` render ulang sendiri.
  */
 @Composable
-fun xyLang(): XyLang = XyText.current()
+fun xyLang(): XyLang = SeiText.current()
 
-/** Pintasan composable: pakai [XyText.t] dengan recomposition saat bahasa ganti. */
+/** Pintasan composable: pakai [SeiText.t] dengan recomposition saat bahasa ganti. */
 @Composable
 fun t(key: String): String {
     xyLang()
-    return XyText.t(key)
+    return SeiText.t(key)
 }
 
 /**
@@ -219,7 +219,7 @@ fun xy(id: String, en: String, vararg args: Any?): String =
 
 /** Versi non-composable (notice, callback) — pakai bahasa yang sedang aktif. */
 fun xyNow(id: String, en: String, vararg args: Any?): String =
-    fill(if (XyText.current() == XyLang.ID) id else en, args)
+    fill(if (SeiText.current() == XyLang.ID) id else en, args)
 
 private fun fill(template: String, args: Array<out Any?>): String {
     if (args.isEmpty()) return template

@@ -39,21 +39,21 @@ class RdpOptionsTest {
 
     @Test
     fun audioModeWireSesuaiArgumenCliFreeRdp() {
-        assertEquals(0, XyAudioMode.DEVICE.wire)
-        assertEquals(1, XyAudioMode.REMOTE.wire)
-        assertEquals(2, XyAudioMode.OFF.wire)
+        assertEquals(0, SeiAudioMode.DEVICE.wire)
+        assertEquals(1, SeiAudioMode.REMOTE.wire)
+        assertEquals(2, SeiAudioMode.OFF.wire)
     }
 
     @Test
     fun gatewayIdGabunganHostPort() {
-        assertEquals("gw.corp.id:443", XyGateway(host = "gw.corp.id").id)
-        assertEquals("gw.corp.id:8443", XyGateway(host = "gw.corp.id", port = 8443).id)
+        assertEquals("gw.corp.id:443", SeiGateway(host = "gw.corp.id").id)
+        assertEquals("gw.corp.id:8443", SeiGateway(host = "gw.corp.id", port = 8443).id)
     }
 
     @Test
     fun opsiDefaultAmanUntukUserBaru() {
         val o = RdpOptions()
-        assertEquals(XyAudioMode.DEVICE, o.audioMode)
+        assertEquals(SeiAudioMode.DEVICE, o.audioMode)
         assertTrue(o.clipboard)
         assertTrue(o.udpTransport)
         assertTrue(o.networkAutoDetect)
@@ -107,15 +107,15 @@ class RdpOptionsTest {
     fun streamProfilePresetsMengaturOpsiPerformaDanCodecDenganBenar() {
         // AUTO adalah preset bawaan, jadi pipeline async harus ikut nyala:
         // tanpa itu sesi default menunggu antrean jaringan sebelum merender.
-        val auto = RdpOptions().withStreamProfile(XyStreamProfile.AUTO)
-        assertEquals(XyStreamProfile.AUTO, auto.streamProfile)
+        val auto = RdpOptions().withStreamProfile(SeiStreamProfile.AUTO)
+        assertEquals(SeiStreamProfile.AUTO, auto.streamProfile)
         assertTrue(auto.asyncUpdate)
         assertTrue(auto.asyncChannels)
         assertTrue(auto.networkAutoDetect)
         assertEquals(32, auto.colorDepth)
 
-        val ultra = RdpOptions().withStreamProfile(XyStreamProfile.ULTRA_LOW_LATENCY)
-        assertEquals(XyStreamProfile.ULTRA_LOW_LATENCY, ultra.streamProfile)
+        val ultra = RdpOptions().withStreamProfile(SeiStreamProfile.ULTRA_LOW_LATENCY)
+        assertEquals(SeiStreamProfile.ULTRA_LOW_LATENCY, ultra.streamProfile)
         assertTrue(ultra.lowBandwidth)
         assertTrue(ultra.asyncUpdate)
         assertTrue(ultra.asyncChannels)
@@ -124,8 +124,8 @@ class RdpOptionsTest {
         assertEquals(24, ultra.colorDepth)
         assertEquals("AVC420", ultra.activeCodecLabel())
 
-        val highVis = ultra.withStreamProfile(XyStreamProfile.HIGH_VISUAL)
-        assertEquals(XyStreamProfile.HIGH_VISUAL, highVis.streamProfile)
+        val highVis = ultra.withStreamProfile(SeiStreamProfile.HIGH_VISUAL)
+        assertEquals(SeiStreamProfile.HIGH_VISUAL, highVis.streamProfile)
         assertTrue(!highVis.lowBandwidth)
         assertTrue(highVis.desktopWallpaper)
         assertTrue(highVis.desktopComposition)
@@ -133,7 +133,7 @@ class RdpOptionsTest {
         assertEquals(32, highVis.colorDepth)
         assertEquals("AVC444", highVis.activeCodecLabel())
 
-        val saver = highVis.withStreamProfile(XyStreamProfile.DATA_SAVER)
+        val saver = highVis.withStreamProfile(SeiStreamProfile.DATA_SAVER)
         assertEquals(16, saver.colorDepth)
         assertEquals(2, saver.compressionLevel)
         assertEquals(30, saver.targetFps)
@@ -180,25 +180,25 @@ class RdpOptionsTest {
 
     @Test
     fun pcStreamEngineMengunciModeKonsolDanMematikanDynamicResolution() {
-        val game = RdpOptions().withPcStreamEngine(XyPcStreamEngine.DIRECT_GAME_ULTRA)
+        val game = RdpOptions().withPcStreamEngine(SeiPcStreamEngine.DIRECT_GAME_ULTRA)
         assertTrue(game.pcConnectMode)
         assertTrue(game.consoleAdmin)
         assertTrue(!game.dynamicResolution)
-        assertEquals(XyPcStreamEngine.DIRECT_GAME_ULTRA, game.pcStreamEngine)
+        assertEquals(SeiPcStreamEngine.DIRECT_GAME_ULTRA, game.pcStreamEngine)
         assertEquals(32, game.colorDepth)
         assertTrue(game.fontSmoothing)
         assertTrue(game.desktopComposition)
         assertTrue(!game.lowBandwidth)
 
-        val studio = game.withPcStreamEngine(XyPcStreamEngine.DIRECT_STUDIO_444)
-        assertEquals(XyPcStreamEngine.DIRECT_STUDIO_444, studio.pcStreamEngine)
+        val studio = game.withPcStreamEngine(SeiPcStreamEngine.DIRECT_STUDIO_444)
+        assertEquals(SeiPcStreamEngine.DIRECT_STUDIO_444, studio.pcStreamEngine)
         assertEquals(32, studio.colorDepth)
         assertTrue(!studio.lowBandwidth)
     }
 
     @Test
     fun pcStreamEnginePreservesHandsetRefreshPreference() {
-        for (engine in XyPcStreamEngine.entries) {
+        for (engine in SeiPcStreamEngine.entries) {
             assertEquals(90, RdpOptions(pcTargetFps = 90).withPcStreamEngine(engine).pcTargetFps)
             assertEquals(30, RdpOptions(pcTargetFps = 30).withPcStreamEngine(engine).pcTargetFps)
         }

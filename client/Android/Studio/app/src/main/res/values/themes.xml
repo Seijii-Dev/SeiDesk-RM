@@ -3,7 +3,6 @@
     <!-- SeiDesk RM: theme for SeiDeskHomeActivity (Compose, no ActionBar) -->
     <style name="Theme.SeiDeskHome" parent="Theme.AppCompat.DayNight.NoActionBar">
         <!-- Window background: dark charcoal matching dark theme -->
-        <item name="android:windowBackground">@color/xy_window_bg</item>
+        <item name="android:windowBackground">@color/sei_window_bg</item>
     </style>
-    <style name="Theme.XyDeskHome" parent="Theme.SeiDeskHome" />
 </resources>

@@ -27,12 +27,12 @@ import io.seidesk.rm.R
 /**
  * Wallpaper desktop untuk preview perangkat + latar layar koneksi.
  *
- * Windows 11 memakai foto asli (drawable-nodpi/xy_win11_wall.jpg) supaya
+ * Windows 11 memakai foto asli (drawable-nodpi/sei_win11_wall.jpg) supaya
  * preview perangkat Windows terasa seperti desktop yang benar-benar dilihat
  * user. Sisanya digambar prosedural (Canvas): bobot APK nol dan tidak ada
  * urusan lisensi gambar.
  */
-enum class XyWall(val label: String) {
+enum class SeiWall(val label: String) {
     WIN11("Windows 11"),
     WIN10("Windows 10"),
     MACOS("macOS"),
@@ -40,19 +40,19 @@ enum class XyWall(val label: String) {
 }
 
 /** Tebak motif dari nama/label perangkat. */
-fun XyWall.forDevice(label: String?): XyWall {
+fun SeiWall.forDevice(label: String?): SeiWall {
     val l = label?.lowercase().orEmpty()
     return when {
-        l.contains("mac") || l.contains("osx") || l.contains("macbook") -> XyWall.MACOS
-        l.contains("win 10") || l.contains("win10") || l.contains("windows 10") -> XyWall.WIN10
-        l.contains("win") || l.contains("11") -> XyWall.WIN11
+        l.contains("mac") || l.contains("osx") || l.contains("macbook") -> SeiWall.MACOS
+        l.contains("win 10") || l.contains("win10") || l.contains("windows 10") -> SeiWall.WIN10
+        l.contains("win") || l.contains("11") -> SeiWall.WIN11
         else -> this
     }
 }
 
 @Composable
-fun XyWallpaper(
-    wall: XyWall,
+fun SeiWallpaper(
+    wall: SeiWall,
     modifier: Modifier = Modifier,
     blurRadius: Dp = 0.dp,
     dim: Float = 0f,
@@ -63,9 +63,9 @@ fun XyWallpaper(
         Modifier
     }
     Box(modifier.fillMaxSize().then(blurModifier)) {
-        if (wall == XyWall.WIN11) {
+        if (wall == SeiWall.WIN11) {
             Image(
-                painter = painterResource(R.drawable.xy_win11_wall),
+                painter = painterResource(R.drawable.sei_win11_wall),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
@@ -75,7 +75,7 @@ fun XyWallpaper(
             val w = size.width
             val h = size.height
             when (wall) {
-                XyWall.WIN11 -> {
+                SeiWall.WIN11 -> {
                     // Fotonya digambar di luar Canvas (lihat Image di atas) —
                     // scrim tipis hanya untuk menjaga teks terbaca; sengaja
                     // ringan supaya wallpaper tidak lagi terlihat hitam.
@@ -88,7 +88,7 @@ fun XyWallpaper(
                     )
                 }
 
-                XyWall.WIN10 -> {
+                SeiWall.WIN10 -> {
                     drawRect(
                         Brush.linearGradient(
                             colors = listOf(Color(0xFF17364F), Color(0xFF10283C), Color(0xFF0C1D2C)),
@@ -114,7 +114,7 @@ fun XyWallpaper(
                     )
                 }
 
-                XyWall.MACOS -> {
+                SeiWall.MACOS -> {
                     drawRect(
                         Brush.linearGradient(
                             colors = listOf(
@@ -145,7 +145,7 @@ fun XyWallpaper(
                     )
                 }
 
-                XyWall.NEUTRAL -> {
+                SeiWall.NEUTRAL -> {
                     drawRect(
                         Brush.linearGradient(
                             colors = listOf(Color(0xFF262C33), Color(0xFF171C22)),
@@ -188,7 +188,7 @@ fun XyBackdrop(modifier: Modifier = Modifier) {
 @Composable
 fun DevicePreviewArt(
     seed: String,
-    os: XyWall,
+    os: SeiWall,
     modifier: Modifier = Modifier,
 ) {
     val h = seed.hashCode()
@@ -196,11 +196,11 @@ fun DevicePreviewArt(
     Box(
         modifier.fillMaxSize(),
     ) {
-        if (os == XyWall.WIN11) {
+        if (os == SeiWall.WIN11) {
             // Preview perangkat Windows 11 memakai wallpaper aslinya, lalu
             // ditutup scrim gelap: kartu tetap bagian UI app, bukan pameran foto.
             Image(
-                painter = painterResource(R.drawable.xy_win11_wall),
+                painter = painterResource(R.drawable.sei_win11_wall),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
@@ -239,7 +239,7 @@ fun DevicePreviewArt(
         ) {
             val stroke = Stroke(width = 1.4f)
             when (os) {
-                XyWall.MACOS -> {
+                SeiWall.MACOS -> {
                     drawRoundRect(
                         color = Color(0xFFB9C4CC),
                         topLeft = Offset(2f, 2f),
@@ -255,7 +255,7 @@ fun DevicePreviewArt(
                     )
                 }
 
-                XyWall.WIN10 -> {
+                SeiWall.WIN10 -> {
                     drawRect(
                         color = Color(0xFFB9C4CC),
                         topLeft = Offset(2f, 4f),
@@ -270,7 +270,7 @@ fun DevicePreviewArt(
                     )
                 }
 
-                XyWall.WIN11 -> {
+                SeiWall.WIN11 -> {
                     drawRoundRect(
                         color = Color(0xFFB9C4CC),
                         topLeft = Offset(2f, 4f),
@@ -286,7 +286,7 @@ fun DevicePreviewArt(
                     )
                 }
 
-                XyWall.NEUTRAL -> {
+                SeiWall.NEUTRAL -> {
                     drawCircle(
                         color = Color(0xFFB9C4CC),
                         radius = size.minDimension * 0.36f,

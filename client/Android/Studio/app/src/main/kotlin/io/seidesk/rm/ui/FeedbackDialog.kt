@@ -29,9 +29,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
-import io.seidesk.rm.ui.components.XyOverlay
-import io.seidesk.rm.ui.components.XyPillButton
-import io.seidesk.rm.ui.components.XySegmented
+import io.seidesk.rm.ui.components.SeiOverlay
+import io.seidesk.rm.ui.components.SeiPillButton
+import io.seidesk.rm.ui.components.SeiSegmented
 
 internal fun feedbackShareDraft(category: String, message: String): String = buildString {
     appendLine("SeiDesk RM — ${AppBrand.PUBLISHER}")
@@ -70,7 +70,7 @@ internal fun FeedbackDialog(
     var selected by remember { mutableIntStateOf(1) }
     var message by remember { mutableStateOf("") }
 
-    XyOverlay(
+    SeiOverlay(
         title = xy("Masukan & saran", "Feedback & suggestions"),
         onDismiss = onDismiss,
     ) {
@@ -86,7 +86,7 @@ internal fun FeedbackDialog(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            XySegmented(categories, selected, onSelect = { selected = it })
+            SeiSegmented(categories, selected, onSelect = { selected = it })
             Box(
                 Modifier
                     .fillMaxWidth()
@@ -130,20 +130,20 @@ internal fun FeedbackDialog(
                 horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                XyPillButton(
+                SeiPillButton(
                     text = xy("Batal", "Cancel"),
                     onClick = onDismiss,
                     primary = false,
                     compact = true,
                 )
-                XyPillButton(
+                SeiPillButton(
                     text = xy("Salin draf", "Copy draft"),
                     onClick = { onSend(FeedbackDestination.COPY, categories[selected], message.trim()) },
                     enabled = message.isNotBlank(),
                     primary = false,
                     compact = true,
                 )
-                XyPillButton(
+                SeiPillButton(
                     text = xy("Bagikan…", "Share…"),
                     onClick = { onSend(FeedbackDestination.SHARE, categories[selected], message.trim()) },
                     enabled = message.isNotBlank(),

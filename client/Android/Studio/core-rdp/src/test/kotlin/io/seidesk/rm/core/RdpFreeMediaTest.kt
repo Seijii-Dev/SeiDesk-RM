@@ -20,7 +20,7 @@ class RdpFreeMediaTest {
     @Test fun rdpFreeEnablesWallpaperAndRdpPlaybackWithoutBridge() {
         val options = RdpOptions().forRdpFree(microphone = false)
         assertTrue(options.desktopWallpaper)
-        assertEquals(XyAudioMode.DEVICE, options.audioMode)
+        assertEquals(SeiAudioMode.DEVICE, options.audioMode)
         assertFalse(options.pcConnectMode)
         assertFalse(options.quicAudio)
         assertFalse(options.microphone)

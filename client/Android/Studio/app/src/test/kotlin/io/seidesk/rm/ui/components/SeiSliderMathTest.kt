@@ -10,7 +10,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Test
 
-class XySliderMathTest {
+class SeiSliderMathTest {
     @Test
     fun continuousSliderMapsAndClampsFractions() {
         val range = 10f..110f

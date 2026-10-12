@@ -9,11 +9,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import io.seidesk.rm.ui.components.XyGlassCard
-import io.seidesk.rm.ui.components.XyGlassSectionLabel
-import io.seidesk.rm.ui.components.XyIconPill
-import io.seidesk.rm.ui.components.XyIcons
-import io.seidesk.rm.ui.components.XyTopBar
+import io.seidesk.rm.ui.components.SeiGlassCard
+import io.seidesk.rm.ui.components.SeiGlassSectionLabel
+import io.seidesk.rm.ui.components.SeiIconPill
+import io.seidesk.rm.ui.components.SeiIcons
+import io.seidesk.rm.ui.components.SeiTopBar
 
 /**
  * Layar Feed — layar sendiri, bukan kartu yang menumpang di Beranda.
@@ -36,9 +36,9 @@ internal fun SeiFeedScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
     ) {
-        XyTopBar(
+        SeiTopBar(
             title = xy("Feed", "Feed"),
-            actions = { XyIconPill(XyIcons.Menu, onMenu, flat = true, contentDescription = "Menu") },
+            actions = { SeiIconPill(SeiIcons.Menu, onMenu, flat = true, contentDescription = "Menu") },
         )
         Column(
             Modifier
@@ -47,8 +47,8 @@ internal fun SeiFeedScreen(
                 .padding(bottom = 18.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            XyGlassSectionLabel(xy("Komunitas", "Community"))
-            XyGlassCard(padding = 14.dp) {
+            SeiGlassSectionLabel(xy("Komunitas", "Community"))
+            SeiGlassCard(padding = 14.dp) {
                 FunHubCard(onHide = null)
             }
         }

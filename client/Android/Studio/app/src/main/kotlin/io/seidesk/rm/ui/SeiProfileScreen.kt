@@ -28,21 +28,21 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.seidesk.rm.ui.components.XyGlassCard
-import io.seidesk.rm.ui.components.XyGlassRow
-import io.seidesk.rm.ui.components.XyGlassSectionLabel
-import io.seidesk.rm.ui.components.XyGlassTile
-import io.seidesk.rm.ui.components.XyIconPill
-import io.seidesk.rm.ui.components.XyIcons
-import io.seidesk.rm.ui.components.XyLogo
-import io.seidesk.rm.ui.components.XyOverlay
-import io.seidesk.rm.ui.components.XyPillButton
-import io.seidesk.rm.ui.components.XySegmented
-import io.seidesk.rm.ui.components.XyTileGrid
-import io.seidesk.rm.ui.components.XyTopBar
-import io.seidesk.rm.ui.components.XyWordmark
+import io.seidesk.rm.ui.components.SeiGlassCard
+import io.seidesk.rm.ui.components.SeiGlassRow
+import io.seidesk.rm.ui.components.SeiGlassSectionLabel
+import io.seidesk.rm.ui.components.SeiGlassTile
+import io.seidesk.rm.ui.components.SeiIconPill
+import io.seidesk.rm.ui.components.SeiIcons
+import io.seidesk.rm.ui.components.SeiLogo
+import io.seidesk.rm.ui.components.SeiOverlay
+import io.seidesk.rm.ui.components.SeiPillButton
+import io.seidesk.rm.ui.components.SeiSegmented
+import io.seidesk.rm.ui.components.SeiTileGrid
+import io.seidesk.rm.ui.components.SeiTopBar
+import io.seidesk.rm.ui.components.SeiWordmark
 import kotlinx.coroutines.launch
-import io.seidesk.rm.ui.theme.XyThemeState
+import io.seidesk.rm.ui.theme.SeiThemeState
 
 /**
  * Layar Profil — dashboard kartu.
@@ -55,7 +55,7 @@ import io.seidesk.rm.ui.theme.XyThemeState
 @Composable
 internal fun SeiProfileScreen(
     onMenu: () -> Unit,
-    onOpenSection: (XySection) -> Unit,
+    onOpenSection: (SeiSection) -> Unit,
     appPrefs: AppPrefs,
     deviceCount: Int,
     onShowLog: () -> Unit,
@@ -70,10 +70,10 @@ internal fun SeiProfileScreen(
         }.getOrNull()
     }
     // Mode tema sebagai state lokal supaya segmen langsung berpindah; nilai
-    // sebenarnya tetap disimpan lewat XyThemeState.set (prefs + state global).
+    // sebenarnya tetap disimpan lewat SeiThemeState.set (prefs + state global).
     var themeMode by remember {
         mutableIntStateOf(
-            if (XyThemeState.mode == Int.MIN_VALUE) XyThemeState.FOLLOW_SYSTEM else XyThemeState.mode,
+            if (SeiThemeState.mode == Int.MIN_VALUE) SeiThemeState.FOLLOW_SYSTEM else SeiThemeState.mode,
         )
     }
 
@@ -82,9 +82,9 @@ internal fun SeiProfileScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
     ) {
-        XyTopBar(
+        SeiTopBar(
             title = xy("Profil", "Profile"),
-            actions = { XyIconPill(XyIcons.Menu, onMenu, flat = true, contentDescription = "Menu") },
+            actions = { SeiIconPill(SeiIcons.Menu, onMenu, flat = true, contentDescription = "Menu") },
         )
         Column(
             Modifier
@@ -97,7 +97,7 @@ internal fun SeiProfileScreen(
             CommunityAccountCard()
 
             // ---- identitas app ----
-            XyGlassCard(padding = 16.dp) {
+            SeiGlassCard(padding = 16.dp) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -109,10 +109,10 @@ internal fun SeiProfileScreen(
                             .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)),
                         contentAlignment = Alignment.Center,
                     ) {
-                        XyLogo(modifier = Modifier.size(26.dp))
+                        SeiLogo(modifier = Modifier.size(26.dp))
                     }
                     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        XyWordmark(fontSize = 20.sp)
+                        SeiWordmark(fontSize = 20.sp)
                         Text(
                             buildString {
                                 append(xy("Versi", "Version"))
@@ -135,14 +135,14 @@ internal fun SeiProfileScreen(
             }
 
             // ---- seksi sebagai grid kartu ----
-            XyGlassSectionLabel(xy("Pengaturan", "Settings"))
-            XyTileGrid(columns = 2, spacing = 10.dp) {
-                XySection.entries.forEach { section ->
+            SeiGlassSectionLabel(xy("Pengaturan", "Settings"))
+            SeiTileGrid(columns = 2, spacing = 10.dp) {
+                SeiSection.entries.forEach { section ->
                     // sectionTitle() @Composable; dipanggil di sini, di luar
                     // lambda item {} yang disimpan lalu dipanggil belakangan.
                     val title = sectionTitle(section)
                     item {
-                        XyGlassTile(
+                        SeiGlassTile(
                             icon = sectionIcon(section),
                             title = title,
                             onClick = { onOpenSection(section) },
@@ -153,8 +153,8 @@ internal fun SeiProfileScreen(
             }
 
             // ---- tema ----
-            XyGlassSectionLabel(xy("Tampilan", "Appearance"))
-            XyGlassCard(padding = 14.dp) {
+            SeiGlassSectionLabel(xy("Tampilan", "Appearance"))
+            SeiGlassCard(padding = 14.dp) {
                 Text(
                     xy("Mode tema", "Theme mode"),
                     style = MaterialTheme.typography.titleSmall,
@@ -169,7 +169,7 @@ internal fun SeiProfileScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 10.dp),
                 )
-                XySegmented(
+                SeiSegmented(
                     options = listOf(
                         xy("Ikut sistem", "Follow system"),
                         xy("Gelap", "Dark"),
@@ -178,15 +178,15 @@ internal fun SeiProfileScreen(
                     selectedIndex = themeMode,
                     onSelect = { index ->
                         themeMode = index
-                        XyThemeState.set(appPrefs, index)
+                        SeiThemeState.set(appPrefs, index)
                     },
                 )
             }
 
             // ---- lainnya ----
-            XyGlassSectionLabel(xy("Lainnya", "More"))
-            XyGlassRow(
-                icon = XyIcons.Terminal,
+            SeiGlassSectionLabel(xy("Lainnya", "More"))
+            SeiGlassRow(
+                icon = SeiIcons.Terminal,
                 title = xy("Log koneksi", "Connection log"),
                 subtitle = xy(
                     "20 baris terakhir dari log boot native.",
@@ -194,8 +194,8 @@ internal fun SeiProfileScreen(
                 ),
                 onClick = onShowLog,
             )
-            XyGlassRow(
-                icon = XyIcons.Heart,
+            SeiGlassRow(
+                icon = SeiIcons.Heart,
                 title = xy("Masukan & saran", "Feedback & suggestions"),
                 subtitle = xy(
                     "Bagikan ke aplikasi mana pun, atau salin drafnya.",
@@ -208,13 +208,13 @@ internal fun SeiProfileScreen(
 }
 
 /** Ikon per seksi — sama dengan pemetaan lama di nav bawah enam slot. */
-private fun sectionIcon(section: XySection): ImageVector = when (section) {
-    XySection.PERANGKAT -> XyIcons.Monitor
-    XySection.TAMPILAN -> XyIcons.Fit
-    XySection.KREDENSIAL -> XyIcons.Lock
-    XySection.UMUM -> XyIcons.Sliders
-    XySection.KEAMANAN -> XyIcons.Shield
-    XySection.TENTANG -> XyIcons.Info
+private fun sectionIcon(section: SeiSection): ImageVector = when (section) {
+    SeiSection.PERANGKAT -> SeiIcons.Monitor
+    SeiSection.TAMPILAN -> SeiIcons.Fit
+    SeiSection.KREDENSIAL -> SeiIcons.Lock
+    SeiSection.UMUM -> SeiIcons.Sliders
+    SeiSection.KEAMANAN -> SeiIcons.Shield
+    SeiSection.TENTANG -> SeiIcons.Info
 }
 
 /**
@@ -308,9 +308,9 @@ private fun CommunityAccountCard() {
     androidx.compose.runtime.LaunchedEffect(Unit) {
         githubUser = runCatching {
             val vault = io.seidesk.rm.security.CredentialVault(context.applicationContext)
-            val pat = vault.get(io.seidesk.rm.ui.rdp.XyRdpConfig.VAULT_PAT_ID)
-                ?: vault.get(io.seidesk.rm.ui.rdp.XyRdpConfig.VAULT_PAT_ID_LEGACY)
-            if (pat != null) io.seidesk.rm.ui.rdp.XyRdpClient.whoami(pat) else null
+            val pat = vault.get(io.seidesk.rm.ui.rdp.SeiRdpConfig.VAULT_PAT_ID)
+                ?: vault.get(io.seidesk.rm.ui.rdp.SeiRdpConfig.VAULT_PAT_ID_LEGACY)
+            if (pat != null) io.seidesk.rm.ui.rdp.SeiRdpClient.whoami(pat) else null
         }.getOrNull()
     }
 
@@ -319,10 +319,10 @@ private fun CommunityAccountCard() {
     androidx.compose.runtime.LaunchedEffect(Unit) {
         if (name == null) {
             val vault = io.seidesk.rm.security.CredentialVault(context.applicationContext)
-            val pat = vault.get(io.seidesk.rm.ui.rdp.XyRdpConfig.VAULT_PAT_ID)
-                ?: vault.get(io.seidesk.rm.ui.rdp.XyRdpConfig.VAULT_PAT_ID_LEGACY)
+            val pat = vault.get(io.seidesk.rm.ui.rdp.SeiRdpConfig.VAULT_PAT_ID)
+                ?: vault.get(io.seidesk.rm.ui.rdp.SeiRdpConfig.VAULT_PAT_ID_LEGACY)
             if (pat != null) {
-                val gh = runCatching { io.seidesk.rm.ui.rdp.XyRdpClient.whoami(pat) }.getOrNull()
+                val gh = runCatching { io.seidesk.rm.ui.rdp.SeiRdpClient.whoami(pat) }.getOrNull()
                 if (gh != null && api.displayName() == null) {
                     runCatching { api.setDisplayName(gh) }
                     name = api.displayName() ?: gh
@@ -331,7 +331,7 @@ private fun CommunityAccountCard() {
         }
     }
 
-    XyGlassCard(padding = 14.dp) {
+    SeiGlassCard(padding = 14.dp) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Box(
                 Modifier
@@ -367,8 +367,8 @@ private fun CommunityAccountCard() {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            XyIconPill(
-                XyIcons.Clip,
+            SeiIconPill(
+                SeiIcons.Clip,
                 {
                     clipboard.setText(androidx.compose.ui.text.AnnotatedString(api.restoreCode()))
                     message = xyNow("Kode pemulihan disalin. Simpan untuk pulihkan akun setelah pasang ulang.", "Recovery code copied. Keep it to restore this account after a reinstall.")
@@ -377,13 +377,13 @@ private fun CommunityAccountCard() {
             )
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            XyPillButton(
+            SeiPillButton(
                 text = xy("Ganti nama", "Change name"),
                 onClick = { editing = !editing; draft = name.orEmpty() },
                 primary = false,
                 compact = true,
             )
-            XyPillButton(
+            SeiPillButton(
                 text = if (avatarBusy) xy("Menyimpan…", "Saving…") else xy("Ganti foto", "Change photo"),
                 onClick = {
                     pickAvatar.launch("image/*")
@@ -396,20 +396,20 @@ private fun CommunityAccountCard() {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
             val ghUser = githubUser
             if (ghUser != null) {
-                XyPillButton(
+                SeiPillButton(
                     text = xy("GitHub: $ghUser", "GitHub: $ghUser"),
                     onClick = {},
                     primary = false,
                     compact = true,
                     enabled = false,
                 )
-                XyPillButton(
+                SeiPillButton(
                     text = xy("Keluar", "Sign out"),
                     onClick = {
                         scope.launch {
                             runCatching {
                                 io.seidesk.rm.security.CredentialVault(context.applicationContext)
-                                    .remove(io.seidesk.rm.ui.rdp.XyRdpConfig.VAULT_PAT_ID)
+                                    .remove(io.seidesk.rm.ui.rdp.SeiRdpConfig.VAULT_PAT_ID)
                             }
                             githubUser = null
                             message = xyNow("Akun GitHub dilepas.", "GitHub account removed.")
@@ -419,7 +419,7 @@ private fun CommunityAccountCard() {
                     compact = true,
                 )
             } else {
-                XyPillButton(
+                SeiPillButton(
                     text = xy("Login pakai GitHub", "Sign in with GitHub"),
                     onClick = { githubOpen = true },
                     primary = false,
@@ -447,7 +447,7 @@ private fun CommunityAccountCard() {
                         inner()
                     },
                 )
-                XyPillButton(
+                SeiPillButton(
                     text = if (busy) "…" else xy("Simpan", "Save"),
                     onClick = {
                         if (!busy && draft.trim().isNotEmpty()) {
@@ -491,7 +491,7 @@ private fun CommunityAccountCard() {
                     inner()
                 },
             )
-            XyPillButton(
+            SeiPillButton(
                 text = xy("Pulihkan", "Restore"),
                 onClick = {
                     val ok = api.restoreClientId(restoreDraft)
@@ -517,7 +517,7 @@ private fun CommunityAccountCard() {
     }
 
     if (githubOpen) {
-        XyOverlay(
+        SeiOverlay(
             title = xy("Login pakai GitHub", "Sign in with GitHub"),
             onDismiss = { if (!githubBusy) githubOpen = false },
         ) {
@@ -532,7 +532,7 @@ private fun CommunityAccountCard() {
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                XyPillButton(
+                SeiPillButton(
                     text = xy("Buka github.com/settings/tokens", "Open github.com/settings/tokens"),
                     onClick = {
                         runCatching {
@@ -569,27 +569,27 @@ private fun CommunityAccountCard() {
                     },
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    XyPillButton(
+                    SeiPillButton(
                         text = xy("Batal", "Cancel"),
                         onClick = { githubOpen = false },
                         primary = false,
                         compact = true,
                         modifier = Modifier.weight(1f),
                     )
-                    XyPillButton(
+                    SeiPillButton(
                         text = if (githubBusy) xy("Memeriksa…", "Checking…") else xy("Masuk", "Sign in"),
                         onClick = {
                             scope.launch {
                                 githubBusy = true
                                 try {
                                     val token = githubPatDraft.trim()
-                                    val user = io.seidesk.rm.ui.rdp.XyRdpClient.whoami(token)
+                                    val user = io.seidesk.rm.ui.rdp.SeiRdpClient.whoami(token)
                                     if (user == null) {
                                         message = xyNow("Token tidak valid atau scope kurang (read:user).", "Invalid token or missing scope (read:user).")
                                     } else {
                                         val saved = runCatching {
                                             io.seidesk.rm.security.CredentialVault(context.applicationContext)
-                                                .put(io.seidesk.rm.ui.rdp.XyRdpConfig.VAULT_PAT_ID, token)
+                                                .put(io.seidesk.rm.ui.rdp.SeiRdpConfig.VAULT_PAT_ID, token)
                                         }.getOrDefault(false)
                                         if (saved) {
                                             githubUser = user

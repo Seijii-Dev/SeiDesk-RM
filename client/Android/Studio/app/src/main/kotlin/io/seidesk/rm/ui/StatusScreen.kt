@@ -30,12 +30,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import io.seidesk.rm.core.ConnectionLog
-import io.seidesk.rm.ui.components.XyCard
-import io.seidesk.rm.ui.components.XyIconPill
-import io.seidesk.rm.ui.components.XyIcons
-import io.seidesk.rm.ui.components.XyPillButton
+import io.seidesk.rm.ui.components.SeiCard
+import io.seidesk.rm.ui.components.SeiIconPill
+import io.seidesk.rm.ui.components.SeiIcons
+import io.seidesk.rm.ui.components.SeiPillButton
 import io.seidesk.rm.ui.components.XySectionLabel
-import io.seidesk.rm.ui.components.XyTopBar
+import io.seidesk.rm.ui.components.SeiTopBar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -115,11 +115,11 @@ fun StatusScreen(
             .fillMaxSize()
             .padding(horizontal = 16.dp),
     ) {
-        XyTopBar(
+        SeiTopBar(
             title = xy("Status", "Status"),
             onBack = onBack,
             actions = {
-                XyIconPill(XyIcons.Info, onShowLog, flat = true, contentDescription = xy("Log sesi", "Session log"))
+                SeiIconPill(SeiIcons.Info, onShowLog, flat = true, contentDescription = xy("Log sesi", "Session log"))
             },
         )
         Column(
@@ -129,7 +129,7 @@ fun StatusScreen(
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             XySectionLabel(xy("Aplikasi ini", "This app"))
-            XyCard {
+            SeiCard {
                 KeyValue("Versi", "$versionName ($versionCode)")
                 KeyValue("ABI", abi)
                 KeyValue("Paket", context.packageName)
@@ -144,7 +144,7 @@ fun StatusScreen(
             }
 
             XySectionLabel(xy("Portal rilis", "Release portal"))
-            XyCard {
+            SeiCard {
                 if (portalLoading) {
                     Text(xy("Memuat…", "Loading…"), style = MaterialTheme.typography.bodyMedium)
                 } else if (portalError != null) {
@@ -165,14 +165,14 @@ fun StatusScreen(
                 }
                 Spacer(Modifier.height(10.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    XyPillButton(
+                    SeiPillButton(
                         text = xy("Muat ulang", "Reload"),
                         onClick = { scope.launch { fetchPortal() } },
-                        icon = XyIcons.Rotate,
+                        icon = SeiIcons.Rotate,
                         compact = true,
                         modifier = Modifier.weight(1f),
                     )
-                    XyPillButton(
+                    SeiPillButton(
                         text = xy("Salin diagnostik", "Copy diagnostics"),
                         onClick = {
                             val tail = ConnectionLog.last(25).joinToString("\n")
@@ -192,7 +192,7 @@ fun StatusScreen(
             }
 
             XySectionLabel(xy("Kalau audio/mic bermasalah", "If audio/mic misbehaves"))
-            XyCard {
+            SeiCard {
                 Text(
                     text = xy(
                         "1. Mode audio \"Putar di perangkat ini\" = suara + mic lewat kanal RDP (tanpa host agent).\n" +

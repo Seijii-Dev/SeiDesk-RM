@@ -4,5 +4,5 @@ package io.seidesk.rm.ui
 internal object AppBrand {
     const val APP_NAME = "SeiDesk RM"
     const val APPLICATION_ID = "io.seidesk.rm"
-    const val PUBLISHER = "XyVerse Technology Global"
+    const val PUBLISHER = "Seijixinghe888"
 }

@@ -3,7 +3,7 @@ package io.seidesk.rm.core
 /** Standard RDP media, without requiring the optional XyDesk UDP host agent. */
 fun RdpOptions.forRdpFree(microphone: Boolean): RdpOptions = copy(
     pcConnectMode = false,
-    audioMode = XyAudioMode.DEVICE,
+    audioMode = SeiAudioMode.DEVICE,
     microphone = microphone,
     desktopWallpaper = true,
     quicAudio = false,

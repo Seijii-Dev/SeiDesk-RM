@@ -6,7 +6,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import kotlin.math.abs
 
-class XyVirtualPadTest {
+class SeiVirtualPadTest {
     @Test
     fun radialDeadzoneZeroesDriftAndRescalesToFullDeflection() {
         val inside = XyPadAxis.deadzone(0.05f, 0.05f)
@@ -61,8 +61,8 @@ class XyVirtualPadTest {
         tracker.setLeftStick(1f, 0f)
         tracker.setRightStick(0f, -1f)
         tracker.setTrigger(left = 1f, right = 0.5f)
-        tracker.setButton(XyPadButton.A, true)
-        tracker.setButton(XyPadButton.RIGHT_SHOULDER, true)
+        tracker.setButton(SeiPadButton.A, true)
+        tracker.setButton(SeiPadButton.RIGHT_SHOULDER, true)
         assertFalse(tracker.isIdle())
 
         val frame = tracker.nextFrame(timestampMs = 1_234L)
@@ -86,11 +86,11 @@ class XyVirtualPadTest {
     @Test
     fun releasingEveryControlReturnsToIdleAndStopsMarkingDirty() {
         val tracker = XyVirtualPadTracker()
-        tracker.setButton(XyPadButton.A, true)
+        tracker.setButton(SeiPadButton.A, true)
         assertTrue(tracker.consumeDirty())
         assertFalse(tracker.consumeDirty())
 
-        tracker.setButton(XyPadButton.A, false)
+        tracker.setButton(SeiPadButton.A, false)
         assertTrue(tracker.consumeDirty())
         assertTrue(tracker.isIdle())
         assertEquals(0, tracker.state().buttons)

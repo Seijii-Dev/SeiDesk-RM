@@ -86,7 +86,7 @@
             android:autoRemoveFromRecents="true">
             <!--android:configChanges="orientation|keyboardHidden|screenSize|keyboard"-->
             <!-- XyDesk: deep-link freerdp:// dibuang. Sesi dibuka lewat
-                 XyDeskSessionActivity milik app, bukan activity inti ini, jadi
+                 SeiDeskSessionActivity milik app, bukan activity inti ini, jadi
                  filter VIEW/BROWSABLE hanya jadi pintu masuk dari luar. -->
         </activity>
         <activity

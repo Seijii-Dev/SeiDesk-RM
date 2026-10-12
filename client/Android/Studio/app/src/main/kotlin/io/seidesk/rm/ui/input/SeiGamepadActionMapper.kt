@@ -2,11 +2,11 @@ package io.seidesk.rm.ui.input
 
 import io.seidesk.rm.pcstream.XyGamepadPacketV1
 import io.seidesk.rm.pcstream.XyGamepadState
-import io.seidesk.rm.ui.XyMouseButton
+import io.seidesk.rm.ui.SeiMouseButton
 import kotlin.math.abs
 
 /** Keys the virtual pad can emit; the session translates these to Android key codes. */
-enum class XyPadKey {
+enum class SeiPadKey {
     ENTER,
     ESCAPE,
     ARROW_UP,
@@ -24,14 +24,14 @@ enum class XyPadKey {
  * [ARROWS] mengirim tombol papan ketik sehingga stik bisa dipakai untuk game
  * yang tidak menerima gamepad.
  */
-enum class XyStickMode {
+enum class SeiStickMode {
     POINTER,
     WASD,
     ARROWS,
 }
 
 /** Arah digital yang diturunkan dari simpangan stik analog. */
-enum class XyStickDirection {
+enum class SeiStickDirection {
     UP,
     DOWN,
     LEFT,
@@ -43,25 +43,25 @@ enum class XyStickDirection {
  * physical Bluetooth/USB pad already uses (pointer delta, scroll units, mouse click,
  * virtual key), so both pads end up on one code path.
  */
-interface XyGamepadOutput {
+interface SeiGamepadOutput {
     fun pointerDelta(dx: Float, dy: Float)
     fun scrollUnits(units: Int)
-    fun mouseClick(button: XyMouseButton, down: Boolean)
-    fun key(key: XyPadKey, down: Boolean)
+    fun mouseClick(button: SeiMouseButton, down: Boolean)
+    fun key(key: SeiPadKey, down: Boolean)
 }
 
 /**
  * Translates gamepad state into RDP-side actions.
  *
  * Semantics intentionally mirror the existing physical-pad mapping in
- * `XyDeskSessionActivity` so an on-screen pad and a Bluetooth pad behave the same:
+ * `SeiDeskSessionActivity` so an on-screen pad and a Bluetooth pad behave the same:
  * A = left click, B = right click, X = Enter, Y = Escape, left stick moves the
  * pointer at 18 units per full deflection, shoulders scroll one notch, and the
  * right stick / triggers scroll proportionally.
  *
  * Pure Kotlin (no Android imports) so the mapping is unit-testable on the JVM.
  */
-object XyGamepadActionMapper {
+object SeiGamepadActionMapper {
     /** Pointer units per full stick deflection; matches the physical pad. */
     const val POINTER_UNITS_PER_DEFLECTION = 18f
 
@@ -91,14 +91,14 @@ object XyGamepadActionMapper {
     fun apply(
         state: XyGamepadState,
         previous: XyGamepadState?,
-        out: XyGamepadOutput,
-        stickMode: XyStickMode = XyStickMode.POINTER,
+        out: SeiGamepadOutput,
+        stickMode: SeiStickMode = SeiStickMode.POINTER,
     ) {
         val before = previous ?: EMPTY
 
         val leftX = axis(state.leftX)
         val leftY = axis(state.leftY)
-        if (stickMode == XyStickMode.POINTER) {
+        if (stickMode == SeiStickMode.POINTER) {
             if (abs(leftX) > STICK_EPSILON || abs(leftY) > STICK_EPSILON) {
                 out.pointerDelta(
                     leftX * POINTER_UNITS_PER_DEFLECTION,
@@ -110,7 +110,7 @@ object XyGamepadActionMapper {
             // edge (turun/naik) supaya menahan stik tidak mengulang tombol.
             val now = directions(leftX, leftY)
             val was = directions(axis(before.leftX), axis(before.leftY))
-            for (direction in XyStickDirection.entries) {
+            for (direction in SeiStickDirection.entries) {
                 val isDown = direction in now
                 if (isDown != (direction in was)) {
                     out.key(keyFor(direction, stickMode), isDown)
@@ -128,31 +128,31 @@ object XyGamepadActionMapper {
         if (crossed(before.rightTrigger, state.rightTrigger)) out.scrollUnits(-SHOULDER_SCROLL_UNITS)
 
         edge(before.buttons, state.buttons, XyGamepadPacketV1.A) { down ->
-            out.mouseClick(XyMouseButton.LEFT, down)
+            out.mouseClick(SeiMouseButton.LEFT, down)
         }
         edge(before.buttons, state.buttons, XyGamepadPacketV1.B) { down ->
-            out.mouseClick(XyMouseButton.RIGHT, down)
+            out.mouseClick(SeiMouseButton.RIGHT, down)
         }
         edge(before.buttons, state.buttons, XyGamepadPacketV1.LEFT_THUMB) { down ->
-            out.mouseClick(XyMouseButton.MIDDLE, down)
+            out.mouseClick(SeiMouseButton.MIDDLE, down)
         }
         edge(before.buttons, state.buttons, XyGamepadPacketV1.X) { down ->
-            out.key(XyPadKey.ENTER, down)
+            out.key(SeiPadKey.ENTER, down)
         }
         edge(before.buttons, state.buttons, XyGamepadPacketV1.Y) { down ->
-            out.key(XyPadKey.ESCAPE, down)
+            out.key(SeiPadKey.ESCAPE, down)
         }
         edge(before.buttons, state.buttons, XyGamepadPacketV1.DPAD_UP) { down ->
-            out.key(XyPadKey.ARROW_UP, down)
+            out.key(SeiPadKey.ARROW_UP, down)
         }
         edge(before.buttons, state.buttons, XyGamepadPacketV1.DPAD_DOWN) { down ->
-            out.key(XyPadKey.ARROW_DOWN, down)
+            out.key(SeiPadKey.ARROW_DOWN, down)
         }
         edge(before.buttons, state.buttons, XyGamepadPacketV1.DPAD_LEFT) { down ->
-            out.key(XyPadKey.ARROW_LEFT, down)
+            out.key(SeiPadKey.ARROW_LEFT, down)
         }
         edge(before.buttons, state.buttons, XyGamepadPacketV1.DPAD_RIGHT) { down ->
-            out.key(XyPadKey.ARROW_RIGHT, down)
+            out.key(SeiPadKey.ARROW_RIGHT, down)
         }
         // START/BACK have no unambiguous RDP target and are intentionally unmapped;
         // they still travel to a PC/Game Stream host inside the packet.
@@ -168,21 +168,21 @@ object XyGamepadActionMapper {
      * Arah digital dari stik analog. Ambang [STICK_KEY_THRESHOLD] dipakai agar
      * simpangan kecil tidak memicu tombol; diagonal menghasilkan dua arah.
      */
-    fun directions(x: Float, y: Float): Set<XyStickDirection> {
-        val out = mutableSetOf<XyStickDirection>()
-        if (y <= -STICK_KEY_THRESHOLD) out += XyStickDirection.UP
-        if (y >= STICK_KEY_THRESHOLD) out += XyStickDirection.DOWN
-        if (x <= -STICK_KEY_THRESHOLD) out += XyStickDirection.LEFT
-        if (x >= STICK_KEY_THRESHOLD) out += XyStickDirection.RIGHT
+    fun directions(x: Float, y: Float): Set<SeiStickDirection> {
+        val out = mutableSetOf<SeiStickDirection>()
+        if (y <= -STICK_KEY_THRESHOLD) out += SeiStickDirection.UP
+        if (y >= STICK_KEY_THRESHOLD) out += SeiStickDirection.DOWN
+        if (x <= -STICK_KEY_THRESHOLD) out += SeiStickDirection.LEFT
+        if (x >= STICK_KEY_THRESHOLD) out += SeiStickDirection.RIGHT
         return out
     }
 
     /** Kunci untuk satu arah pada mode stik papan ketik. */
-    fun keyFor(direction: XyStickDirection, mode: XyStickMode): XyPadKey = when (direction) {
-        XyStickDirection.UP -> if (mode == XyStickMode.WASD) XyPadKey.W else XyPadKey.ARROW_UP
-        XyStickDirection.DOWN -> if (mode == XyStickMode.WASD) XyPadKey.S else XyPadKey.ARROW_DOWN
-        XyStickDirection.LEFT -> if (mode == XyStickMode.WASD) XyPadKey.A else XyPadKey.ARROW_LEFT
-        XyStickDirection.RIGHT -> if (mode == XyStickMode.WASD) XyPadKey.D else XyPadKey.ARROW_RIGHT
+    fun keyFor(direction: SeiStickDirection, mode: SeiStickMode): SeiPadKey = when (direction) {
+        SeiStickDirection.UP -> if (mode == SeiStickMode.WASD) SeiPadKey.W else SeiPadKey.ARROW_UP
+        SeiStickDirection.DOWN -> if (mode == SeiStickMode.WASD) SeiPadKey.S else SeiPadKey.ARROW_DOWN
+        SeiStickDirection.LEFT -> if (mode == SeiStickMode.WASD) SeiPadKey.A else SeiPadKey.ARROW_LEFT
+        SeiStickDirection.RIGHT -> if (mode == SeiStickMode.WASD) SeiPadKey.D else SeiPadKey.ARROW_RIGHT
     }
 
     private fun axis(rawValue: Int): Float = rawValue / AXIS_DENOMINATOR
@@ -197,10 +197,3 @@ object XyGamepadActionMapper {
     private fun crossed(before: Int, after: Int): Boolean =
         before < TRIGGER_THRESHOLD * 255f && after >= TRIGGER_THRESHOLD * 255f
 }
-
-typealias SeiPadKey = XyPadKey
-typealias SeiStickMode = XyStickMode
-typealias SeiStickDirection = XyStickDirection
-typealias SeiGamepadOutput = XyGamepadOutput
-typealias SeiGamepadActionMapper = XyGamepadActionMapper
-

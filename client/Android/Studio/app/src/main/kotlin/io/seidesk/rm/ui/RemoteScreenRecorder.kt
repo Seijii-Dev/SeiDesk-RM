@@ -79,7 +79,7 @@ internal class RemoteScreenRecorder(
             return true
         }
         return try {
-            worker = Thread({ recordLoop() }, "XyDesk-PC-Recorder").apply {
+            worker = Thread({ recordLoop() }, "SeiDesk-PC-Recorder").apply {
                 // Di atas normal, bukan di bawah. Thread ini punya tenggat 33ms
                 // per frame; kalau diprioritaskan di bawah thread UI dan decoder,
                 // HP yang sedang sibuk akan membuatnya kehilangan jadwal frame
@@ -1008,7 +1008,7 @@ internal class RemoteAudioRecorder(
     }
 
     fun start() {
-        val worker = Thread({ runLoop() }, "XyDesk-PC-AudioRec")
+        val worker = Thread({ runLoop() }, "SeiDesk-PC-AudioRec")
         thread = worker
         worker.start()
     }

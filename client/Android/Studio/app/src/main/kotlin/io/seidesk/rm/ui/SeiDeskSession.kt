@@ -1,6 +1,6 @@
 package io.seidesk.rm.ui
 
-import io.seidesk.rm.ui.input.XyStickMode
+import io.seidesk.rm.ui.input.SeiStickMode
 import io.seidesk.rm.core.QuicAudioBridge
 import androidx.compose.runtime.SideEffect
 import android.app.Activity
@@ -36,10 +36,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.ui.text.input.ImeAction
-import io.seidesk.rm.ui.components.XyDialog
-import io.seidesk.rm.ui.components.XyNoticeBus
-import io.seidesk.rm.ui.components.XyField
-import io.seidesk.rm.ui.components.XyOverlay
+import io.seidesk.rm.ui.components.SeiDialog
+import io.seidesk.rm.ui.components.SeiNoticeBus
+import io.seidesk.rm.ui.components.SeiField
+import io.seidesk.rm.ui.components.SeiOverlay
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -79,7 +79,7 @@ import androidx.compose.ui.zIndex
 import com.freerdp.freerdpcore.utils.ClipboardImageProvider
 import com.freerdp.freerdpcore.utils.Mouse
 import io.seidesk.rm.core.CertificateInfo
-import io.seidesk.rm.XySessionService
+import io.seidesk.rm.SeiSessionService
 import io.seidesk.rm.core.ConnectionLog
 import io.seidesk.rm.core.ConnectionProfile
 import io.seidesk.rm.core.RdpFailure
@@ -88,11 +88,11 @@ import io.seidesk.rm.core.SessionManager
 import io.seidesk.rm.core.SmartResolution
 import io.seidesk.rm.core.SessionState
 import io.seidesk.rm.core.TelemetrySample
-import io.seidesk.rm.ui.components.XyIcons
-import io.seidesk.rm.ui.components.XyNoticeHost
+import io.seidesk.rm.ui.components.SeiIcons
+import io.seidesk.rm.ui.components.SeiNoticeHost
 import io.seidesk.rm.ui.components.rememberXyNotice
-import io.seidesk.rm.ui.components.XyPillButton
-import io.seidesk.rm.ui.components.XySpinner
+import io.seidesk.rm.ui.components.SeiPillButton
+import io.seidesk.rm.ui.components.SeiSpinner
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
@@ -170,11 +170,11 @@ fun SeiDeskSessionScreen(
     onExit: () -> Unit,
     onDisplayRefreshPreferenceChange: (Int) -> Unit,
     /** Mode stick yang berlaku sekarang; dibaca tiap gerak, bukan saat komposisi. */
-    stickModeProvider: () -> XyStickMode = { XyStickMode.POINTER },
+    stickModeProvider: () -> SeiStickMode = { SeiStickMode.POINTER },
     /** Sumbu stick untuk mode WASD/Panah, nilainya -1..1. */
     onStickKeys: (Float, Float) -> Unit = { _, _ -> },
     /** Dipanggil saat pengguna memilih mode stick di panel sesi. */
-    onStickModeChange: (XyStickMode) -> Unit = {},
+    onStickModeChange: (SeiStickMode) -> Unit = {},
 ) {
     val context = LocalContext.current
     val appContext = context.applicationContext
@@ -257,7 +257,7 @@ fun SeiDeskSessionScreen(
         }.getOrDefault(false)
     }
     val wall = remember(profile.id) {
-        XyWall.NEUTRAL.forDevice(profile.label ?: profile.host)
+        SeiWall.NEUTRAL.forDevice(profile.label ?: profile.host)
     }
     var certPrompt by remember { mutableStateOf<CertPrompt?>(null) }
     var nlaPrompt by remember { mutableStateOf<NlaPrompt?>(null) }
@@ -477,7 +477,7 @@ fun SeiDeskSessionScreen(
                         } catch (e: RuntimeException) {
                             // Never log remote clipboard contents or exception details.
                             ConnectionLog.add("clipboard: Android clipboard service rejected remote text")
-                            XyNoticeBus.post(
+                            SeiNoticeBus.post(
                                 xyNow(
                                     "Clipboard remote gagal disalin ke HP; isi tidak dicatat",
                                     "Remote clipboard could not be copied to phone; contents were not logged",
@@ -548,12 +548,12 @@ fun SeiDeskSessionScreen(
         val active = manager.instance() != 0L || state is SessionState.Connecting ||
             state is SessionState.Authenticating || state is SessionState.Connected ||
             state is SessionState.Disconnecting
-        XySessionRegistry.setActive(profile.id, active)
+        SeiSessionRegistry.setActive(profile.id, active)
         if (active) manager.instance().takeIf { it != 0L }?.let(controller::setInstance)
         if (state is SessionState.Connected) {
-            XySessionService.start(context, label)
-        } else if (XySessionRegistry.activeCount() == 0) {
-            XySessionService.stop(context)
+            SeiSessionService.start(context, label)
+        } else if (SeiSessionRegistry.activeCount() == 0) {
+            SeiSessionService.stop(context)
         }
     }
 
@@ -798,19 +798,19 @@ fun SeiDeskSessionScreen(
         sendCursorEvent(c.x.roundToInt(), c.y.roundToInt(), Mouse.getMoveEvent())
     }
 
-    fun sendButton(button: XyMouseButton, down: Boolean) {
+    fun sendButton(button: SeiMouseButton, down: Boolean) {
         val c = cursor()
         val effectiveButton = if (swapMouseButtons) {
             when (button) {
-                XyMouseButton.LEFT -> XyMouseButton.RIGHT
-                XyMouseButton.RIGHT -> XyMouseButton.LEFT
-                XyMouseButton.MIDDLE -> XyMouseButton.MIDDLE
+                SeiMouseButton.LEFT -> SeiMouseButton.RIGHT
+                SeiMouseButton.RIGHT -> SeiMouseButton.LEFT
+                SeiMouseButton.MIDDLE -> SeiMouseButton.MIDDLE
             }
         } else button
         val flags = when (effectiveButton) {
-            XyMouseButton.LEFT -> Mouse.getLeftButtonEvent(context, down)
-            XyMouseButton.RIGHT -> Mouse.getRightButtonEvent(context, down)
-            XyMouseButton.MIDDLE -> Mouse.getMiddleButtonEvent(down)
+            SeiMouseButton.LEFT -> Mouse.getLeftButtonEvent(context, down)
+            SeiMouseButton.RIGHT -> Mouse.getRightButtonEvent(context, down)
+            SeiMouseButton.MIDDLE -> Mouse.getMiddleButtonEvent(down)
         }
         sendCursorEvent(c.x.roundToInt(), c.y.roundToInt(), flags)
     }
@@ -849,9 +849,9 @@ fun SeiDeskSessionScreen(
             // Sumbu joystick dialirkan lewat onStickAxis saat jari bergerak,
             // bukan sebagai aksi tekan/lepas, jadi tidak ada yang perlu dikirim.
             HudKind.PAD_STICK -> Unit
-            HudKind.MOUSE_LEFT -> sendButton(XyMouseButton.LEFT, down)
-            HudKind.MOUSE_RIGHT -> sendButton(XyMouseButton.RIGHT, down)
-            HudKind.MOUSE_MIDDLE -> sendButton(XyMouseButton.MIDDLE, down)
+            HudKind.MOUSE_LEFT -> sendButton(SeiMouseButton.LEFT, down)
+            HudKind.MOUSE_RIGHT -> sendButton(SeiMouseButton.RIGHT, down)
+            HudKind.MOUSE_MIDDLE -> sendButton(SeiMouseButton.MIDDLE, down)
             HudKind.MOUSE_SWAP -> if (down) {
                 val next = !swapMouseButtons
                 swapMouseButtons = next
@@ -1101,13 +1101,13 @@ fun SeiDeskSessionScreen(
                             edgeScrollEnabled = prefs.edgeScrollZone,
                             onMove = { dx, dy -> movePointer(dx, dy) },
                             onTap = {
-                                sendButton(XyMouseButton.LEFT, true)
-                                sendButton(XyMouseButton.LEFT, false)
+                                sendButton(SeiMouseButton.LEFT, true)
+                                sendButton(SeiMouseButton.LEFT, false)
                                 consumeOneShotKeys()
                             },
                             onTwoFingerTap = {
-                                sendButton(XyMouseButton.RIGHT, true)
-                                sendButton(XyMouseButton.RIGHT, false)
+                                sendButton(SeiMouseButton.RIGHT, true)
+                                sendButton(SeiMouseButton.RIGHT, false)
                                 consumeOneShotKeys()
                             },
                             onScrollUnits = { sendScrollUnits(it) },
@@ -1241,7 +1241,7 @@ fun SeiDeskSessionScreen(
                     // mapper inti lewat onStickKeys supaya joystick HUD dan
                     // gamepad fisik berperilaku identik.
                     when (stickModeProvider()) {
-                        XyStickMode.POINTER ->
+                        SeiStickMode.POINTER ->
                             if (x != 0f || y != 0f) {
                                 movePointer(x * HUD_STICK_POINTER_UNITS, y * HUD_STICK_POINTER_UNITS)
                             }
@@ -1504,7 +1504,7 @@ fun SeiDeskSessionScreen(
 
             // Pesan app sendiri (bukan Toast bawaan Android) — satu bahasa
             // visual dengan panel, ikut tema.
-            XyNoticeHost(
+            SeiNoticeHost(
                 state = notice,
                 modifier = Modifier.align(Alignment.TopCenter),
             )
@@ -1622,7 +1622,7 @@ fun SeiDeskSessionScreen(
         }
     }
     if (!active && !reconnecting && !applyingResolution && !userDisconnect) err?.let { e ->
-        XyOverlay(
+        SeiOverlay(
             title = xy("Tidak dapat tersambung", "Unable to connect"),
             onDismiss = { exitSession() },
         ) {
@@ -1652,14 +1652,14 @@ fun SeiDeskSessionScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                XyPillButton(
+                SeiPillButton(
                     text = xy("Detail", "Details"),
                     onClick = { showLog = true },
                     primary = false,
                     compact = true,
                     modifier = Modifier.weight(1f),
                 )
-                XyPillButton(
+                SeiPillButton(
                     text = xy("Reset resolusi", "Reset resolution"),
                     onClick = {
                         DisplayPrefs.setResolution(context, activeProfile.id, DisplayPrefs.AUTOMATIC)
@@ -1671,7 +1671,7 @@ fun SeiDeskSessionScreen(
                     modifier = Modifier.weight(1f),
                 )
             }
-            XyPillButton(
+            SeiPillButton(
                 text = xy("Coba lagi", "Try again"),
                 onClick = {
                     showLog = false
@@ -1681,7 +1681,7 @@ fun SeiDeskSessionScreen(
                 compact = true,
                 modifier = Modifier.fillMaxWidth(),
             )
-            XyPillButton(
+            SeiPillButton(
                 text = xy("Tutup", "Close"),
                 onClick = { exitSession() },
                 compact = true,
@@ -1690,7 +1690,7 @@ fun SeiDeskSessionScreen(
         }
     }
     if (!active && err != null && showLog && !userDisconnect) {
-        XyOverlay(title = xy("Log koneksi", "Connection log"), onDismiss = { showLog = false }) {
+        SeiOverlay(title = xy("Log koneksi", "Connection log"), onDismiss = { showLog = false }) {
             Column(
                 Modifier
                     .fillMaxWidth()
@@ -1705,7 +1705,7 @@ fun SeiDeskSessionScreen(
                     )
                 }
             }
-            XyPillButton(
+            SeiPillButton(
                 text = xy("Tutup", "Close"),
                 onClick = { showLog = false },
                 compact = true,
@@ -1714,7 +1714,7 @@ fun SeiDeskSessionScreen(
         }
     }
     if (!active && err == null && confirmDisconnect) {
-        XyDialog(
+        SeiDialog(
             title = xy("Putuskan sesi?", "Disconnect session?"),
             body = xy("Putuskan sesi sekarang dan kembali ke beranda?", "Disconnect the session now and return to home?"),
             confirmLabel = xy("Putuskan", "Disconnect"),
@@ -1736,7 +1736,7 @@ fun SeiDeskSessionScreen(
         )
     }
     if (!active && confirmCancelConnect) {
-        XyDialog(
+        SeiDialog(
             title = xy("Batalkan koneksi?", "Cancel connection?"),
             body = xy(
                 "Hentikan proses menyambung ke server dan kembali ke beranda?",
@@ -1795,7 +1795,7 @@ private fun ReconnectingOverlay(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        XySpinner(size = 24.dp, color = MaterialTheme.colorScheme.primary)
+        SeiSpinner(size = 24.dp, color = MaterialTheme.colorScheme.primary)
         Text(
             xy("Jaringan terputus sementara", "Temporary network interruption"),
             color = MaterialTheme.colorScheme.onSurface,
@@ -1820,13 +1820,13 @@ private fun ReconnectingOverlay(
             style = MaterialTheme.typography.bodySmall,
             textAlign = TextAlign.Center,
         )
-        XyPillButton(xy("Berhenti mencoba", "Stop retrying"), onStop, primary = false, compact = true)
+        SeiPillButton(xy("Berhenti mencoba", "Stop retrying"), onStop, primary = false, compact = true)
     }
 }
 
 @Composable
 private fun ConnectingScreen(
-    wall: XyWall,
+    wall: SeiWall,
     deviceLabel: String,
     stage: SessionManager.Stage,
     onCancel: () -> Unit,
@@ -1842,7 +1842,7 @@ private fun ConnectingScreen(
 
     Box(Modifier.fillMaxSize()) {
         // Blur layar penuh berbiaya tinggi di HP kelas menengah -> pakai dim saja.
-        XyWallpaper(wall, blurRadius = 0.dp, dim = 0.35f)
+        SeiWallpaper(wall, blurRadius = 0.dp, dim = 0.35f)
         Column(
             Modifier
                 .fillMaxSize()
@@ -1873,12 +1873,12 @@ private fun ConnectingScreen(
                         Box(Modifier.size(16.dp), contentAlignment = Alignment.Center) {
                             when {
                                 index < active -> androidx.compose.material3.Icon(
-                                    XyIcons.Check,
+                                    SeiIcons.Check,
                                     contentDescription = null,
                                     tint = Color.White.copy(alpha = 0.9f),
                                     modifier = Modifier.size(14.dp),
                                 )
-                                index == active -> XySpinner(
+                                index == active -> SeiSpinner(
                                     modifier = Modifier.size(14.dp),
                                     size = 14.dp,
                                     strokeWidth = 2.dp,
@@ -1902,21 +1902,21 @@ private fun ConnectingScreen(
                 }
             }
             Spacer(Modifier.height(30.dp))
-            XyPillButton(xy("Batalkan", "Cancel"), onCancel, primary = false, compact = true)
+            SeiPillButton(xy("Batalkan", "Cancel"), onCancel, primary = false, compact = true)
         }
     }
 }
 
 @Composable
 private fun DisconnectedScreen(
-    wall: XyWall,
+    wall: SeiWall,
     deviceLabel: String,
     detail: String?,
     onReconnect: () -> Unit,
     onExit: () -> Unit,
 ) {
     Box(Modifier.fillMaxSize()) {
-        XyWallpaper(wall, blurRadius = 0.dp, dim = 0.40f)
+        SeiWallpaper(wall, blurRadius = 0.dp, dim = 0.40f)
         Column(
             Modifier.fillMaxSize().padding(32.dp),
             verticalArrangement = Arrangement.Center,
@@ -1949,9 +1949,9 @@ private fun DisconnectedScreen(
                 )
             }
             Spacer(Modifier.height(20.dp))
-            XyPillButton(xy("Sambungkan lagi", "Reconnect"), onReconnect, compact = true)
+            SeiPillButton(xy("Sambungkan lagi", "Reconnect"), onReconnect, compact = true)
             Spacer(Modifier.height(8.dp))
-            XyPillButton(xy("Kembali ke home", "Back to home"), onExit, primary = false, compact = true)
+            SeiPillButton(xy("Kembali ke home", "Back to home"), onExit, primary = false, compact = true)
         }
     }
 }
@@ -1976,7 +1976,7 @@ private suspend fun androidx.compose.ui.input.pointer.PointerInputScope.trackpad
     onTwoFingerTap: () -> Unit,
     onScrollUnits: (Int) -> Unit,
     onFlingScroll: (Float) -> Unit = {},
-    onButton: (XyMouseButton, Boolean) -> Unit,
+    onButton: (SeiMouseButton, Boolean) -> Unit,
 ) {
     awaitEachGesture {
         val slop = viewConfiguration.touchSlop
@@ -2002,7 +2002,7 @@ private suspend fun androidx.compose.ui.input.pointer.PointerInputScope.trackpad
         var deadline = first.uptimeMillis + holdTimeout
         var holdEligible = !startedInEdgeScroll
         var tapEligible = !startedInEdgeScroll
-        var heldButton: XyMouseButton? = null
+        var heldButton: SeiMouseButton? = null
 
         fun emitScroll(deltaY: Float) {
             lastScrollDeltaY = deltaY
@@ -2014,14 +2014,14 @@ private suspend fun androidx.compose.ui.input.pointer.PointerInputScope.trackpad
         fun beginLongPress() {
             when {
                 mode == TrackpadGestureMode.SINGLE_PENDING && activePointers == 1 -> {
-                    heldButton = XyMouseButton.LEFT
-                    onButton(XyMouseButton.LEFT, true)
+                    heldButton = SeiMouseButton.LEFT
+                    onButton(SeiMouseButton.LEFT, true)
                     mode = TrackpadGestureMode.LEFT_DRAG
                     tapEligible = false
                 }
                 mode == TrackpadGestureMode.TWO_PENDING && activePointers == 2 -> {
-                    heldButton = XyMouseButton.RIGHT
-                    onButton(XyMouseButton.RIGHT, true)
+                    heldButton = SeiMouseButton.RIGHT
+                    onButton(SeiMouseButton.RIGHT, true)
                     mode = TrackpadGestureMode.RIGHT_DRAG
                     tapEligible = false
                 }
@@ -2160,7 +2160,7 @@ private fun CertificateDialog(
     onTrustRemember: () -> Unit,
 ) {
     var showCertificateDetails by remember(info.host, info.port, info.fingerprint) { mutableStateOf(false) }
-    XyOverlay(
+    SeiOverlay(
         title = if (info.isChanged) {
             xy("Sertifikat server berubah", "Server certificate changed")
         } else {
@@ -2218,21 +2218,21 @@ private fun CertificateDialog(
                     style = MaterialTheme.typography.bodySmall, fontFamily = FontFamily.Monospace)
             }
         }
-        XyPillButton(
+        SeiPillButton(
             text = xy("Percaya & ingat", "Trust & remember"),
             onClick = onTrustRemember,
             compact = true,
             modifier = Modifier.fillMaxWidth(),
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            XyPillButton(
+            SeiPillButton(
                 text = xy("Percaya (sekali)", "Trust (once)"),
                 onClick = { onReply(CertificateInfo.VERIFY_ACCEPT) },
                 primary = false,
                 compact = true,
                 modifier = Modifier.weight(1f),
             )
-            XyPillButton(
+            SeiPillButton(
                 text = xy("Tolak kali ini", "Deny this time"),
                 onClick = { onReply(CertificateInfo.VERIFY_DENY) },
                 primary = false,
@@ -2251,19 +2251,19 @@ private fun NlaDialog(
     var user by remember { mutableStateOf(p.user ?: "") }
     var domain by remember { mutableStateOf(p.domain ?: "") }
     var pass by remember { mutableStateOf("") }
-    XyOverlay(title = xy("Masuk ke server", "Sign in to server"), onDismiss = null) {
+    SeiOverlay(title = xy("Masuk ke server", "Sign in to server"), onDismiss = null) {
         Text(
             xy("Server meminta kredensial (NLA/CredSSP).", "The server asks for credentials (NLA/CredSSP)."),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        XyField(value = user, onValueChange = { user = it }, label = xy("Username", "Username"))
-        XyField(
+        SeiField(value = user, onValueChange = { user = it }, label = xy("Username", "Username"))
+        SeiField(
             value = domain,
             onValueChange = { domain = it },
             label = xy("Domain (opsional)", "Domain (optional)"),
         )
-        XyField(
+        SeiField(
             value = pass,
             onValueChange = { pass = it },
             label = xy("Password", "Password"),
@@ -2271,7 +2271,7 @@ private fun NlaDialog(
             imeAction = ImeAction.Done,
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            XyPillButton(
+            SeiPillButton(
                 text = xy("Masuk", "Sign in"),
                 onClick = {
                     onReply(
@@ -2284,7 +2284,7 @@ private fun NlaDialog(
                 compact = true,
                 modifier = Modifier.weight(1f),
             )
-            XyPillButton(
+            SeiPillButton(
                 text = xy("Batal", "Cancel"),
                 onClick = { onReply(null, null, null) },
                 primary = false,
@@ -2294,26 +2294,3 @@ private fun NlaDialog(
         }
     }
 }
-
-@Composable
-fun XyDeskSessionScreen(
-    profile: ConnectionProfile,
-    manager: SessionManager,
-    controller: SessionSurfaceController,
-    onExit: () -> Unit,
-    onDisplayRefreshPreferenceChange: (Int) -> Unit,
-    stickModeProvider: () -> XyStickMode = { XyStickMode.POINTER },
-    onStickKeys: (Float, Float) -> Unit = { _, _ -> },
-    onStickModeChange: (XyStickMode) -> Unit = {},
-) = SeiDeskSessionScreen(
-    profile = profile,
-    manager = manager,
-    controller = controller,
-    onExit = onExit,
-    onDisplayRefreshPreferenceChange = onDisplayRefreshPreferenceChange,
-    stickModeProvider = stickModeProvider,
-    onStickKeys = onStickKeys,
-    onStickModeChange = onStickModeChange,
-)
-
-

@@ -25,8 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
 import com.freerdp.freerdpcore.services.LibFreeRDP
 import io.seidesk.rm.ui.theme.SeiDeskTheme
-import io.seidesk.rm.ui.theme.XyThemeState
-import io.seidesk.rm.ui.theme.xyDark
+import io.seidesk.rm.ui.theme.SeiThemeState
+import io.seidesk.rm.ui.theme.seiDark
 import java.io.File
 
 /**
@@ -39,7 +39,6 @@ import java.io.File
  */
 internal const val EXTRA_SKIP_AUTO_RESUME = "io.seidesk.rm.ui.extra.SKIP_AUTO_RESUME"
 
-typealias XyDeskHomeActivity = SeiDeskHomeActivity
 
 class SeiDeskHomeActivity : ComponentActivity() {
 
@@ -65,8 +64,8 @@ class SeiDeskHomeActivity : ComponentActivity() {
         markSkipAutoResumeIfNeeded(intent)
         handleIncomingShareIntent(intent)
         setContent {
-            XyThemeState.init(AppPrefs(this))
-            SeiDeskTheme(dark = xyDark()) {
+            SeiThemeState.init(AppPrefs(this))
+            SeiDeskTheme(dark = seiDark()) {
                 var boot by remember { mutableStateOf(true) }
                 var ready by remember { mutableStateOf(false) }
                 val sharedBanner by sharedFileBanner
@@ -85,9 +84,9 @@ class SeiDeskHomeActivity : ComponentActivity() {
                     // sudah tersusun di belakangnya, jadi begitu splash hilang
                     // tidak ada kedipan.
                     if (boot) {
-                        XySplashScreen(
+                        SeiSplashScreen(
                             ready = ready,
-                            dark = xyDark(),
+                            dark = seiDark(),
                             onDone = { boot = false },
                         )
                     }

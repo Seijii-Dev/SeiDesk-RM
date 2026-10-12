@@ -10,10 +10,10 @@ package io.seidesk.rm.ui.input
  */
 
 /** Posisi kiri-atas sebuah klaster dalam pecahan lebar/tinggi layar. */
-data class XyPadPos(val x: Float, val y: Float)
+data class SeiPadPos(val x: Float, val y: Float)
 
 /** Klaster yang bisa dipindah sendiri-sendiri oleh pengguna. */
-enum class XyPadCluster {
+enum class SeiPadCluster {
     LEFT_STICK,
     DPAD,
     ABXY,
@@ -21,7 +21,7 @@ enum class XyPadCluster {
     TOP_BAR,
 }
 
-object XyPadLayout {
+object SeiPadLayout {
     const val MIN_SCALE = 0.7f
     const val MAX_SCALE = 1.4f
 
@@ -30,17 +30,17 @@ object XyPadLayout {
      * pemutar Spotify mengambang di tengah-atas, HUD rail default di kanan
      * (x≈0.78, y≈0.42), dan pill scroll di tengah-kanan.
      */
-    fun defaults(): Map<XyPadCluster, XyPadPos> =
+    fun defaults(): Map<SeiPadCluster, SeiPadPos> =
         mapOf(
-            XyPadCluster.TOP_BAR to XyPadPos(0.02f, 0.10f),
-            XyPadCluster.DPAD to XyPadPos(0.02f, 0.38f),
-            XyPadCluster.LEFT_STICK to XyPadPos(0.03f, 0.72f),
-            XyPadCluster.ABXY to XyPadPos(0.80f, 0.62f),
-            XyPadCluster.RIGHT_STICK to XyPadPos(0.79f, 0.30f),
+            SeiPadCluster.TOP_BAR to SeiPadPos(0.02f, 0.10f),
+            SeiPadCluster.DPAD to SeiPadPos(0.02f, 0.38f),
+            SeiPadCluster.LEFT_STICK to SeiPadPos(0.03f, 0.72f),
+            SeiPadCluster.ABXY to SeiPadPos(0.80f, 0.62f),
+            SeiPadCluster.RIGHT_STICK to SeiPadPos(0.79f, 0.30f),
         )
 
     /** Gabungkan tata letak tersimpan dengan bawaan; kunci asing diabaikan. */
-    fun resolve(stored: Map<XyPadCluster, XyPadPos>?): Map<XyPadCluster, XyPadPos> {
+    fun resolve(stored: Map<SeiPadCluster, SeiPadPos>?): Map<SeiPadCluster, SeiPadPos> {
         val base = defaults().toMutableMap()
         stored?.forEach { (cluster, pos) -> base[cluster] = pos }
         return base
@@ -51,14 +51,14 @@ object XyPadLayout {
      * terlihat di layar. [clusterW]/[clusterH] adalah ukuran klaster dalam piksel.
      */
     fun drag(
-        pos: XyPadPos,
+        pos: SeiPadPos,
         dxPx: Float,
         dyPx: Float,
         screenW: Int,
         screenH: Int,
         clusterW: Float,
         clusterH: Float,
-    ): XyPadPos {
+    ): SeiPadPos {
         val current = topLeftPx(pos, screenW, screenH, clusterW, clusterH)
         return fromTopLeftPx(
             current.first + dxPx,
@@ -72,7 +72,7 @@ object XyPadLayout {
 
     /** Posisi pecahan -> offset piksel kiri-atas, sudah dijepit ke layar. */
     fun topLeftPx(
-        pos: XyPadPos,
+        pos: SeiPadPos,
         screenW: Int,
         screenH: Int,
         clusterW: Float,
@@ -93,12 +93,12 @@ object XyPadLayout {
         screenH: Int,
         clusterW: Float,
         clusterH: Float,
-    ): XyPadPos {
+    ): SeiPadPos {
         val w = screenW.coerceAtLeast(1)
         val h = screenH.coerceAtLeast(1)
         val maxX = (w - clusterW).coerceAtLeast(0f)
         val maxY = (h - clusterH).coerceAtLeast(0f)
-        return XyPadPos(
+        return SeiPadPos(
             x = leftPx.coerceIn(0f, maxX) / w,
             y = topPx.coerceIn(0f, maxY) / h,
         )
@@ -114,29 +114,24 @@ object XyPadLayout {
     fun clampScale(scale: Float): Float = scale.coerceIn(MIN_SCALE, MAX_SCALE)
 
     /** `TOP_BAR:0.02,0.10|DPAD:0.02,0.38` — format ringkas, tanpa dependensi JSON. */
-    fun encode(layout: Map<XyPadCluster, XyPadPos>): String =
+    fun encode(layout: Map<SeiPadCluster, SeiPadPos>): String =
         layout.entries.joinToString("|") { "${it.key.name}:${fmt(it.value.x)},${fmt(it.value.y)}" }
 
-    fun decode(raw: String?): Map<XyPadCluster, XyPadPos>? {
+    fun decode(raw: String?): Map<SeiPadCluster, SeiPadPos>? {
         if (raw.isNullOrBlank()) return null
-        val out = mutableMapOf<XyPadCluster, XyPadPos>()
+        val out = mutableMapOf<SeiPadCluster, SeiPadPos>()
         for (part in raw.split('|')) {
             val kv = part.split(':')
             if (kv.size != 2) continue
-            val cluster = XyPadCluster.entries.firstOrNull { it.name == kv[0] } ?: continue
+            val cluster = SeiPadCluster.entries.firstOrNull { it.name == kv[0] } ?: continue
             val xy = kv[1].split(',')
             if (xy.size != 2) continue
             val x = xy[0].toFloatOrNull() ?: continue
             val y = xy[1].toFloatOrNull() ?: continue
-            out[cluster] = XyPadPos(x, y)
+            out[cluster] = SeiPadPos(x, y)
         }
         return out.ifEmpty { null }
     }
 
     private fun fmt(value: Float): String = String.format(java.util.Locale.US, "%.4f", value)
 }
-
-typealias SeiPadPos = XyPadPos
-typealias SeiPadCluster = XyPadCluster
-typealias SeiPadLayout = XyPadLayout
-

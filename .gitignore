@@ -6,6 +6,7 @@ abi-checker
 
 # --- XyDesk Remote: Android / Gradle ---
 client/Android/Studio/.gradle/
+client/Android/Studio/.kotlin/
 client/Android/Studio/build/
 client/Android/Studio/local.properties
 client/Android/Studio/.idea/

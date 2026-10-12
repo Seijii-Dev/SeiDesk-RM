@@ -31,6 +31,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import io.seidesk.rm.ui.components.SeiLogo
+import io.seidesk.rm.ui.components.SeiWordmark
 import io.seidesk.rm.R
 import kotlinx.coroutines.delay
 
@@ -40,7 +45,7 @@ import kotlinx.coroutines.delay
  * ditutup ketika proses boot selesai.
  */
 @Composable
-fun XySplashScreen(
+fun SeiSplashScreen(
     ready: Boolean,
     dark: Boolean = true,
     onDone: () -> Unit,
@@ -119,26 +124,30 @@ fun XySplashScreen(
     Box(
         Modifier
             .fillMaxSize()
-            .background(if (dark) Color(0xFF14161A) else Color(0xFFF6F7F9)),
+            .background(if (dark) Color(0xFF0A0C10) else Color(0xFFF8FAFC)),
         contentAlignment = Alignment.Center,
     ) {
-        Image(
-            painter = painterResource(
-                if (dark) R.drawable.xy_logo_h_white else R.drawable.xy_logo_h_black,
-            ),
-            contentDescription = "SeiDesk RM",
-            contentScale = ContentScale.Fit,
+        Column(
             modifier = Modifier
-                .size(width = 252.dp, height = 86.dp)
                 .alpha(alpha)
                 .scale(scale),
-        )
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            SeiLogo(
+                modifier = Modifier.size(64.dp),
+                tint = if (dark) Color.White else Color(0xFF0A0C10),
+            )
+            Spacer(Modifier.height(14.dp))
+            SeiWordmark(
+                fontSize = 24.sp,
+            )
+        }
         Text(
             text = AppBrand.PUBLISHER,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 14.dp),
-            color = if (dark) Color.White.copy(alpha = 0.72f) else Color(0xFF14161A).copy(alpha = 0.72f),
+            color = if (dark) Color.White.copy(alpha = 0.72f) else Color(0xFF0A0C10).copy(alpha = 0.72f),
             style = MaterialTheme.typography.labelSmall,
             letterSpacing = 0.8.sp,
             textAlign = TextAlign.Center,

@@ -33,14 +33,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.seidesk.rm.ui.components.XyIcons
-import io.seidesk.rm.ui.components.xyGlass
+import io.seidesk.rm.ui.components.SeiIcons
+import io.seidesk.rm.ui.components.seiSurface
 
 /**
  * Tujuan navigasi bawah.
  *
  * Sengaja hanya **tiga** sesuai permintaan pengguna. Sebelumnya bar ini memuat
- * enam seksi (`XySection`) sehingga penuh dan tiap item jadi sempit; seksi
+ * enam seksi (`SeiSection`) sehingga penuh dan tiap item jadi sempit; seksi
  * lain sekarang hidup di drawer kiri dan di layar Profil.
  */
 internal enum class SeiTab(val title: String, val titleEn: String) {
@@ -49,11 +49,8 @@ internal enum class SeiTab(val title: String, val titleEn: String) {
     PROFILE("Profil", "Profile"),
 }
 
-/** Backward compatibility alias */
-internal typealias XyTab = SeiTab
-
 /**
- * Navigasi bawah app: tiga tujuan, gaya kaca monokrom.
+ * Navigasi bawah app: tiga tujuan, gaya permukaan monokrom.
  *
  * Warna tetap hitam-putih (`onSurface`/`surface`) alih-alih aksen, mengikuti
  * permintaan pengguna. Item terpilih digambar sebagai pil berisi; sisanya
@@ -71,17 +68,13 @@ internal fun SeiBottomNav(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            // Lapisan kaca tipis: bar menyatu dengan latar tanpa jadi bidang
-            // datar, senada dengan kartu di atasnya.
-            .xyGlass(shape = RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp), strength = 0.8f)
+            .seiSurface(shape = RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp), strength = 0.8f)
             .padding(horizontal = 10.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         SeiTab.entries.forEach { tab ->
             val active = tab == selected
-            // xy() bersifat @Composable, jadi harus dipanggil di sini, bukan di
-            // dalam lambda semantics {} yang bukan composable.
             val title = xy(tab.title, tab.titleEn)
             val pillWidth by animateDpAsState(
                 targetValue = if (active) 48.dp else 34.dp,
@@ -153,9 +146,9 @@ internal fun SeiBottomNav(
 
 /** Ikon per tujuan. Tiga saja, jadi tidak ada risiko dua seksi berbagi ikon. */
 private fun tabIcon(tab: SeiTab): ImageVector = when (tab) {
-    SeiTab.HOME -> XyIcons.Monitor
-    SeiTab.FEED -> XyIcons.Users
-    SeiTab.PROFILE -> XyIcons.Gear
+    SeiTab.HOME -> SeiIcons.Monitor
+    SeiTab.FEED -> SeiIcons.Users
+    SeiTab.PROFILE -> SeiIcons.Gear
 }
 
 /**
@@ -180,3 +173,4 @@ internal fun SeiBottomNavHairline(modifier: Modifier = Modifier) {
             ),
     )
 }
+

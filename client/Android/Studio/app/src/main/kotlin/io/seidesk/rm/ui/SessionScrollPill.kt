@@ -37,8 +37,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import io.seidesk.rm.ui.components.XyIcons
-import io.seidesk.rm.ui.theme.XyPill
+import io.seidesk.rm.ui.components.SeiIcons
+import io.seidesk.rm.ui.theme.SeiPill
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -85,9 +85,9 @@ internal fun SessionScrollPill(
     Column(
         modifier = modifier
             .width(40.dp)
-            .clip(XyPill)
+            .clip(SeiPill)
             .background(trackColor)
-            .border(1.dp, edgeColor, XyPill)
+            .border(1.dp, edgeColor, SeiPill)
             .padding(horizontal = 5.dp, vertical = 5.dp)
             .semantics {
                 contentDescription =
@@ -104,7 +104,7 @@ internal fun SessionScrollPill(
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                XyIcons.ChevronUp,
+                SeiIcons.ChevronUp,
                 contentDescription = xyNow("Scroll mouse ke atas", "Scroll mouse up"),
                 tint = palette.ink,
                 modifier = Modifier.size(16.dp),
@@ -174,7 +174,7 @@ internal fun SessionScrollPill(
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                XyIcons.ChevronDown,
+                SeiIcons.ChevronDown,
                 contentDescription = xyNow("Scroll mouse ke bawah", "Scroll mouse down"),
                 tint = palette.ink,
                 modifier = Modifier.size(16.dp),

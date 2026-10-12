@@ -68,7 +68,7 @@ internal fun sliderValueAtFraction(
 
 /** Slider: track tipis ber-border, isi aksen, pegangan bulat dan dapat diakses. */
 @Composable
-fun XySlider(
+fun SeiSlider(
     value: Float,
     onValueChange: (Float) -> Unit,
     valueRange: ClosedFloatingPointRange<Float>,
@@ -166,13 +166,13 @@ fun XySlider(
  * bawaan supaya tidak ada dua bahasa animasi di satu layar.
  */
 @Composable
-fun XySpinner(
+fun SeiSpinner(
     modifier: Modifier = Modifier,
     size: Dp = 18.dp,
     color: Color = MaterialTheme.colorScheme.primary,
     strokeWidth: Dp = 2.dp,
 ) {
-    val transition = rememberInfiniteTransition(label = "xy-spinner")
+    val transition = rememberInfiniteTransition(label = "sei-spinner")
     val angle by transition.animateFloat(
         initialValue = 0f,
         targetValue = 360f,
@@ -199,7 +199,7 @@ fun XySpinner(
 
 /** Garis pemisah tipis milik app (bukan HorizontalDivider). */
 @Composable
-fun XyDivider(modifier: Modifier = Modifier) {
+fun SeiDivider(modifier: Modifier = Modifier) {
     Box(
         modifier
             .fillMaxWidth()
@@ -210,7 +210,7 @@ fun XyDivider(modifier: Modifier = Modifier) {
 
 /** Titik kecil sebagai pengganti indikator akhir daftar. */
 @Composable
-fun XyDot(color: Color, sizeDp: Dp = 6.dp, modifier: Modifier = Modifier) {
+fun SeiDot(color: Color, sizeDp: Dp = 6.dp, modifier: Modifier = Modifier) {
     Box(
         modifier
             .size(sizeDp)
@@ -221,7 +221,7 @@ fun XyDot(color: Color, sizeDp: Dp = 6.dp, modifier: Modifier = Modifier) {
 
 /** Teks kecil ber-huruf renggang untuk label bagian. */
 @Composable
-fun XyTag(text: String, modifier: Modifier = Modifier) {
+fun SeiTag(text: String, modifier: Modifier = Modifier) {
     Text(
         text = text,
         modifier = modifier,
@@ -236,7 +236,7 @@ fun XyTag(text: String, modifier: Modifier = Modifier) {
 
 /** Latar panel kecil dengan radius konsisten (dipakai di beberapa layar). */
 @Composable
-fun XyInset(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+fun SeiInset(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     Box(
         modifier
             .clip(RoundedCornerShape(10.dp))
@@ -246,48 +246,3 @@ fun XyInset(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
         content()
     }
 }
-
-// =========================================================================
-// SeiDesk RM Control Aliases
-// =========================================================================
-
-@Composable
-fun SeiSlider(
-    value: Float,
-    onValueChange: (Float) -> Unit,
-    valueRange: ClosedFloatingPointRange<Float>,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    steps: Int = 0,
-) = XySlider(
-    value = value,
-    onValueChange = onValueChange,
-    valueRange = valueRange,
-    modifier = modifier,
-    enabled = enabled,
-    steps = steps,
-)
-
-@Composable
-fun SeiSpinner(
-    modifier: Modifier = Modifier,
-    size: Dp = 18.dp,
-    color: Color = MaterialTheme.colorScheme.primary,
-    strokeWidth: Dp = 2.dp,
-) = XySpinner(modifier = modifier, size = size, color = color, strokeWidth = strokeWidth)
-
-@Composable
-fun SeiDivider(modifier: Modifier = Modifier) = XyDivider(modifier = modifier)
-
-@Composable
-fun SeiDot(color: Color, sizeDp: Dp = 6.dp, modifier: Modifier = Modifier) =
-    XyDot(color = color, sizeDp = sizeDp, modifier = modifier)
-
-@Composable
-fun SeiTag(text: String, modifier: Modifier = Modifier) =
-    XyTag(text = text, modifier = modifier)
-
-@Composable
-fun SeiInset(modifier: Modifier = Modifier, content: @Composable () -> Unit) =
-    XyInset(modifier = modifier, content = content)
-

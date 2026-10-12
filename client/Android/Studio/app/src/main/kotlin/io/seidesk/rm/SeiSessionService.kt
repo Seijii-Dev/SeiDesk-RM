@@ -164,7 +164,7 @@ class SeiSessionService : Service() {
         // Ikon besar di sisi kiri. Dipakai PNG (bukan vektor) karena
         // BitmapFactory tidak membaca drawable vektor.
         runCatching {
-            BitmapFactory.decodeResource(resources, io.seidesk.rm.R.drawable.xy_mark_white)
+            BitmapFactory.decodeResource(resources, io.seidesk.rm.R.drawable.ic_launcher_monochrome)
         }.getOrNull()?.let { builder.setLargeIcon(it) }
 
         // Layar kunci tidak menampilkan host yang sedang disambungkan.

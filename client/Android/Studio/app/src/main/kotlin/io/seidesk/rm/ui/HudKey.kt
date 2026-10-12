@@ -1,7 +1,7 @@
 package io.seidesk.rm.ui
 
 import android.view.KeyEvent
-import io.seidesk.rm.core.XyAudioMode
+import io.seidesk.rm.core.SeiAudioMode
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -385,7 +385,7 @@ data class HudKey(
  * Tombol mouse yang bisa dikirim HUD. Dulu dideklarasikan di SessionControls
  * lama; sekarang di model HUD karena HUD yang memakainya.
  */
-enum class XyMouseButton { LEFT, RIGHT, MIDDLE }
+enum class SeiMouseButton { LEFT, RIGHT, MIDDLE }
 
 
 /** Satu pilihan di daftar "tambah tombol". */
@@ -650,7 +650,7 @@ object HudKeyCatalog {
      * HudKind memaksa perubahan di empat `when` exhaustive (labelFor, glyph,
      * hudIconFor, runHudKey) tanpa menambah kemampuan apa pun di sini.
      *
-     * Penamaan mengikuti pemetaan gamepad fisik di XyGamepadActionMapper
+     * Penamaan mengikuti pemetaan gamepad fisik di SeiGamepadActionMapper
      * (A = klik kiri, B = klik kanan, X = Enter, Y = Escape, shoulder = satu
      * takik scroll) supaya pad di layar dan pad Bluetooth berperilaku sama.
      */
@@ -726,15 +726,15 @@ object HudKeyCatalog {
     }
 }
 
-/** Satu-satunya tempat yang tahu arti XyAudioMode buat label UI. */
-internal fun XyAudioMode.shortTitle(): String = when (this) {
-    XyAudioMode.DEVICE -> "Perangkat"
-    XyAudioMode.REMOTE -> "Remote"
-    XyAudioMode.OFF -> "Mati"
+/** Satu-satunya tempat yang tahu arti SeiAudioMode buat label UI. */
+internal fun SeiAudioMode.shortTitle(): String = when (this) {
+    SeiAudioMode.DEVICE -> "Perangkat"
+    SeiAudioMode.REMOTE -> "Remote"
+    SeiAudioMode.OFF -> "Mati"
 }
 
-internal fun XyAudioMode.shortTitleEn(): String = when (this) {
-    XyAudioMode.DEVICE -> "Device"
-    XyAudioMode.REMOTE -> "Remote"
-    XyAudioMode.OFF -> "Off"
+internal fun SeiAudioMode.shortTitleEn(): String = when (this) {
+    SeiAudioMode.DEVICE -> "Device"
+    SeiAudioMode.REMOTE -> "Remote"
+    SeiAudioMode.OFF -> "Off"
 }

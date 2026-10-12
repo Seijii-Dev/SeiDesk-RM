@@ -78,11 +78,6 @@
             </intent-filter>
         </activity>
 
-        <activity-alias
-            android:name="io.seidesk.rm.ui.XyDeskHomeActivity"
-            android:targetActivity="io.seidesk.rm.ui.SeiDeskHomeActivity"
-            android:exported="false" />
-
         <!-- SeiDesk RM session activity (surface + Compose controls). -->
         <activity
             android:name="io.seidesk.rm.ui.SeiDeskSessionActivity"
@@ -91,11 +86,6 @@
             android:theme="@style/Theme.SeiDeskHome"
             android:windowSoftInputMode="adjustNothing"
             android:configChanges="orientation|keyboardHidden|screenSize|smallestScreenSize|density|screenLayout" />
-
-        <activity-alias
-            android:name="io.seidesk.rm.ui.XyDeskSessionActivity"
-            android:targetActivity="io.seidesk.rm.ui.SeiDeskSessionActivity"
-            android:exported="false" />
 
         <!-- FileProvider buat share screenshot -->
         <provider

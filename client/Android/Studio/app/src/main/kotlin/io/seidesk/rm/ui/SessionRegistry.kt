@@ -50,25 +50,3 @@ object SeiSessionRegistry {
 
     fun count(): Int = items.size
 }
-
-/** Backward compatibility alias for [SeiSessionRegistry]. */
-object XySessionRegistry {
-    class Live(
-        id: String,
-        label: String,
-        address: String,
-        open: () -> Unit,
-        kill: () -> Unit,
-        bitmapProvider: (() -> android.graphics.Bitmap?)? = null,
-    ) : SeiSessionRegistry.Live(id, label, address, open, kill, bitmapProvider)
-
-    fun add(item: SeiSessionRegistry.Live) = SeiSessionRegistry.add(item)
-    fun remove(id: String) = SeiSessionRegistry.remove(id)
-    fun setActive(id: String, active: Boolean) = SeiSessionRegistry.setActive(id, active)
-    fun activeCount(): Int = SeiSessionRegistry.activeCount()
-    fun list(): List<SeiSessionRegistry.Live> = SeiSessionRegistry.list()
-    fun disconnectAll() = SeiSessionRegistry.disconnectAll()
-    fun count(): Int = SeiSessionRegistry.count()
-}
-
-

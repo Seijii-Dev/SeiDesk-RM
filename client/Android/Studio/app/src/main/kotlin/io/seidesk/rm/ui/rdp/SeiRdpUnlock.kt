@@ -7,7 +7,7 @@ import android.content.Context
  * saluran. Keduanya flag lokal; iklan diverifikasi AdMob (reward callback),
  * gabung saluran berbasis kepercayaan (tidak ada bot/token komunitas).
  */
-internal class XyRdpUnlock(context: Context) {
+internal class SeiRdpUnlock(context: Context) {
     private val sp =
         context.applicationContext.getSharedPreferences("seidesk.rdpfree", Context.MODE_PRIVATE)
 

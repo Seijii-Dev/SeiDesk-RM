@@ -38,9 +38,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.seidesk.rm.core.RdpOptions
-import io.seidesk.rm.ui.components.XyIcons
-import io.seidesk.rm.ui.components.XyPillButton
-import io.seidesk.rm.ui.components.XyNoticeState
+import io.seidesk.rm.ui.components.SeiIcons
+import io.seidesk.rm.ui.components.SeiPillButton
+import io.seidesk.rm.ui.components.SeiNoticeState
 import kotlinx.coroutines.launch
 
 /**
@@ -52,7 +52,7 @@ import kotlinx.coroutines.launch
  * tombol untuk menyimpan kiriman PC ke folder Download HP.
  */
 @Composable
-internal fun TransferFileSection(deviceId: String, notice: XyNoticeState) {
+internal fun TransferFileSection(deviceId: String, notice: SeiNoticeState) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val jobs by SessionFileTransfer.jobs.collectAsState()
@@ -151,19 +151,19 @@ internal fun TransferFileSection(deviceId: String, notice: XyNoticeState) {
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            XyPillButton(
+            SeiPillButton(
                 xy("Kirim file ke PC", "Send files to PC"),
                 { picker.launch(arrayOf("*/*")) },
-                icon = XyIcons.Upload,
+                icon = SeiIcons.Upload,
                 primary = false,
                 compact = true,
                 enabled = driveAvailable,
                 modifier = Modifier.weight(1f),
             )
-            XyPillButton(
+            SeiPillButton(
                 xy("Segarkan", "Refresh"),
                 refreshIncoming,
-                icon = XyIcons.Refresh,
+                icon = SeiIcons.Refresh,
                 primary = false,
                 compact = true,
                 modifier = Modifier.weight(1f),
@@ -202,7 +202,7 @@ internal fun TransferFileSection(deviceId: String, notice: XyNoticeState) {
             ) {
                 jobs.take(12).forEach { job -> JobRow(job) }
             }
-            XyPillButton(
+            SeiPillButton(
                 xy("Bersihkan catatan selesai", "Clear finished entries"),
                 { SessionFileTransfer.clearFinished() },
                 primary = false,
@@ -323,9 +323,9 @@ private fun JobRow(job: TransferJob) {
             Icon(
                 when (job.phase) {
                     TransferPhase.RUNNING ->
-                        if (job.direction == TransferDirection.TO_PC) XyIcons.Upload else XyIcons.Download
-                    TransferPhase.DONE -> XyIcons.Check
-                    TransferPhase.FAILED -> XyIcons.Close
+                        if (job.direction == TransferDirection.TO_PC) SeiIcons.Upload else SeiIcons.Download
+                    TransferPhase.DONE -> SeiIcons.Check
+                    TransferPhase.FAILED -> SeiIcons.Close
                 },
                 contentDescription = null,
                 tint = when (job.phase) {
@@ -408,7 +408,7 @@ private fun IncomingRow(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
-                XyIcons.File,
+                SeiIcons.File,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(14.dp),
@@ -430,25 +430,25 @@ private fun IncomingRow(
             )
         }
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            XyPillButton(
+            SeiPillButton(
                 xy("Simpan ke HP", "Save to phone"),
                 onSave,
-                icon = XyIcons.Download,
+                icon = SeiIcons.Download,
                 primary = false,
                 compact = true,
                 modifier = Modifier.weight(1f),
             )
-            XyPillButton(
+            SeiPillButton(
                 xy("Bagikan", "Share"),
                 onShare,
-                icon = XyIcons.ExternalLink,
+                icon = SeiIcons.ExternalLink,
                 primary = false,
                 compact = true,
             )
-            XyPillButton(
+            SeiPillButton(
                 xy("Hapus", "Delete"),
                 onDelete,
-                icon = XyIcons.Trash,
+                icon = SeiIcons.Trash,
                 primary = false,
                 compact = true,
             )

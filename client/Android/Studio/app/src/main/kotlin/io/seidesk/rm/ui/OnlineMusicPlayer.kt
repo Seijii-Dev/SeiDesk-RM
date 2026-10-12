@@ -91,7 +91,7 @@ object OnlineMusicPlayer {
             filter,
             ContextCompat.RECEIVER_NOT_EXPORTED,
         )
-        session = MediaSessionCompat(app, "XyDeskOnlineMusic").apply {
+        session = MediaSessionCompat(app, "SeiDeskOnlineMusic").apply {
             setCallback(
                 object : MediaSessionCompat.Callback() {
                     override fun onPlay() = play()

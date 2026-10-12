@@ -29,7 +29,7 @@ object RdpUri {
     }
 
     /** Argumen gateway FreeRDP: `g:host[:port][,u:user][,d:domain][,p:pass]`. */
-    fun gatewayArg(g: XyGateway): String = buildString {
+    fun gatewayArg(g: SeiGateway): String = buildString {
         append("g:").append(g.host)
         if (g.port != 443) append(':').append(g.port)
         g.username?.takeIf { it.isNotBlank() }?.let { append(",u:").append(it) }
@@ -56,7 +56,7 @@ object RdpUri {
 
         // Audio: /audio-mode:0|1|2, ditambah /sound:sys:opensles,format:1,quality:high saat diputar di perangkat.
         out += "audio-mode" to options.audioMode.wire.toString()
-        if (options.audioMode == XyAudioMode.DEVICE) {
+        if (options.audioMode == SeiAudioMode.DEVICE) {
             out += "sound" to "sys:opensles,format:1,quality:high"
         }
         if (options.microphone && !options.pcConnectMode) out += "microphone" to ""
@@ -82,7 +82,7 @@ object RdpUri {
         if (options.dynamicResolution && !options.pcConnectMode) out += "dynamic-resolution" to ""
 
         // ---- Streaming & Latency CLI flags ----
-        if (options.colorDepth != 32 || options.streamProfile != XyStreamProfile.AUTO) {
+        if (options.colorDepth != 32 || options.streamProfile != SeiStreamProfile.AUTO) {
             out += "bpp" to options.colorDepth.coerceIn(16, 32).toString()
         }
         if (options.asyncUpdate) out += "async-update" to "+"
@@ -94,22 +94,22 @@ object RdpUri {
         if (options.fontSmoothing) out += "fonts" to "+"
         if (options.desktopWallpaper) {
             out += "wallpaper" to "+"
-        } else if (options.streamProfile != XyStreamProfile.AUTO) {
+        } else if (options.streamProfile != SeiStreamProfile.AUTO) {
             out += "wallpaper" to "-"
         }
         if (options.windowDrag) {
             out += "window-drag" to "+"
-        } else if (options.streamProfile != XyStreamProfile.AUTO) {
+        } else if (options.streamProfile != SeiStreamProfile.AUTO) {
             out += "window-drag" to "-"
         }
         if (options.menuAnimations) {
             out += "menu-anims" to "+"
-        } else if (options.streamProfile != XyStreamProfile.AUTO) {
+        } else if (options.streamProfile != SeiStreamProfile.AUTO) {
             out += "menu-anims" to "-"
         }
         if (!options.visualThemes) {
             out += "themes" to "-"
-        } else if (options.streamProfile == XyStreamProfile.HIGH_VISUAL) {
+        } else if (options.streamProfile == SeiStreamProfile.HIGH_VISUAL) {
             out += "themes" to "+"
         }
         if (options.desktopComposition) out += "aero" to "+"

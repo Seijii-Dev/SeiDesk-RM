@@ -786,7 +786,7 @@ class SessionManager(context: Context) {
                     // Hindari suara dobel: mode Perangkat sudah memutar suara lewat
                     // kanal RDP (rdpsnd), jadi bridge hanya mengantar suara di mode
                     // "Audio di PC" (REMOTE).
-                    val speakerOn = opts.quicAudio && opts.audioMode == XyAudioMode.REMOTE
+                    val speakerOn = opts.quicAudio && opts.audioMode == SeiAudioMode.REMOTE
                     val micOn = opts.usesQuicMicrophone()
                     if (speakerOn || micOn) {
                         audioBridgeState = "start…"
@@ -1072,7 +1072,7 @@ class SessionManager(context: Context) {
     enum class Stage { IDLE, PROBE, HANDSHAKE, AUTH, READY }
 
     companion object {
-        private const val TAG = "XyDeskSession"
+        private const val TAG = "SeiDeskSession"
         private const val PROMPT_TIMEOUT_SEC = 120L
         private const val CANCEL_FALLBACK_MS = 5_000L
         private const val DISCONNECT_FALLBACK_MS = 8_000L

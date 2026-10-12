@@ -10,7 +10,7 @@ package io.seidesk.rm.pcstream
  * The viewer is resolved lazily because a PC-stream session may not exist yet;
  * frames are dropped silently until a viewer is attached.
  */
-class XyPcStreamGamepadSink(private val viewer: () -> PcStreamViewer?) : XyGamepadSink {
+class SeiPcStreamGamepadSink(private val viewer: () -> PcStreamViewer?) : XyGamepadSink {
     override fun onFrame(frame: XyGamepadFrame) {
         viewer()?.sendGamepadState(frame.sequence, frame.timestampMs32, frame.state)
     }

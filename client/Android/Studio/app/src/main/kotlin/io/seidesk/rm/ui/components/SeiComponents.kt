@@ -65,8 +65,8 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.zIndex
-import io.seidesk.rm.ui.theme.XyDisplay
-import io.seidesk.rm.ui.theme.XyPill
+import io.seidesk.rm.ui.theme.SeiDisplay
+import io.seidesk.rm.ui.theme.SeiPill
 
 /**
  * Primitif XyDesk: permukaan rounded dengan garis lembut untuk mengelompokkan
@@ -74,7 +74,7 @@ import io.seidesk.rm.ui.theme.XyPill
  */
 
 @Composable
-fun XyCard(
+fun SeiCard(
     modifier: Modifier = Modifier,
     padding: Dp = 16.dp,
     content: @Composable ColumnScope.() -> Unit,
@@ -99,7 +99,7 @@ fun XyCard(
 
 /** Tombol aksi rounded; `primary` = isi penuh bergradien aksen; `false` = outline kaca. */
 @Composable
-fun XyPillButton(
+fun SeiPillButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -127,11 +127,11 @@ fun XyPillButton(
     }
     Row(
         modifier = modifier
-            .clip(XyPill)
+            .clip(SeiPill)
             .then(bgModifier)
             .then(
                 if (primary && enabled) Modifier
-                else Modifier.border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f), XyPill)
+                else Modifier.border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f), SeiPill)
             )
             .clickable(enabled = enabled, onClick = onClick)
             .padding(
@@ -157,7 +157,7 @@ fun XyPillButton(
 
 /** Tombol ikon; bisa berupa lingkaran berisi (HUD) atau aksi datar tanpa chip. */
 @Composable
-fun XyIconPill(
+fun SeiIconPill(
     icon: ImageVector,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -201,7 +201,7 @@ fun XySectionLabel(text: String, modifier: Modifier = Modifier) {
         text.uppercase(),
         modifier = modifier,
         style = MaterialTheme.typography.labelSmall,
-        fontFamily = XyDisplay,
+        fontFamily = SeiDisplay,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         letterSpacing = 1.4.sp,
     )
@@ -209,7 +209,7 @@ fun XySectionLabel(text: String, modifier: Modifier = Modifier) {
 
 /** Baris daftar: judul + subjudul opsional + trailing. */
 @Composable
-fun XyRow(
+fun SeiRow(
     title: String,
     subtitle: String? = null,
     modifier: Modifier = Modifier,
@@ -257,7 +257,7 @@ fun XyRow(
 
 /** Toggle custom: track pill + knob, tanpa komponen bawaan OS. */
 @Composable
-fun XySwitch(
+fun SeiSwitch(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     enabled: Boolean = true,
@@ -279,13 +279,13 @@ fun XySwitch(
         Box(
             modifier = Modifier
                 .size(width = 46.dp, height = 28.dp)
-                .clip(XyPill)
+                .clip(SeiPill)
                 .background(trackColor)
                 .border(
                     1.dp,
                     if (checked) MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
                     else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                    XyPill,
+                    SeiPill,
                 )
                 .toggleable(
                     value = checked,
@@ -306,7 +306,7 @@ fun XySwitch(
 }
 
 @Composable
-fun XyToggleRow(
+fun SeiToggleRow(
     title: String,
     subtitle: String? = null,
     checked: Boolean,
@@ -347,13 +347,13 @@ fun XyToggleRow(
                 )
             }
         }
-        XySwitch(checked = checked, onCheckedChange = onCheckedChange, enabled = enabled)
+        SeiSwitch(checked = checked, onCheckedChange = onCheckedChange, enabled = enabled)
     }
 }
 
 /** Segmented pill: pilihan tunggal dari beberapa opsi. */
 @Composable
-fun XySegmented(
+fun SeiSegmented(
     options: List<String>,
     selectedIndex: Int,
     onSelect: (Int) -> Unit,
@@ -389,7 +389,7 @@ fun XySegmented(
 
 /** Input teks: label kecil, permukaan jelas, outline membesar dan beraksen saat fokus. */
 @Composable
-fun XyField(
+fun SeiField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
@@ -413,7 +413,7 @@ fun XyField(
         Text(
             label.uppercase(),
             style = MaterialTheme.typography.labelSmall,
-            fontFamily = XyDisplay,
+            fontFamily = SeiDisplay,
             letterSpacing = 1.2.sp,
             color = if (focused) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -435,9 +435,9 @@ fun XyField(
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(min = 52.dp)
-                        .clip(XyPill)
+                        .clip(SeiPill)
                         .background(fieldBg)
-                        .border(fieldOutlineWidth, fieldOutline, XyPill)
+                        .border(fieldOutlineWidth, fieldOutline, SeiPill)
                         .padding(horizontal = 14.dp, vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -459,7 +459,7 @@ fun XyField(
                                 .padding(6.dp),
                         ) {
                             Icon(
-                                if (pwVisible) XyIcons.EyeOff else XyIcons.Eye,
+                                if (pwVisible) SeiIcons.EyeOff else SeiIcons.Eye,
                                 contentDescription = if (pwVisible) {
                                     "Sembunyikan password (hide password)"
                                 } else {
@@ -479,7 +479,7 @@ fun XyField(
 
 /** Bar header minimal: tombol kembali + judul + aksi kanan. */
 @Composable
-fun XyTopBar(
+fun SeiTopBar(
     title: String,
     modifier: Modifier = Modifier,
     onBack: (() -> Unit)? = null,
@@ -493,8 +493,8 @@ fun XyTopBar(
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         if (onBack != null) {
-            XyIconPill(
-                icon = XyIcons.ChevronLeft,
+            SeiIconPill(
+                icon = SeiIcons.ChevronLeft,
                 onClick = onBack,
                 size = 44.dp,
                 flat = true,
@@ -514,7 +514,7 @@ fun XyTopBar(
 }
 
 @Composable
-fun XyStatusDot(color: Color, label: String, modifier: Modifier = Modifier) {
+fun SeiStatusDot(color: Color, label: String, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
@@ -534,14 +534,14 @@ fun XyStatusDot(color: Color, label: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun XyWordmark(
+fun SeiWordmark(
     modifier: Modifier = Modifier,
     fontSize: TextUnit = 22.sp,
 ) {
     Text(
         io.seidesk.rm.ui.AppBrand.APP_NAME,
         modifier = modifier,
-        fontFamily = XyDisplay,
+        fontFamily = SeiDisplay,
         fontWeight = FontWeight.SemiBold,
         fontSize = fontSize,
         letterSpacing = (-0.4).sp,
@@ -554,7 +554,7 @@ fun XyWordmark(
  * layar + kursor di dalamnya. Satu warna, jadi bisa di-tint sesuai tema.
  */
 @Composable
-fun XyLogo(
+fun SeiLogo(
     modifier: Modifier = Modifier,
     tint: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.onSurface,
 ) {
@@ -604,7 +604,7 @@ fun XyLogo(
  * Scrim bisa ditutup untuk prompt kredensial/sertifikat yang tidak boleh ditutup begitu saja.
  */
 @Composable
-fun XyOverlay(
+fun SeiOverlay(
     title: String,
     modifier: Modifier = Modifier,
     onDismiss: (() -> Unit)? = null,
@@ -696,7 +696,7 @@ fun XyOverlay(
         ) {
             Text(
                 title.uppercase(),
-                fontFamily = XyDisplay,
+                fontFamily = SeiDisplay,
                 fontSize = 11.sp,
                 letterSpacing = 1.3.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -708,7 +708,7 @@ fun XyOverlay(
 
 /** Dialog teks sederhana: judul + isi (+ opsional tombol kedua). */
 @Composable
-fun XyDialog(
+fun SeiDialog(
     title: String,
     body: String,
     confirmLabel: String,
@@ -717,7 +717,7 @@ fun XyDialog(
     onDismiss: (() -> Unit)? = null,
     mono: Boolean = false,
 ) {
-    XyOverlay(title = title, onDismiss = onDismiss) {
+    SeiOverlay(title = title, onDismiss = onDismiss) {
         if (mono) {
             Column(
                 Modifier
@@ -750,7 +750,7 @@ fun XyDialog(
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (dismissLabel != null && onDismiss != null) {
-                XyPillButton(
+                SeiPillButton(
                     text = dismissLabel,
                     onClick = onDismiss,
                     primary = false,
@@ -758,7 +758,7 @@ fun XyDialog(
                     modifier = Modifier.weight(1f),
                 )
             }
-            XyPillButton(
+            SeiPillButton(
                 text = confirmLabel,
                 onClick = onConfirm,
                 compact = true,
@@ -767,193 +767,3 @@ fun XyDialog(
         }
     }
 }
-
-// =========================================================================
-// SeiDesk RM Component Aliases
-// =========================================================================
-
-@Composable
-fun SeiCard(
-    modifier: Modifier = Modifier,
-    padding: Dp = 16.dp,
-    content: @Composable ColumnScope.() -> Unit,
-) = XyCard(modifier = modifier, padding = padding, content = content)
-
-@Composable
-fun SeiPillButton(
-    text: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    primary: Boolean = true,
-    icon: ImageVector? = null,
-    compact: Boolean = false,
-    enabled: Boolean = true,
-) = XyPillButton(
-    text = text,
-    onClick = onClick,
-    modifier = modifier,
-    primary = primary,
-    icon = icon,
-    compact = compact,
-    enabled = enabled,
-)
-
-@Composable
-fun SeiIconPill(
-    icon: ImageVector,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    size: Dp = 46.dp,
-    active: Boolean = false,
-    flat: Boolean = false,
-    contentDescription: String? = null,
-) = XyIconPill(
-    icon = icon,
-    onClick = onClick,
-    modifier = modifier,
-    size = size,
-    active = active,
-    flat = flat,
-    contentDescription = contentDescription,
-)
-
-@Composable
-fun SeiSectionLabel(text: String, modifier: Modifier = Modifier) =
-    XySectionLabel(text = text, modifier = modifier)
-
-@Composable
-fun SeiRow(
-    title: String,
-    subtitle: String? = null,
-    modifier: Modifier = Modifier,
-    leading: ImageVector? = null,
-    leadingTint: Color? = null,
-    trailing: @Composable (() -> Unit)? = null,
-    onClick: (() -> Unit)? = null,
-) = XyRow(
-    title = title,
-    subtitle = subtitle,
-    modifier = modifier,
-    leading = leading,
-    leadingTint = leadingTint,
-    trailing = trailing,
-    onClick = onClick,
-)
-
-@Composable
-fun SeiSwitch(
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-    enabled: Boolean = true,
-) = XySwitch(checked = checked, onCheckedChange = onCheckedChange, enabled = enabled)
-
-@Composable
-fun SeiToggleRow(
-    title: String,
-    subtitle: String? = null,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier,
-) = XyToggleRow(
-    title = title,
-    subtitle = subtitle,
-    checked = checked,
-    onCheckedChange = onCheckedChange,
-    modifier = modifier,
-)
-
-@Composable
-fun SeiSegmented(
-    options: List<String>,
-    selectedIndex: Int,
-    onSelect: (Int) -> Unit,
-    modifier: Modifier = Modifier,
-) = XySegmented(
-    options = options,
-    selectedIndex = selectedIndex,
-    onSelect = onSelect,
-    modifier = modifier,
-)
-
-@Composable
-fun SeiField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    label: String,
-    modifier: Modifier = Modifier,
-    hint: String? = null,
-    isPassword: Boolean = false,
-    keyboardType: KeyboardType = KeyboardType.Text,
-    imeAction: ImeAction = ImeAction.Next,
-    trailing: (@Composable () -> Unit)? = null,
-) = XyField(
-    value = value,
-    onValueChange = onValueChange,
-    label = label,
-    modifier = modifier,
-    hint = hint,
-    isPassword = isPassword,
-    keyboardType = keyboardType,
-    imeAction = imeAction,
-    trailing = trailing,
-)
-
-@Composable
-fun SeiTopBar(
-    title: String,
-    onBack: (() -> Unit)? = null,
-    modifier: Modifier = Modifier,
-    actions: @Composable () -> Unit = {},
-) = XyTopBar(title = title, onBack = onBack, modifier = modifier, actions = actions)
-
-@Composable
-fun SeiStatusDot(color: Color, label: String, modifier: Modifier = Modifier) =
-    XyStatusDot(color = color, label = label, modifier = modifier)
-
-@Composable
-fun SeiWordmark(
-    modifier: Modifier = Modifier,
-    fontSize: TextUnit = 22.sp,
-) = XyWordmark(modifier = modifier, fontSize = fontSize)
-
-@Composable
-fun SeiLogo(
-    modifier: Modifier = Modifier,
-    tint: Color = MaterialTheme.colorScheme.onSurface,
-) = XyLogo(modifier = modifier, tint = tint)
-
-@Composable
-fun SeiOverlay(
-    title: String,
-    modifier: Modifier = Modifier,
-    onDismiss: (() -> Unit)? = null,
-    maxWidth: Dp = 440.dp,
-    origin: Alignment = Alignment.Center,
-    content: @Composable ColumnScope.() -> Unit,
-) = XyOverlay(
-    title = title,
-    modifier = modifier,
-    onDismiss = onDismiss,
-    maxWidth = maxWidth,
-    origin = origin,
-    content = content,
-)
-
-@Composable
-fun SeiDialog(
-    title: String,
-    body: String,
-    confirmLabel: String,
-    onConfirm: () -> Unit,
-    dismissLabel: String? = null,
-    onDismiss: (() -> Unit)? = null,
-) = XyDialog(
-    title = title,
-    body = body,
-    confirmLabel = confirmLabel,
-    onConfirm = onConfirm,
-    dismissLabel = dismissLabel,
-    onDismiss = onDismiss,
-)
-
-

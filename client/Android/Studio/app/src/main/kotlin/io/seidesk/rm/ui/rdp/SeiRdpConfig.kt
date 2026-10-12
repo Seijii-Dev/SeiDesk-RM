@@ -6,7 +6,7 @@ package io.seidesk.rm.ui.rdp
  * app hanya membantu fork + trigger workflow + membaca status sesi dari fork
  * mereka lewat GitHub API. Tidak ada akun pusat, tidak ada server pusat.
  */
-internal object XyRdpConfig {
+internal object SeiRdpConfig {
     const val TEMPLATE_REPO = "xykal/XyRDP"
     const val FORK_REPO_NAME = "XyRDP"
     const val WORKFLOW_FILE = "rdp-6h.yml"
@@ -27,6 +27,3 @@ internal object XyRdpConfig {
     const val VAULT_PAT_ID = "seirdp-github-pat"
     const val VAULT_PAT_ID_LEGACY = "xyrdp-github-pat"
 }
-
-internal typealias SeiRdpConfig = XyRdpConfig
-

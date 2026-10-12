@@ -9,7 +9,7 @@ class FeedbackShareDraftTest {
     fun shareDraftContainsOnlyBrandCategoryAndUserText() {
         val draft = feedbackShareDraft("Feature idea", "Please add a touch mode.")
         assertEquals(
-            "SeiDesk RM — XyVerse Technology Global\n" +
+            "SeiDesk RM — Seijixinghe888\n" +
                 "Category: Feature idea\n\n" +
                 "Please add a touch mode.",
             draft,

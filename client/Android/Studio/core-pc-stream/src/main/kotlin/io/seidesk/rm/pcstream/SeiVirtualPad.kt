@@ -56,7 +56,7 @@ object XyPadAxis {
 }
 
 /** On-screen control identifiers, each bound to its XInput bit in the wire format. */
-enum class XyPadButton(val bit: Int) {
+enum class SeiPadButton(val bit: Int) {
     A(XyGamepadPacketV1.A),
     B(XyGamepadPacketV1.B),
     X(XyGamepadPacketV1.X),
@@ -130,7 +130,7 @@ class XyVirtualPadTracker {
         }
     }
 
-    fun setButton(button: XyPadButton, down: Boolean) {
+    fun setButton(button: SeiPadButton, down: Boolean) {
         val next = if (down) buttons or button.bit else buttons and button.bit.inv()
         if (next != buttons) {
             buttons = next
@@ -138,7 +138,7 @@ class XyVirtualPadTracker {
         }
     }
 
-    fun isPressed(button: XyPadButton): Boolean = (buttons and button.bit) != 0
+    fun isPressed(button: SeiPadButton): Boolean = (buttons and button.bit) != 0
 
     /** True when nothing is deflected or held, so callers can skip sending. */
     fun isIdle(): Boolean =

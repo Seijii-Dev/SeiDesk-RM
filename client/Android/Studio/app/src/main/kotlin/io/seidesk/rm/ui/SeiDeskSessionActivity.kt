@@ -36,11 +36,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.seidesk.rm.pcstream.XyGamepadState
-import io.seidesk.rm.ui.input.XyGamepadActionMapper
-import io.seidesk.rm.ui.input.XyPadLayout
-import io.seidesk.rm.ui.input.XyStickMode
-import io.seidesk.rm.ui.input.XyGamepadOutput
-import io.seidesk.rm.ui.input.XyPadKey
+import io.seidesk.rm.ui.input.SeiGamepadActionMapper
+import io.seidesk.rm.ui.input.SeiPadLayout
+import io.seidesk.rm.ui.input.SeiStickMode
+import io.seidesk.rm.ui.input.SeiGamepadOutput
+import io.seidesk.rm.ui.input.SeiPadKey
 import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.result.contract.ActivityResultContracts
@@ -50,7 +50,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import android.os.Build
-import io.seidesk.rm.XySessionService
+import io.seidesk.rm.SeiSessionService
 import io.seidesk.rm.core.ConnectionLog
 import io.seidesk.rm.core.ConnectionProfile
 import io.seidesk.rm.core.RdpOptions
@@ -58,10 +58,10 @@ import io.seidesk.rm.core.RefreshRatePolicy
 import io.seidesk.rm.core.SessionManager
 import io.seidesk.rm.core.SessionState
 import com.freerdp.freerdpcore.utils.ClipboardImageProvider
-import io.seidesk.rm.ui.components.XyNoticeBus
+import io.seidesk.rm.ui.components.SeiNoticeBus
 import io.seidesk.rm.ui.theme.SeiDeskTheme
-import io.seidesk.rm.ui.theme.XyThemeState
-import io.seidesk.rm.ui.theme.xyDark
+import io.seidesk.rm.ui.theme.SeiThemeState
+import io.seidesk.rm.ui.theme.seiDark
 import java.util.concurrent.Executors
 
 /**
@@ -77,7 +77,6 @@ import java.util.concurrent.Executors
  * Back: ditangani layar Compose ([SeiDeskSessionScreen] memasang
  * [backHandler]); default = finish.
  */
-typealias XyDeskSessionActivity = SeiDeskSessionActivity
 
 class SeiDeskSessionActivity : ComponentActivity() {
 
@@ -113,7 +112,7 @@ class SeiDeskSessionActivity : ComponentActivity() {
         private set
 
     /**
-     * Dipasang [XyDeskSessionScreen]: return `true` kalau back sudah
+     * Dipasang [SeiDeskSessionScreen]: return `true` kalau back sudah
      * ditangani (dialog ditutup, panel disembunyikan, konfirmasi, dll).
      */
     var backHandler: (() -> Boolean)? = null
@@ -121,7 +120,7 @@ class SeiDeskSessionActivity : ComponentActivity() {
 
     var onExternalPointerDelta: ((Float, Float) -> Unit)? = null
     var onExternalScrollUnits: ((Int) -> Unit)? = null
-    var onExternalMouseClick: ((XyMouseButton, Boolean) -> Unit)? = null
+    var onExternalMouseClick: ((SeiMouseButton, Boolean) -> Unit)? = null
 
     private val externalInputState = mutableStateOf(false)
     /** True while a physical keyboard, mouse, gamepad or D-pad is connected. */
@@ -168,7 +167,7 @@ class SeiDeskSessionActivity : ComponentActivity() {
     }
     private var clipListener: ClipboardManager.OnPrimaryClipChangedListener? = null
     private val clipboardReader = Executors.newSingleThreadExecutor { task ->
-        Thread(task, "XyDeskClipboardReader").apply { isDaemon = true }
+        Thread(task, "SeiDeskClipboardReader").apply { isDaemon = true }
     }
     private var clipboardSyncEnabled = true
     @Volatile
@@ -346,7 +345,7 @@ class SeiDeskSessionActivity : ComponentActivity() {
         lastInputFailureNoticeAt = now
         val showNotice = {
             if (!isFinishing && !isDestroyed) {
-                XyNoticeBus.post(xyNow(
+                SeiNoticeBus.post(xyNow(
                     "Aksi belum masuk antrean input FreeRDP. Periksa koneksi dan coba lagi.",
                     "Input was not queued by FreeRDP. Check the connection and try again.",
                 ))
@@ -381,7 +380,7 @@ class SeiDeskSessionActivity : ComponentActivity() {
             ConnectionLog.addThrowable("SES: FAIL inisialisasi", t)
             Log.e(TAG, "gagal inisialisasi sesi", t)
             CrashLog.note(this, "inisialisasi sesi gagal: ${t.stackTraceToString().take(12_000)}")
-            XyNoticeBus.post("Gagal menyiapkan sesi: ${t.message}")
+            SeiNoticeBus.post("Gagal menyiapkan sesi: ${t.message}")
             finish()
             return
         }
@@ -461,8 +460,8 @@ class SeiDeskSessionActivity : ComponentActivity() {
             // mode terang panel dan dialog di sini tidak nyambung dengan sisa
             // app). Tombol HUD yang menempel di gambar remote tetap punya
             // warna tetap supaya selalu terbaca.
-            XyThemeState.init(appPrefs ?: AppPrefs(this))
-            SeiDeskTheme(dark = xyDark()) {
+            SeiThemeState.init(appPrefs ?: AppPrefs(this))
+            SeiDeskTheme(dark = seiDark()) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     SeiDeskSessionScreen(
                         profile = profile,
@@ -536,7 +535,7 @@ class SeiDeskSessionActivity : ComponentActivity() {
             // Default: sesi dibiarkan hidup di latar lewat foreground service.
             appPrefs?.keepAlive != false -> {
                 Log.i(TAG, "keep-alive: sesi jalan di latar (foreground service)")
-                XySessionService.start(this, sessionLabel, ping = true)
+                SeiSessionService.start(this, sessionLabel, ping = true)
             }
 
             appPrefs?.autoDisconnect != false -> {
@@ -550,9 +549,9 @@ class SeiDeskSessionActivity : ComponentActivity() {
         inputManager = null
         super.onDestroy()
         setGyroMouseActive(false)
-        sessionId?.let { XySessionRegistry.remove(it) }
+        sessionId?.let { SeiSessionRegistry.remove(it) }
         bgHandler.removeCallbacks(bgDisconnect)
-        if (XySessionRegistry.activeCount() == 0) XySessionService.stop(this)
+        if (SeiSessionRegistry.activeCount() == 0) SeiSessionService.stop(this)
         val cm = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
         clipListener?.let { cm.removePrimaryClipChangedListener(it) }
         clipListener = null
@@ -678,14 +677,14 @@ class SeiDeskSessionActivity : ComponentActivity() {
     private var lastHudStickState: XyGamepadState? = null
 
     /** Tujuan stik kiri gamepad virtual; disinkronkan dari state Compose. */
-    private var padStickMode: XyStickMode = XyStickMode.POINTER
+    private var padStickMode: SeiStickMode = SeiStickMode.POINTER
 
     /**
      * Jalur keluar gamepad virtual untuk sesi RDP. Sengaja memakai hook yang sama
      * dengan gamepad fisik (pointer delta, scroll units, klik, tombol virtual)
      * supaya satu pemetaan berlaku untuk kedua jenis pad.
      */
-    private val virtualPadOutput = object : XyGamepadOutput {
+    private val virtualPadOutput = object : SeiGamepadOutput {
         override fun pointerDelta(dx: Float, dy: Float) {
             onExternalPointerDelta?.invoke(dx, dy)
         }
@@ -694,24 +693,24 @@ class SeiDeskSessionActivity : ComponentActivity() {
             onExternalScrollUnits?.invoke(units)
         }
 
-        override fun mouseClick(button: XyMouseButton, down: Boolean) {
+        override fun mouseClick(button: SeiMouseButton, down: Boolean) {
             onExternalMouseClick?.invoke(button, down)
         }
 
-        override fun key(key: XyPadKey, down: Boolean) {
+        override fun key(key: SeiPadKey, down: Boolean) {
             if (!::controller.isInitialized) return
             controller.sendVirtualKey(
                 when (key) {
-                    XyPadKey.ENTER -> KeyEvent.KEYCODE_ENTER
-                    XyPadKey.ESCAPE -> KeyEvent.KEYCODE_ESCAPE
-                    XyPadKey.ARROW_UP -> KeyEvent.KEYCODE_DPAD_UP
-                    XyPadKey.ARROW_DOWN -> KeyEvent.KEYCODE_DPAD_DOWN
-                    XyPadKey.ARROW_LEFT -> KeyEvent.KEYCODE_DPAD_LEFT
-                    XyPadKey.ARROW_RIGHT -> KeyEvent.KEYCODE_DPAD_RIGHT
-                    XyPadKey.W -> KeyEvent.KEYCODE_W
-                    XyPadKey.A -> KeyEvent.KEYCODE_A
-                    XyPadKey.S -> KeyEvent.KEYCODE_S
-                    XyPadKey.D -> KeyEvent.KEYCODE_D
+                    SeiPadKey.ENTER -> KeyEvent.KEYCODE_ENTER
+                    SeiPadKey.ESCAPE -> KeyEvent.KEYCODE_ESCAPE
+                    SeiPadKey.ARROW_UP -> KeyEvent.KEYCODE_DPAD_UP
+                    SeiPadKey.ARROW_DOWN -> KeyEvent.KEYCODE_DPAD_DOWN
+                    SeiPadKey.ARROW_LEFT -> KeyEvent.KEYCODE_DPAD_LEFT
+                    SeiPadKey.ARROW_RIGHT -> KeyEvent.KEYCODE_DPAD_RIGHT
+                    SeiPadKey.W -> KeyEvent.KEYCODE_W
+                    SeiPadKey.A -> KeyEvent.KEYCODE_A
+                    SeiPadKey.S -> KeyEvent.KEYCODE_S
+                    SeiPadKey.D -> KeyEvent.KEYCODE_D
                 },
                 down,
             )
@@ -730,7 +729,7 @@ class SeiDeskSessionActivity : ComponentActivity() {
             leftX = (x.coerceIn(-1f, 1f) * 32_767f).toInt(),
             leftY = (y.coerceIn(-1f, 1f) * 32_767f).toInt(),
         )
-        XyGamepadActionMapper.apply(state, lastHudStickState, virtualPadOutput, padStickMode)
+        SeiGamepadActionMapper.apply(state, lastHudStickState, virtualPadOutput, padStickMode)
         lastHudStickState = state
     }
 
@@ -746,11 +745,11 @@ class SeiDeskSessionActivity : ComponentActivity() {
             val down = event.action == KeyEvent.ACTION_DOWN
             when (event.keyCode) {
                 KeyEvent.KEYCODE_BUTTON_A -> {
-                    onExternalMouseClick?.invoke(XyMouseButton.LEFT, down)
+                    onExternalMouseClick?.invoke(SeiMouseButton.LEFT, down)
                     return true
                 }
                 KeyEvent.KEYCODE_BUTTON_B -> {
-                    onExternalMouseClick?.invoke(XyMouseButton.RIGHT, down)
+                    onExternalMouseClick?.invoke(SeiMouseButton.RIGHT, down)
                     return true
                 }
                 KeyEvent.KEYCODE_BUTTON_X -> {
@@ -850,7 +849,7 @@ class SeiDeskSessionActivity : ComponentActivity() {
                     )
                     if (adjusted != options) adjusted.write(this, profile.id)
                     if ((options.camera && !cameraGranted) || (options.microphone && !microphoneGranted)) {
-                        XyNoticeBus.post("Izin kamera/mikrofon ditolak; kanal dinonaktifkan di opsi profil.")
+                        SeiNoticeBus.post("Izin kamera/mikrofon ditolak; kanal dinonaktifkan di opsi profil.")
                     }
                 }
                 connectProfile(profile)
@@ -882,15 +881,15 @@ class SeiDeskSessionActivity : ComponentActivity() {
     }
 
     companion object {
-        private const val TAG = "XyDeskSessionAct"
+        private const val TAG = "SeiDeskSessionAct"
 
-        const val EXTRA_HOST = "xydesk.host"
-        const val EXTRA_PORT = "xydesk.port"
-        const val EXTRA_USER = "xydesk.user"
-        const val EXTRA_PASS = "xydesk.pass"
-        const val EXTRA_DOMAIN = "xydesk.domain"
-        const val EXTRA_LABEL = "xydesk.label"
-        const val EXTRA_KEY = "xydesk.key"
+        const val EXTRA_HOST = "seidesk.host"
+        const val EXTRA_PORT = "seidesk.port"
+        const val EXTRA_USER = "seidesk.user"
+        const val EXTRA_PASS = "seidesk.pass"
+        const val EXTRA_DOMAIN = "seidesk.domain"
+        const val EXTRA_LABEL = "seidesk.label"
+        const val EXTRA_KEY = "seidesk.key"
 
         /** Auto-disconnect kalau app di-background dan keep-alive dimatikan. */
         const val BACKGROUND_DISCONNECT_DELAY_MS = 15_000L
