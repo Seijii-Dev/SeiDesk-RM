@@ -53,7 +53,7 @@ class CertificateTrustStore(context: Context) {
     }
 
     companion object {
-        private const val NAME = "xydesk.certtrust"
+        private const val NAME = "seidesk.certtrust"
         private fun key(host: String, port: Int) = "fp.$host:$port"
     }
 }

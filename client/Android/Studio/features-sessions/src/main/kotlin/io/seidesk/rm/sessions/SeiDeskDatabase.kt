@@ -13,7 +13,7 @@ abstract class SeiDeskDatabase : RoomDatabase() {
     abstract fun favoriteDao(): FavoriteDao
 
     companion object {
-        private const val NAME = "xydesk.db"
+        private const val NAME = "seidesk.db"
 
         @Volatile
         private var instance: SeiDeskDatabase? = null

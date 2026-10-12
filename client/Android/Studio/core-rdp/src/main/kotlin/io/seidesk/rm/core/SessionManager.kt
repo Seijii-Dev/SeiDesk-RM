@@ -257,7 +257,7 @@ class SessionManager(context: Context) {
                 "udp=${options.udpTransport} lowbw=${options.lowBandwidth} h264=${options.h264} wallpaper=${options.desktopWallpaper} " +
                 "bpp=${options.colorDepth} sec=${options.securityProtocol.name} gateway=${options.gateway?.id ?: "-"}"
         )
-        val prefs = appContext.getSharedPreferences("xydesk.remote.display", Context.MODE_PRIVATE)
+        val prefs = appContext.getSharedPreferences("seidesk.remote.display", Context.MODE_PRIVATE)
         val remoteScale = prefs.getInt("${profile.id}.remote_dpi", 100)
             .let { if (it in REMOTE_DESKTOP_SCALE_FACTORS) it else 100 }
         lastDispScale = if (options.pcConnectMode) 100 else remoteScale

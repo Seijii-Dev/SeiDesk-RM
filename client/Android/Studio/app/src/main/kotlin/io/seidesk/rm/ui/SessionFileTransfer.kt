@@ -44,7 +44,7 @@ internal object SessionFileTransfer {
     val jobs: StateFlow<List<TransferJob>> = mutableJobs.asStateFlow()
 
     /** Nama drive di sisi Windows, harus sama dengan `RdpUri`. */
-    private const val REMOTE_DRIVE_NAME = "XyDesk"
+    private const val REMOTE_DRIVE_NAME = "SeiDesk"
 
     /**
      * Folder HP yang tampak di PC.

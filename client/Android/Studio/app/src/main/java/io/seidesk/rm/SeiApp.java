@@ -13,6 +13,8 @@ public class SeiApp extends com.freerdp.freerdpcore.application.GlobalApp
 {
 	@Override public void onCreate()
 	{
+		// Migrate saved legacy preferences, database, and files before any subsystem reads them.
+		io.seidesk.rm.LegacyMigration.INSTANCE.run(this);
 		// Initialize both durable logs before GlobalApp touches LibFreeRDP/JNI.
 		// This preserves the last Java/native startup marker if JNI_OnLoad fails.
 		io.seidesk.rm.security.CrashLog.INSTANCE.install(this);

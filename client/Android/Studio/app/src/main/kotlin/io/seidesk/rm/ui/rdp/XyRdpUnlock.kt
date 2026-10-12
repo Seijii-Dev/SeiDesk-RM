@@ -9,7 +9,7 @@ import android.content.Context
  */
 internal class XyRdpUnlock(context: Context) {
     private val sp =
-        context.applicationContext.getSharedPreferences("xydesk.rdpfree", Context.MODE_PRIVATE)
+        context.applicationContext.getSharedPreferences("seidesk.rdpfree", Context.MODE_PRIVATE)
 
     var adWatched: Boolean
         get() = sp.getBoolean(KEY_AD, false)

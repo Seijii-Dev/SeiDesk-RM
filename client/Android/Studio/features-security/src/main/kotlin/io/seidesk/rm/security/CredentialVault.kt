@@ -111,7 +111,7 @@ class CredentialVault(context: Context) {
         private const val TAG = "CredentialVault"
         private const val ANDROID_KEYSTORE = "AndroidKeyStore"
         private const val MASTER_ALIAS = "xydesk_cred_vault_v1"
-        private const val PREFS_FILE = "xydesk_credential_vault"
+        private const val PREFS_FILE = "seidesk_credential_vault"
         private const val TRANSFORMATION = "AES/GCM/NoPadding"
         private const val KEY_SIZE_BITS = 256
         private const val GCM_IV_BYTES = 12

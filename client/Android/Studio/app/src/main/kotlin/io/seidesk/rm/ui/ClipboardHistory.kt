@@ -24,7 +24,7 @@ import org.json.JSONObject
 object ClipboardHistory {
     data class Entry(val id: Long, val text: String, val atMillis: Long)
 
-    private const val SP_NAME = "xydesk.clipboard"
+    private const val SP_NAME = "seidesk.clipboard"
     private const val KEY_ITEMS = "items"
     private const val MAX_ITEMS = 10
     private const val MAX_TEXT_LENGTH = 4_000

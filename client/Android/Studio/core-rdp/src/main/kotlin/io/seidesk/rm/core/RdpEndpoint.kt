@@ -96,8 +96,9 @@ fun parsePcIdOrEndpoint(input: String, defaultPort: Int = 3389): RdpEndpoint? {
     if (portPart !in 1..65535) return null
 
     val compact = basePart.replace("-", "").replace(" ", "")
-    if (compact.uppercase().startsWith("XY") && compact.length == 10) {
-        val hex = compact.substring(2)
+    val upper = compact.uppercase()
+    if ((upper.startsWith("XY") && upper.length == 10) || (upper.startsWith("SEI") && upper.length == 11)) {
+        val hex = if (upper.startsWith("SEI")) upper.substring(3) else upper.substring(2)
         val num = hex.toLongOrNull(16)
         if (num != null && num in 16777216L..4294967295L) {
             val ip = "${(num shr 24) and 0xFF}.${(num shr 16) and 0xFF}.${(num shr 8) and 0xFF}.${num and 0xFF}"

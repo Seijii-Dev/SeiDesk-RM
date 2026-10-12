@@ -133,7 +133,7 @@ class RdpUriTest {
     @Test
     fun driveLokalDanKamera() {
         val p = params(simple(), RdpOptions(localDrive = true, camera = true))
-        assertEquals("XyDesk", p["drive"])
+        assertEquals("SeiDesk", p["drive"])
         assertEquals("rdpecam", p["dvc"])
     }
 

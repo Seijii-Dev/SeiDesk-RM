@@ -280,8 +280,8 @@ class SessionPrefs(context: Context) {
     }
 
     companion object {
-        private const val INPUT_FILE = "xydesk.input"
-        private const val DEVICE_FILE = "xydesk.session"
+        private const val INPUT_FILE = "seidesk.input"
+        private const val DEVICE_FILE = "seidesk.session"
         private const val KEY_INPUT_MODE = "input_mode"
         private const val KEY_POINTER_STYLE = "pointer_style"
         private const val KEY_POINTER_SIZE = "pointer_size"
@@ -439,5 +439,5 @@ object DisplayPrefs {
             .apply()
     }
 
-    private const val FILE = "xydesk.remote.display"
+    private const val FILE = "seidesk.remote.display"
 }

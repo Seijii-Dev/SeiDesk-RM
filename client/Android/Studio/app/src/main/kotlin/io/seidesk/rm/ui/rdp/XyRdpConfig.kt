@@ -24,7 +24,8 @@ internal object XyRdpConfig {
     const val CHANNEL_URL = "https://github.com/Seijii-Dev/SeiDesk-RM"
 
     /** PAT disimpan terenkripsi di CredentialVault dengan id ini. */
-    const val VAULT_PAT_ID = "xyrdp-github-pat"
+    const val VAULT_PAT_ID = "seirdp-github-pat"
+    const val VAULT_PAT_ID_LEGACY = "xyrdp-github-pat"
 }
 
 internal typealias SeiRdpConfig = XyRdpConfig

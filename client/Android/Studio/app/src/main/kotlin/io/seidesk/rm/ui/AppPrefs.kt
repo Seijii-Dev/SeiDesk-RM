@@ -163,7 +163,7 @@ class AppPrefs(context: Context) {
         set(v) = sp.edit().putBoolean(KEY_SHARE_ACTIVE_SESSION_STATS, v).apply()
 
     companion object {
-        private const val NAME = "xydesk.app"
+        private const val NAME = "seidesk.app"
         private const val KEY_THEME = "theme_mode"
         private const val KEY_BG_DISCONNECT = "bg_disconnect"
         private const val KEY_KEEP_ALIVE = "keep_alive"

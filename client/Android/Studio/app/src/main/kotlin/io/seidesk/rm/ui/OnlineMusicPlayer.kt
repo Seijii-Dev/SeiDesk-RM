@@ -50,7 +50,7 @@ object OnlineMusicPlayer {
         val current: ScTrack? get() = queue.getOrNull(index)
     }
 
-    private const val CHANNEL_ID = "xy_online_music"
+    private const val CHANNEL_ID = "sei_online_music"
     private const val NOTIF_ID = 0x5C01
     private const val ACTION_TOGGLE = "io.seidesk.rm.ONLINE_MUSIC_TOGGLE"
     private const val ACTION_NEXT = "io.seidesk.rm.ONLINE_MUSIC_NEXT"

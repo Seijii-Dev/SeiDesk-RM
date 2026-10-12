@@ -171,7 +171,7 @@ object LangPrefs {
     @Volatile private var loaded = false
 
     fun install(context: Context): XyLang {
-        val sp = context.getSharedPreferences("xydesk.lang", Context.MODE_PRIVATE)
+        val sp = context.getSharedPreferences("seidesk.lang", Context.MODE_PRIVATE)
         val stored = sp.getString("lang", null)
         val lang = stored?.let { code ->
             XyLang.entries.firstOrNull { it.code == code }
@@ -184,7 +184,7 @@ object LangPrefs {
     fun current(): XyLang = XyText.current()
 
     fun set(context: Context, lang: XyLang) {
-        context.getSharedPreferences("xydesk.lang", Context.MODE_PRIVATE)
+        context.getSharedPreferences("seidesk.lang", Context.MODE_PRIVATE)
             .edit()
             .putString("lang", lang.code)
             .apply()

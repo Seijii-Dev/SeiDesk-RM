@@ -15,7 +15,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 object ConnectionLog {
     private const val MAX_ENTRIES = 300
     private const val MAX_FILE_BYTES = 128 * 1024L
-    private const val FILE_NAME = "xydesk-boot.log"
+    private const val FILE_NAME = "seidesk-boot.log"
     private val buf = CopyOnWriteArrayList<String>()
     private val fmt = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US)
     @Volatile private var files: List<File> = emptyList()

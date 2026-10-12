@@ -666,7 +666,7 @@ data class RdpOptions(
     }
 
     companion object {
-        private const val FILE = "xydesk.rdp.options"
+        private const val FILE = "seidesk.rdp.options"
 
         private val KEYS = listOf(
             "pc_mode", "pc_engine", "pc_fps", "pc_bitrate", "raw_mouse",

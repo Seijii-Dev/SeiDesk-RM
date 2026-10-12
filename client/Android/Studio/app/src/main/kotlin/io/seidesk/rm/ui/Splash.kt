@@ -78,7 +78,8 @@ fun XySplashScreen(
     LaunchedEffect(Unit) {
         visible = true
         val prefs = context.getSharedPreferences(SPLASH_PREFS, Context.MODE_PRIVATE)
-        if (prefs.getBoolean(KEY_SPLASH_VOICE_PLAYED, false)) {
+        val legacyPrefs = context.getSharedPreferences("xydesk.splash", Context.MODE_PRIVATE)
+        if (prefs.getBoolean(KEY_SPLASH_VOICE_PLAYED, false) || legacyPrefs.getBoolean(KEY_SPLASH_VOICE_PLAYED_LEGACY, false)) {
             voiceComplete = true
         } else {
             val player = runCatching {
@@ -145,5 +146,6 @@ fun XySplashScreen(
     }
 }
 
-private const val SPLASH_PREFS = "xydesk.splash"
-private const val KEY_SPLASH_VOICE_PLAYED = "xydesk_remote_voice_played"
+private const val SPLASH_PREFS = "seidesk.splash"
+private const val KEY_SPLASH_VOICE_PLAYED = "seidesk_remote_voice_played"
+private const val KEY_SPLASH_VOICE_PLAYED_LEGACY = "xydesk_remote_voice_played"

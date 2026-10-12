@@ -62,7 +62,7 @@ object RdpUri {
         if (options.microphone && !options.pcConnectMode) out += "microphone" to ""
 
         out += "clipboard" to if (options.clipboard) "+" else "-"
-        if (options.localDrive && !options.pcConnectMode) out += "drive" to "XyDesk"
+        if (options.localDrive && !options.pcConnectMode) out += "drive" to "SeiDesk"
         if (options.camera && !options.pcConnectMode) out += "dvc" to "rdpecam"
 
         // Hanya dikirim saat aktif: "+multitransport" menyalakan RDP-UDP (FEC).

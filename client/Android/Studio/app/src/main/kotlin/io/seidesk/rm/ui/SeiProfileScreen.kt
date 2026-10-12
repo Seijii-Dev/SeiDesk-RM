@@ -307,8 +307,9 @@ private fun CommunityAccountCard() {
     }
     androidx.compose.runtime.LaunchedEffect(Unit) {
         githubUser = runCatching {
-            val pat = io.seidesk.rm.security.CredentialVault(context.applicationContext)
-                .get(io.seidesk.rm.ui.rdp.XyRdpConfig.VAULT_PAT_ID)
+            val vault = io.seidesk.rm.security.CredentialVault(context.applicationContext)
+            val pat = vault.get(io.seidesk.rm.ui.rdp.XyRdpConfig.VAULT_PAT_ID)
+                ?: vault.get(io.seidesk.rm.ui.rdp.XyRdpConfig.VAULT_PAT_ID_LEGACY)
             if (pat != null) io.seidesk.rm.ui.rdp.XyRdpClient.whoami(pat) else null
         }.getOrNull()
     }
@@ -317,10 +318,9 @@ private fun CommunityAccountCard() {
     // kecuali pengguna sudah memilih nama sendiri.
     androidx.compose.runtime.LaunchedEffect(Unit) {
         if (name == null) {
-            val pat = runCatching {
-                io.seidesk.rm.security.CredentialVault(context.applicationContext)
-                    .get(io.seidesk.rm.ui.rdp.XyRdpConfig.VAULT_PAT_ID)
-            }.getOrNull()
+            val vault = io.seidesk.rm.security.CredentialVault(context.applicationContext)
+            val pat = vault.get(io.seidesk.rm.ui.rdp.XyRdpConfig.VAULT_PAT_ID)
+                ?: vault.get(io.seidesk.rm.ui.rdp.XyRdpConfig.VAULT_PAT_ID_LEGACY)
             if (pat != null) {
                 val gh = runCatching { io.seidesk.rm.ui.rdp.XyRdpClient.whoami(pat) }.getOrNull()
                 if (gh != null && api.displayName() == null) {

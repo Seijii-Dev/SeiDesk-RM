@@ -631,7 +631,7 @@ public class LibFreeRDP
 			{
 				// Query: key=value
 				// To freerdp argument: /key:value
-				if (key.equals("drive") && (value.equals("sdcard") || value.equals("XyDesk")))
+				if (key.equals("drive") && (value.equals("sdcard") || value.equals("XyDesk") || value.equals("SeiDesk")))
 				{
 					String driveName = value;
 					// Special for local app-drive redirect.
