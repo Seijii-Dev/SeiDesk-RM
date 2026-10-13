@@ -140,7 +140,7 @@ internal fun SeiProfileScreen(
                 SeiSection.entries.forEach { section ->
                     val title = sectionTitle(section)
                     val summary = when (section) {
-                        SeiSection.TAMPILAN -> "1920×1080 · 60 Hz"
+                        SeiSection.TAMPILAN -> sei("Resolution & scale")
                         SeiSection.KEAMANAN -> if (appPrefs.requireDeviceLock) sei("Biometric on") else sei("PIN / Biometric")
                         SeiSection.KREDENSIAL -> sei("{0} saved", deviceCount)
                         SeiSection.UMUM -> sei("Audio & input")

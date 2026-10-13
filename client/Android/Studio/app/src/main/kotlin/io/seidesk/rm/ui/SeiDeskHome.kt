@@ -98,6 +98,10 @@ import io.seidesk.rm.ui.components.SeiSegmented
 import io.seidesk.rm.ui.components.SeiTopBar
 import io.seidesk.rm.ui.components.SeiWordmark
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -281,21 +285,29 @@ fun SeiDeskHome(
         }
     }
 
-    fun submit(profile: ConnectionProfile, rememberPassword: Boolean, startNow: Boolean) {
+    fun submit(
+        profile: ConnectionProfile,
+        rememberPassword: Boolean,
+        startNow: Boolean,
+        onComplete: (Result<Boolean>) -> Unit,
+    ) {
         scope.launch {
             val saved = runCatching { repo.save(profile, rememberPassword) }
             if (saved.isFailure) {
-                notice.show(
-                    seiNow( "Profile not saved: ") +
-                        (saved.exceptionOrNull()?.message ?: seiNow( "storage error")),
-                )
-            } else if (saved.getOrDefault(true) == false) {
+                val err = saved.exceptionOrNull()?.message ?: seiNow("storage error")
+                notice.show(seiNow("Profile not saved: ") + err)
+                onComplete(Result.failure(saved.exceptionOrNull() ?: Exception(err)))
+                return@launch
+            }
+            val passSaved = saved.getOrDefault(true)
+            if (!passSaved) {
                 notice.show(
                     seiNow(
                         "Profile saved, but the password could not be stored securely. Re-enter it later; it was not remembered.",
                     ),
                 )
             }
+            onComplete(Result.success(passSaved))
             route = SeiRoute.Devices
             if (startNow) connect(profile)
         }
@@ -363,9 +375,15 @@ fun SeiDeskHome(
             confirmExitApp -> confirmExitApp = false
             feedbackOpen -> feedbackOpen = false
             route != SeiRoute.Devices || section != SeiSection.PERANGKAT -> {
-                route = SeiRoute.Devices
-                section = SeiSection.PERANGKAT
-                tab = SeiTab.HOME
+                if (section != SeiSection.PERANGKAT) {
+                    section = SeiSection.PERANGKAT
+                    tab = SeiTab.PROFILE
+                    route = SeiRoute.Profile
+                } else {
+                    route = SeiRoute.Devices
+                    section = SeiSection.PERANGKAT
+                    tab = SeiTab.HOME
+                }
             }
             else -> confirmExitApp = true
         }
@@ -394,7 +412,9 @@ fun SeiDeskHome(
                     savedProfiles = favorites,
                     initialPcQuickMode = current.pcQuickMode,
                     onCancel = { route = SeiRoute.Devices },
-                    onSubmit = { profile, remember, startNow -> submit(profile, remember, startNow) },
+                    onSubmit = { profile, remember, startNow, onComplete ->
+                        submit(profile, remember, startNow, onComplete)
+                    },
                 )
 
                 SeiRoute.Devices -> if (section == SeiSection.PERANGKAT) {
@@ -812,17 +832,23 @@ private fun ResumeHeroCard(
                         )
                     }
 
-                    // Scrim mono telemetry chip
+                    // Active session badge
                     Box(
                         Modifier
                             .clip(RoundedCornerShape(6.dp))
-                            .background(Color.Black.copy(alpha = 0.55f))
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f), RoundedCornerShape(6.dp))
                             .padding(horizontal = 8.dp, vertical = 3.dp),
                     ) {
                         Text(
-                            "● 60 fps · 18 ms",
-                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
-                            color = Color.White.copy(alpha = 0.9f),
+                            sei("CONNECTED"),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontFamily = io.seidesk.rm.ui.theme.SeiMono,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 10.5.sp,
+                                letterSpacing = 0.5.sp,
+                            ),
+                            color = MaterialTheme.colorScheme.primary,
                         )
                     }
                 }
@@ -836,7 +862,10 @@ private fun ResumeHeroCard(
                     )
                     Text(
                         text = active.address,
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontFamily = io.seidesk.rm.ui.theme.SeiMono,
+                            fontSize = 12.sp,
+                        ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -976,6 +1005,52 @@ private fun FilterChipsRow(
 }
 
 @Composable
+private fun EmptySearchResult(
+    query: String,
+    filterIndex: Int,
+    onResetFilters: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 32.dp, horizontal = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                SeiIcons.Search,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(22.dp),
+            )
+        }
+        Text(
+            text = if (query.isNotBlank()) sei("No devices match \"{0}\"", query) else sei("No devices match this filter"),
+            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Text(
+            text = sei("Check your search terms or reset active filters to view saved devices."),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        SeiPillButton(
+            text = sei("Reset filters"),
+            onClick = onResetFilters,
+            primary = false,
+            compact = true,
+        )
+    }
+}
+
+@Composable
 private fun DevicesScreen(
     favorites: List<ConnectionProfile>,
     crashLog: String?,
@@ -1006,31 +1081,59 @@ private fun DevicesScreen(
     var lanScanning by remember { mutableStateOf(false) }
     var lanFoundHosts by remember { mutableStateOf<List<DiscoveredPcHost>>(emptyList()) }
 
-    // Probes reachability across all saved devices off the main thread with 1.5s timeout
+    // Probes reachability concurrently off the main thread with periodic refresh
     val reachabilityMap = remember { mutableStateMapOf<String, ReachabilityResult>() }
+
+    // Remove stale reachability entries when devices are deleted
     LaunchedEffect(favorites) {
-        withContext(Dispatchers.IO) {
+        val validIds = favorites.map { it.id }.toSet()
+        val staleKeys = reachabilityMap.keys.filter { it !in validIds }
+        staleKeys.forEach { reachabilityMap.remove(it) }
+    }
+
+    // Refresh reachability periodically and probe devices concurrently off the main thread
+    LaunchedEffect(favorites) {
+        if (favorites.isEmpty()) return@LaunchedEffect
+        while (true) {
             favorites.forEach { prof ->
-                val res = ReachabilityProbe.check(prof.host, prof.port)
-                reachabilityMap[prof.id] = res
+                if (prof.id !in reachabilityMap) {
+                    reachabilityMap[prof.id] = ReachabilityResult.checking()
+                }
             }
+            withContext(Dispatchers.IO) {
+                coroutineScope {
+                    favorites.map { prof ->
+                        async {
+                            val res = ReachabilityProbe.check(prof.host, prof.port)
+                            prof.id to res
+                        }
+                    }.awaitAll().forEach { (id, res) ->
+                        reachabilityMap[id] = res
+                    }
+                }
+            }
+            delay(30_000L)
         }
     }
 
-    // Dynamic counts
+    // Dynamic counts based on valid saved devices
     val pcCount = remember(favorites) {
         favorites.count { RdpOptions.of(context, it.id).pcConnectMode }
     }
     val rdpCount = remember(favorites) {
         favorites.count { !RdpOptions.of(context, it.id).pcConnectMode }
     }
-    val onlineCount = reachabilityMap.values.count { it.online }
+    val onlineCount = remember(favorites, reachabilityMap.toMap()) {
+        val validIds = favorites.map { it.id }.toSet()
+        reachabilityMap.filter { it.key in validIds }.values.count { it.status == ReachabilityStatus.REACHABLE }
+    }
 
-    val filteredFavorites = remember(favorites, searchQuery, modeFilterIndex, reachabilityMap) {
+    val filteredFavorites = remember(favorites, searchQuery, modeFilterIndex, reachabilityMap.toMap()) {
         val q = searchQuery.trim().lowercase()
         favorites.filter { p ->
             val isPc = RdpOptions.of(context, p.id).pcConnectMode
-            val isOnline = reachabilityMap[p.id]?.online == true
+            val reach = reachabilityMap[p.id]
+            val isOnline = reach?.status == ReachabilityStatus.REACHABLE
             val modeOk = when (modeFilterIndex) {
                 1 -> isPc
                 2 -> !isPc
@@ -1043,6 +1146,12 @@ private fun DevicesScreen(
                 p.username.orEmpty().lowercase().contains(q)
             modeOk && queryOk
         }
+    }
+
+    // Dismiss in-place search first before asking for application exit
+    BackHandler(enabled = searchActive) {
+        searchActive = false
+        searchQuery = ""
     }
 
     fun triggerLanScan() {
@@ -1146,7 +1255,7 @@ private fun DevicesScreen(
                                 appPrefs.deviceListGridMode = gridMode
                             },
                             flat = true,
-                            contentDescription = sei("Toggle view"),
+                            contentDescription = if (gridMode) sei("Switch to list view") else sei("Switch to grid view"),
                         )
                         SeiIconPill(
                             icon = SeiIcons.Menu,
@@ -1250,7 +1359,7 @@ private fun DevicesScreen(
                     }
                 }
             } else {
-                val useGrid = gridMode || favorites.size <= 2
+                val useGrid = gridMode
 
                 if (useGrid) {
                     LazyVerticalGrid(
@@ -1273,21 +1382,34 @@ private fun DevicesScreen(
                                 onSelect = { modeFilterIndex = it },
                             )
                         }
-                        gridItems(filteredFavorites, key = { it.id }) { profile ->
-                            val reach = reachabilityMap[profile.id] ?: ReachabilityProbe.getCached(profile.host, profile.port)
-                            DeviceCardRich(
-                                profile = profile,
-                                reachability = reach,
-                                onConnect = { onConnect(profile) },
-                                onWakeConnect = { onWakeConnect(profile) },
-                                onEdit = { onEdit(profile) },
-                                onDuplicate = { onDuplicate(profile) },
-                                onDelete = { onDelete(profile) },
-                            )
-                        }
-                        item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
-                            // Slim one-line RdpFree promo row
-                            RdpFreePromoRow(onCreateRdp = onCreateRdp)
+                        if (filteredFavorites.isEmpty()) {
+                            item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
+                                EmptySearchResult(
+                                    query = searchQuery,
+                                    filterIndex = modeFilterIndex,
+                                    onResetFilters = {
+                                        searchQuery = ""
+                                        modeFilterIndex = 0
+                                    },
+                                )
+                            }
+                        } else {
+                            gridItems(filteredFavorites, key = { it.id }) { profile ->
+                                val reach = reachabilityMap[profile.id] ?: ReachabilityProbe.getCached(profile.host, profile.port)
+                                DeviceCardRich(
+                                    profile = profile,
+                                    reachability = reach,
+                                    onConnect = { onConnect(profile) },
+                                    onWakeConnect = { onWakeConnect(profile) },
+                                    onEdit = { onEdit(profile) },
+                                    onDuplicate = { onDuplicate(profile) },
+                                    onDelete = { onDelete(profile) },
+                                )
+                            }
+                            item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
+                                // Slim one-line RdpFree promo row
+                                RdpFreePromoRow(onCreateRdp = onCreateRdp)
+                            }
                         }
                     }
                 } else {
@@ -1307,21 +1429,34 @@ private fun DevicesScreen(
                                 onSelect = { modeFilterIndex = it },
                             )
                         }
-                        items(filteredFavorites, key = { it.id }) { profile ->
-                            val reach = reachabilityMap[profile.id] ?: ReachabilityProbe.getCached(profile.host, profile.port)
-                            DeviceCardCompact(
-                                profile = profile,
-                                reachability = reach,
-                                onConnect = { onConnect(profile) },
-                                onWakeConnect = { onWakeConnect(profile) },
-                                onEdit = { onEdit(profile) },
-                                onDuplicate = { onDuplicate(profile) },
-                                onDelete = { onDelete(profile) },
-                            )
-                        }
-                        item {
-                            // Slim one-line RdpFree promo row
-                            RdpFreePromoRow(onCreateRdp = onCreateRdp)
+                        if (filteredFavorites.isEmpty()) {
+                            item {
+                                EmptySearchResult(
+                                    query = searchQuery,
+                                    filterIndex = modeFilterIndex,
+                                    onResetFilters = {
+                                        searchQuery = ""
+                                        modeFilterIndex = 0
+                                    },
+                                )
+                            }
+                        } else {
+                            items(filteredFavorites, key = { it.id }) { profile ->
+                                val reach = reachabilityMap[profile.id] ?: ReachabilityProbe.getCached(profile.host, profile.port)
+                                DeviceCardCompact(
+                                    profile = profile,
+                                    reachability = reach,
+                                    onConnect = { onConnect(profile) },
+                                    onWakeConnect = { onWakeConnect(profile) },
+                                    onEdit = { onEdit(profile) },
+                                    onDuplicate = { onDuplicate(profile) },
+                                    onDelete = { onDelete(profile) },
+                                )
+                            }
+                            item {
+                                // Slim one-line RdpFree promo row
+                                RdpFreePromoRow(onCreateRdp = onCreateRdp)
+                            }
                         }
                     }
                 }
@@ -1368,7 +1503,7 @@ private fun DevicesScreen(
             ) {
                 SeiRow(
                     title = sei("PC Connection (ID & Password)"),
-                    subtitle = sei("Ultra-low latency streaming with GPU acceleration (NVIDIA/AMD/Intel)"),
+                    subtitle = sei("Quick connection preset with low-latency desktop display settings"),
                     trailing = {
                         Text(
                             sei("Fast"),
@@ -1493,6 +1628,49 @@ private fun DevicesScreen(
     }
 }
 
+@Composable
+private fun ReachabilityIndicator(
+    reachability: ReachabilityResult?,
+    modifier: Modifier = Modifier,
+) {
+    val status = reachability?.status ?: ReachabilityStatus.UNKNOWN
+    val (dotColor, labelText) = when (status) {
+        ReachabilityStatus.REACHABLE -> {
+            val txt = if (reachability?.latencyMs != null && reachability.latencyMs > 0) {
+                "${reachability.latencyMs} ms"
+            } else {
+                sei("Reachable")
+            }
+            Color(0xFF10B981) to txt
+        }
+        ReachabilityStatus.CHECKING -> Color(0xFF38BDF8) to sei("Checking...")
+        ReachabilityStatus.UNREACHABLE -> Color(0xFF64748B) to sei("Unreachable")
+        ReachabilityStatus.FAILED -> MaterialTheme.colorScheme.error to sei("Check failed")
+        ReachabilityStatus.UNKNOWN -> Color(0xFF94A3B8) to sei("Unknown")
+    }
+
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(7.dp)
+                .clip(CircleShape)
+                .background(dotColor),
+        )
+        Text(
+            text = labelText,
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontFamily = if (status == ReachabilityStatus.REACHABLE && reachability?.latencyMs != null) io.seidesk.rm.ui.theme.SeiMono else FontFamily.Default,
+                fontSize = 11.sp,
+            ),
+            color = if (status == ReachabilityStatus.REACHABLE) Color(0xFF10B981) else MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
 /**
  * Compact Device Card (~112 dp tall) for dense phone lists:
  * 96x64 preview thumb with OS badge, status dot, endpoint in mono, up to 3 chips, and trailing menu.
@@ -1593,29 +1771,17 @@ private fun DeviceCardCompact(
                     modifier = Modifier.weight(1f, fill = false),
                 )
                 // Reachability dot
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(7.dp)
-                            .clip(CircleShape)
-                            .background(if (isOnline) Color(0xFF10B981) else Color(0xFF64748B)),
-                    )
-                    Text(
-                        text = if (isOnline) (if (reachability?.latencyMs != null && reachability.latencyMs > 0) "${reachability.latencyMs} ms" else "Online") else "Offline",
-                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
-                        color = if (isOnline) Color(0xFF10B981) else MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
+                ReachabilityIndicator(reachability = reachability)
             }
 
             // Endpoint & User in mono
             Text(
                 text = (if (rdpOptions.pcConnectMode) profile.host else "${profile.host}:${profile.port}") +
                     if (!profile.username.isNullOrBlank()) "  ·  ${profile.username}" else "",
-                style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontFamily = io.seidesk.rm.ui.theme.SeiMono,
+                    fontSize = 12.sp,
+                ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -1794,6 +1960,21 @@ private fun DeviceCardRich(
                 }
 
                 // Reachability Pill
+                val status = reachability?.status ?: ReachabilityStatus.UNKNOWN
+                val (dotColor, labelText) = when (status) {
+                    ReachabilityStatus.REACHABLE -> {
+                        val txt = if (reachability?.latencyMs != null && reachability.latencyMs > 0) {
+                            "${reachability.latencyMs} ms"
+                        } else {
+                            sei("Reachable")
+                        }
+                        Color(0xFF10B981) to txt
+                    }
+                    ReachabilityStatus.CHECKING -> Color(0xFF38BDF8) to sei("Checking...")
+                    ReachabilityStatus.UNREACHABLE -> Color(0xFF94A3B8) to sei("Unreachable")
+                    ReachabilityStatus.FAILED -> Color(0xFFF87171) to sei("Check failed")
+                    ReachabilityStatus.UNKNOWN -> Color(0xFF94A3B8) to sei("Unknown")
+                }
                 Row(
                     Modifier
                         .clip(RoundedCornerShape(50))
@@ -1807,15 +1988,16 @@ private fun DeviceCardRich(
                         Modifier
                             .size(7.dp)
                             .clip(CircleShape)
-                            .background(if (isOnline) Color(0xFF10B981) else Color(0xFF64748B)),
+                            .background(dotColor),
                     )
                     Text(
-                        if (isOnline) (if (reachability?.latencyMs != null && reachability.latencyMs > 0) "${reachability.latencyMs} ms" else "Online") else "Offline",
+                        labelText,
                         style = MaterialTheme.typography.labelSmall.copy(
+                            fontFamily = if (status == ReachabilityStatus.REACHABLE && reachability?.latencyMs != null) io.seidesk.rm.ui.theme.SeiMono else FontFamily.Default,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Medium,
                         ),
-                        color = if (isOnline) Color(0xFF10B981) else Color.White.copy(alpha = 0.85f),
+                        color = if (status == ReachabilityStatus.REACHABLE) Color(0xFF10B981) else Color.White.copy(alpha = 0.85f),
                     )
                 }
             }
@@ -1901,7 +2083,10 @@ private fun DeviceCardRich(
             Text(
                 text = (if (rdpOptions.pcConnectMode) profile.host else "${profile.host}:${profile.port}") +
                     if (!profile.username.isNullOrBlank()) "  ·  ${profile.username}" else "",
-                style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontFamily = io.seidesk.rm.ui.theme.SeiMono,
+                    fontSize = 12.sp,
+                ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,

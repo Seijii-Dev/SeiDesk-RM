@@ -1,10 +1,12 @@
 package io.seidesk.rm.ui.components
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -620,6 +622,7 @@ fun SeiOverlay(
     onDismiss: (() -> Unit)? = null,
     maxWidth: Dp = 440.dp,
     origin: Alignment = Alignment.Center,
+    scrollable: Boolean = false,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     // Muncul & pergi halus: kartu membesar dari titik tombol pemicu (origin)
@@ -658,8 +661,25 @@ fun SeiOverlay(
     fun requestDismiss() {
         if (!leaving && onDismiss != null) leaving = true
     }
+
+    if (onDismiss != null) {
+        BackHandler(enabled = true) {
+            requestDismiss()
+        }
+    }
+
+    val configuration = LocalConfiguration.current
+    val maxHeight = (configuration.screenHeightDp * 0.86f).coerceAtLeast(320f).dp
+
     Box(
-        Modifier.fillMaxSize().zIndex(50f),
+        Modifier
+            .fillMaxSize()
+            .zIndex(50f)
+            .windowInsetsPadding(
+                WindowInsets.safeDrawing.only(
+                    WindowInsetsSides.Vertical + WindowInsetsSides.Horizontal,
+                ),
+            ),
         contentAlignment = Alignment.Center,
     ) {
         Box(
@@ -687,10 +707,11 @@ fun SeiOverlay(
                 },
         )
         Column(
-            modifier
-                .padding(24.dp)
+            modifier = modifier
+                .padding(horizontal = 20.dp, vertical = 14.dp)
                 .widthIn(max = maxWidth)
                 .fillMaxWidth()
+                .heightIn(max = maxHeight)
                 .graphicsLayer {
                     scaleX = cardScale
                     scaleY = cardScale
@@ -706,12 +727,24 @@ fun SeiOverlay(
         ) {
             Text(
                 title.uppercase(),
-                fontFamily = SeiDisplay,
-                fontSize = 11.sp,
-                letterSpacing = 1.3.sp,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    letterSpacing = 1.3.sp,
+                ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            content()
+            if (scrollable) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f, fill = false)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    content = content,
+                )
+            } else {
+                content()
+            }
         }
     }
 }

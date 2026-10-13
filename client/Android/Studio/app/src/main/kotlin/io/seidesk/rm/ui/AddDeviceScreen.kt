@@ -113,7 +113,7 @@ fun AddDeviceScreen(
     savedProfiles: List<ConnectionProfile> = emptyList(),
     initialPcQuickMode: Boolean = false,
     onCancel: () -> Unit,
-    onSubmit: (profile: ConnectionProfile, rememberPassword: Boolean, connect: Boolean) -> Unit,
+    onSubmit: (profile: ConnectionProfile, rememberPassword: Boolean, connect: Boolean, onComplete: (Result<Boolean>) -> Unit) -> Unit,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -158,6 +158,7 @@ fun AddDeviceScreen(
     var error by remember { mutableStateOf<String?>(null) }
     var validationPopup by remember { mutableStateOf<String?>(null) }
     var confirmDiscard by remember { mutableStateOf(false) }
+    var isSubmitting by remember { mutableStateOf(false) }
 
     // Test connection state
     var testState by remember { mutableStateOf<ConnectionTestState>(ConnectionTestState.Idle) }
@@ -302,19 +303,34 @@ fun AddDeviceScreen(
         }
     }
 
+    val initialPass = remember(existing) { pass }
+    val initialPortText = remember(existing) { (existing?.port ?: 3389).toString() }
     val initialHost = remember(existing) {
         existing?.let { formatRdpEndpoint(it.host, it.port) }.orEmpty()
     }
+    val initialLabel = remember(existing) { existing?.label.orEmpty().trim() }
+    val initialUser = remember(existing) { existing?.username.orEmpty().trim() }
+    val initialDomain = remember(existing) { existing?.domain.orEmpty().trim() }
+    val initialPcMode = remember(existing, initialPcQuickMode) {
+        if (existing != null) existingStored?.pcConnectMode == true
+        else initialPcQuickMode
+    }
+    val initialRememberPass = remember(existing) { existing?.password?.isNotEmpty() ?: true }
+
     val hasChanges = if (existing == null) {
-        host.isNotBlank() || label.isNotBlank() || pass.isNotBlank()
+        host.isNotBlank() || label.isNotBlank() || user.isNotBlank() || pass.isNotBlank() || domain.isNotBlank() || (portText.trim() != "3389" && portText.isNotBlank())
     } else {
-        host != initialHost ||
-            label != existing.label.orEmpty() ||
-            user != existing.username.orEmpty() ||
-            pass != existing.password.orEmpty() ||
-            domain != existing.domain.orEmpty() ||
+        host.trim() != initialHost.trim() ||
+            portText.trim() != initialPortText ||
+            label.trim() != initialLabel ||
+            user.trim() != initialUser ||
+            pass != initialPass ||
+            domain.trim() != initialDomain ||
+            isPcQuickMode != initialPcMode ||
+            rememberPass != initialRememberPass ||
             options != stored ||
-            gatewayOn != (stored.gateway != null)
+            gatewayOn != (stored.gateway != null) ||
+            (gatewayOn && (gwHost.trim() != stored.gateway?.host.orEmpty() || gwPort.trim() != (stored.gateway?.port ?: 443).toString() || gwUser.trim() != stored.gateway?.username.orEmpty() || gwPass != stored.gateway?.password.orEmpty() || gwDomain.trim() != stored.gateway?.domain.orEmpty()))
     }
 
     fun requestCancel() {
@@ -471,7 +487,15 @@ fun AddDeviceScreen(
             DisplayPrefs.setDpi(context, profile.id, dpi)
         }
 
-        onSubmit(profile, rememberPass, connect)
+        isSubmitting = true
+        onSubmit(profile, rememberPass, connect) { result ->
+            isSubmitting = false
+            if (result.isFailure) {
+                val msg = result.exceptionOrNull()?.message ?: seiNow("Failed to save profile.")
+                error = msg
+                validationPopup = msg
+            }
+        }
     }
 
     Box(Modifier.fillMaxSize()) {
@@ -848,16 +872,18 @@ fun AddDeviceScreen(
                     )
 
                     SeiPillButton(
-                        text = sei("Save"),
+                        text = if (isSubmitting) sei("Saving...") else sei("Save"),
                         onClick = { submit(false) },
+                        enabled = !isSubmitting,
                         primary = false,
                         compact = true,
                         modifier = Modifier.weight(1f),
                     )
 
                     SeiPillButton(
-                        text = sei("Save & connect"),
+                        text = if (isSubmitting) sei("Saving...") else sei("Save & connect"),
                         onClick = { submit(true) },
+                        enabled = !isSubmitting,
                         compact = true,
                         modifier = Modifier.weight(1.3f),
                     )
@@ -894,6 +920,7 @@ fun AddDeviceScreen(
             SeiOverlay(
                 title = if (isPcQuickMode) sei("Scan PCs on Wi-Fi Network (LAN)")
                 else sei("Scan RDP Hosts on Local Network"),
+                scrollable = true,
                 onDismiss = { lanScanModalOpen = false },
             ) {
                 Text(
@@ -985,6 +1012,7 @@ fun AddDeviceScreen(
         if (accountDropdownOpen) {
             SeiOverlay(
                 title = sei("Saved Accounts"),
+                scrollable = true,
                 onDismiss = {
                     accountDropdownOpen = false
                     accountSearch = ""

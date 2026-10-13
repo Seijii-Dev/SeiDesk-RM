@@ -104,91 +104,80 @@ val LightScheme = lightColorScheme(
     scrim = Color(0x38000000),
 )
 
-// JetBrains Mono static fonts (SIL OFL 1.1).
-val SeiFont = FontFamily(
+// JetBrains Mono static fonts (SIL OFL 1.1) reserved for technical metadata, IPs, hostnames, and logs.
+val SeiMono = FontFamily(
     Font(R.font.jetbrains_mono_regular, FontWeight.Normal),
     Font(R.font.jetbrains_mono_medium, FontWeight.Medium),
     Font(R.font.jetbrains_mono_semibold, FontWeight.SemiBold),
     Font(R.font.jetbrains_mono_bold, FontWeight.Bold),
 )
-val SeiDisplay = SeiFont
-val SeiBody = SeiFont
+val SeiFont = SeiMono
+
+// Clean, readable sans-serif for general UI readability (WCAG AA & modern Android UX)
+val SeiSans = FontFamily.Default
+val SeiDisplay = SeiSans
+val SeiBody = SeiSans
 
 val SeiTypography = Typography(
     displayLarge = TextStyle(
-        fontFamily = SeiFont, fontSize = 32.sp, lineHeight = 40.sp,
+        fontFamily = SeiSans, fontSize = 32.sp, lineHeight = 40.sp,
         fontWeight = FontWeight.SemiBold, letterSpacing = (-0.3).sp,
-        fontFeatureSettings = "calt 0",
     ),
     displayMedium = TextStyle(
-        fontFamily = SeiFont, fontSize = 28.sp, lineHeight = 36.sp,
+        fontFamily = SeiSans, fontSize = 28.sp, lineHeight = 36.sp,
         fontWeight = FontWeight.SemiBold, letterSpacing = (-0.3).sp,
-        fontFeatureSettings = "calt 0",
     ),
     displaySmall = TextStyle(
-        fontFamily = SeiFont, fontSize = 26.sp, lineHeight = 34.sp,
+        fontFamily = SeiSans, fontSize = 26.sp, lineHeight = 34.sp,
         fontWeight = FontWeight.SemiBold, letterSpacing = (-0.3).sp,
-        fontFeatureSettings = "calt 0",
     ),
     headlineLarge = TextStyle(
-        fontFamily = SeiFont, fontSize = 24.sp, lineHeight = 32.sp,
+        fontFamily = SeiSans, fontSize = 24.sp, lineHeight = 32.sp,
         fontWeight = FontWeight.SemiBold, letterSpacing = (-0.2).sp,
-        fontFeatureSettings = "calt 0",
     ),
     headlineMedium = TextStyle(
-        fontFamily = SeiFont, fontSize = 22.sp, lineHeight = 30.sp,
+        fontFamily = SeiSans, fontSize = 22.sp, lineHeight = 30.sp,
         fontWeight = FontWeight.SemiBold, letterSpacing = (-0.2).sp,
-        fontFeatureSettings = "calt 0",
     ),
     headlineSmall = TextStyle(
-        fontFamily = SeiFont, fontSize = 19.sp, lineHeight = 26.sp,
+        fontFamily = SeiSans, fontSize = 19.sp, lineHeight = 26.sp,
         fontWeight = FontWeight.SemiBold, letterSpacing = (-0.1).sp,
-        fontFeatureSettings = "calt 0",
     ),
     titleLarge = TextStyle(
-        fontFamily = SeiFont, fontSize = 18.sp, lineHeight = 26.sp,
+        fontFamily = SeiSans, fontSize = 18.sp, lineHeight = 26.sp,
         fontWeight = FontWeight.SemiBold, letterSpacing = 0.sp,
-        fontFeatureSettings = "calt 0",
     ),
     titleMedium = TextStyle(
-        fontFamily = SeiFont, fontSize = 16.sp, lineHeight = 22.sp,
+        fontFamily = SeiSans, fontSize = 16.sp, lineHeight = 22.sp,
         fontWeight = FontWeight.SemiBold, letterSpacing = 0.sp,
-        fontFeatureSettings = "calt 0",
     ),
     titleSmall = TextStyle(
-        fontFamily = SeiFont, fontSize = 14.sp, lineHeight = 20.sp,
+        fontFamily = SeiSans, fontSize = 14.sp, lineHeight = 20.sp,
         fontWeight = FontWeight.SemiBold, letterSpacing = 0.sp,
-        fontFeatureSettings = "calt 0",
     ),
     bodyLarge = TextStyle(
-        fontFamily = SeiFont, fontSize = 15.sp, lineHeight = 23.sp,
+        fontFamily = SeiSans, fontSize = 15.sp, lineHeight = 23.sp,
         fontWeight = FontWeight.Normal, letterSpacing = 0.sp,
-        fontFeatureSettings = "calt 0",
     ),
     bodyMedium = TextStyle(
-        fontFamily = SeiFont, fontSize = 14.sp, lineHeight = 21.sp,
+        fontFamily = SeiSans, fontSize = 14.sp, lineHeight = 21.sp,
         fontWeight = FontWeight.Normal, letterSpacing = 0.sp,
-        fontFeatureSettings = "calt 0",
     ),
     bodySmall = TextStyle(
-        fontFamily = SeiFont, fontSize = 12.5.sp, lineHeight = 18.sp,
+        fontFamily = SeiSans, fontSize = 12.5.sp, lineHeight = 18.sp,
         fontWeight = FontWeight.Normal, letterSpacing = 0.sp,
-        fontFeatureSettings = "calt 0",
     ),
     labelLarge = TextStyle(
-        fontFamily = SeiFont, fontSize = 13.5.sp, lineHeight = 18.sp,
+        fontFamily = SeiSans, fontSize = 13.5.sp, lineHeight = 18.sp,
         fontWeight = FontWeight.SemiBold, letterSpacing = 0.1.sp,
-        fontFeatureSettings = "calt 0",
     ),
     labelMedium = TextStyle(
-        fontFamily = SeiFont, fontSize = 12.sp, lineHeight = 16.sp,
+        fontFamily = SeiSans, fontSize = 12.sp, lineHeight = 16.sp,
         fontWeight = FontWeight.Medium, letterSpacing = 0.2.sp,
-        fontFeatureSettings = "calt 0",
     ),
     labelSmall = TextStyle(
-        fontFamily = SeiFont, fontSize = 11.sp, lineHeight = 14.sp,
+        fontFamily = SeiSans, fontSize = 11.sp, lineHeight = 14.sp,
         fontWeight = FontWeight.Medium, letterSpacing = 0.3.sp,
-        fontFeatureSettings = "calt 0",
     ),
 )
 
